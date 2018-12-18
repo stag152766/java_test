@@ -7,26 +7,23 @@ public class MyFirstProject {
 		hello("user");
 		hello("Max");
 
-		double l = 5;
-		System.out.println("Площадь квадрата со стороной " + l + " = " + area(l));
-
-		double a = 4;
-		double b = 6;
-		System.out.println("Площадь прямоугольника со сторонами " + a + " и " + b + " = " + area(a, b));
-
-
-
+		Square s = new Square(5);
+		System.out.println("Площадь квадрата со стороной " + s.l + " = " + area(s)); /* передаем объект, в качестве параметра функции
+s.1 используем объект, у которого мы берем атрибут s.l
+*/
+		Rectangle r = new Rectangle(4, 6); // чать когда, где функция вызывается
+		System.out.println("Площадь прямоугольника со сторонами " + r.a + " и " + r.b + " = " + area(r));
 	}
 
 	public static void hello(String somebody) {
 		System.out.println("Hello, " + somebody + "!");
 	}
 
-	public static double area(double len){
-		return len * len;
+	public static double area(Square s){ // функция принимает не сторону квадрата, а объект типа Квадрат
+		return s.l * s.l; // для того чтобы получить доступ к атрибуту объекта, необходимо написать (объект).(значение атрибута)
 	}
 
-	public static double area(double a, double b) {
-		return a * b;
+	public static double area(Rectangle r) {
+		return r.a * r.b;
 	}
 }
