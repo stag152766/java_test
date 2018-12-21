@@ -13,7 +13,7 @@ public class Distance {
     this.y2 = y2;
   }
 
-  public double distance() {
-    return Math.sqrt(Math.pow((this.x2 - this.x1), 2)+ Math.pow((this.y2 - this.y1), 2));
+  public double distance() { // метод будет ассоциирован с объектом
+    return Math.sqrt(Math.pow((this.x2 - this.x1), 2)+ Math.pow((this.y2 - this.y1), 2)); //обращаемся к ассоциированному объекту
   }
 }
