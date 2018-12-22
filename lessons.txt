@@ -836,12 +836,48 @@ Ctrl + Space
 ---
 Lesson20. Selenium драйвер для браузеров
 
+Скачать пакет
 https://www.apachefriends.org/ru/download_success.html
+
+Инструкция по установки
 https://selenium2.ru/articles/136-installing-xampp.html
 
-http://localhost/phpmyadmin/
 
-Установка addressbook на сервер XAMPP  
+Установка приложения addressbook на сервер XAMPP
+
+Распаковать addressbook в папку
+c:\xampp\htdocs\  
+
+Подготовка базы данных
+MySQL > Admin (http://localhost/phpmyadmin/)
+
+Create New database > addressbook
+
+Создать структуру базы данных (импортировать)
+Import > addressbook.sql
+
+http://localhost/addressbook/
+admin / secret
+
+Если вход выполнился успешно, значит логин / пароль прочитались из базы данных. Приложение базу данных видит.
+
+
+Начнем с подготовки нового модуля
+Создаем подкаталог (модуль) java_test > addressbook-web-tests
+Помещаем туда самое главное -  конфигурационный файл сборщика, потом сможем импортировать его в среду разработки
+
+Перекладываем конфиг файл
+build.gradle
+и запускатель 
+подкаталог gradle 
+и запускаемые файлы для платформ win и linux
+gradlew
+gradlew.bat
+
+
+
+
+
 
 
 
