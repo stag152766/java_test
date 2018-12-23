@@ -866,6 +866,8 @@ admin / secret
 Создаем подкаталог (модуль) java_test > addressbook-web-tests
 Помещаем туда самое главное -  конфигурационный файл сборщика, потом сможем импортировать его в среду разработки
 
+
+
 Перекладываем конфиг файл
 build.gradle
 и запускатель 
@@ -877,30 +879,86 @@ gradlew.bat
 
 
 
+Удаляем 
+apply plugin: 'application'
+mainClassName = "ru.testjava.sandBox.MyFirstProject"
+	
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.testng:testng:6.14.3'
+}
+
+Скачиваем chromedriver.exe 
+https://sites.google.com/a/chromium.org/chromedriver/downloads
+
+Сохраняем в папку
+c:\Tools\chromedriver_win32\
 
 
 
+Устанавливаем Katalon Recorder
+Записываем процесс создания группы http://localhost/addressbook/group.php
+Сохраняем запись в формате java-testng.class и помещаем ее в каталог с нашим тестом
 
+Открываем записанный файл в IJ
+Добавляем строку, указываем путь с ChromeDriver
+    System.setProperty("webdriver.chrome.driver", "c:\Tools\chromedriver_win32\chromedriver.exe");
+    driver = new ChromeDriver();
 
-
-
-The path to the driver executable must be set by the webdriver.chrome.driver system property. Ya tak i sdelal. Pered driver = new ChromeDriver(); vstavil 
-System.setProperty("webdriver.chrome.driver", "C:\\Users\\Konstantine\\Documents\\Chromedriver\\chromedriver.exe"); s lokatsiei chromedrivera.
+Добавляем в конфиг файл две зависимости
+    implementation 'com.katalon:com.katalon.platform.parent:1.0.1'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
 
 nayti podxodyashiy instrument dlia zapisi koda (naprimer Katalon), skachat poslednie drivera Selenium i vse.
 
+---
+Lesson21. Фикстуры инициализация и зачистка
 
-Убедитесь что у вас запущен локальный сервер с приложением addressbook. Перейдите на него вручную из браузера, скопируйте адрес из адресной строки вместе с портом, который там указан и поместите это в метод wd.get(" ");
+Исправим ошибку в сгенерированном коде тестового метода @Test (аннотация Тест)
+
+имя отличное от имени класса и начало с маленькой буквы
+
+Кроме тестового метода @Test сгенерировались два вспомогательный
+BeforeClass //метод инициализации фикстура, единственное место для указания используемого браузера
+AfterClass //метод завершения фикстура
+
+Это пометки (подсказки) для тестового фрейворка
+
+Если код дублируется, то его нужно постараться выделить в отдельную функцию. Его можно использовать повторно, обращаясь к этому методу. В случае с тестовым фрейворком, он автоматически вызывает методы BeforClass / AfterClass перед каждым запуском тестового метода.
+
+Фикструр - тестовая ситуация , тест зажимается между двумя методами. 
+
+
+Модифицируем код 
+Действия для авторизации не являются частью теста создания группы, поэтому вырезаем и переносим кусок кода в метод инициализации фикстура.
+
+ 
 
 
 
-Я использую Chrome версии 70, Firefox 60.3.0esr и InternetExplorer 11.345
-ChromeDriver версии 2.43, GeckoDriver 0.23.0 и IEDriverServer_Win32 3.14.0
-Для запуска тестов на Firefox прописываю capabilities вот такой конструкцией:
-   
-   DesiredCapabilities capabilities = new DesiredCapabilities();
-   capabilities.setCapability(FirefoxDriver.MARIONETTE, false);
-   
+
+---
+Lesson22.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
    
 with avoid to install c:\program files (missing with permissins)
