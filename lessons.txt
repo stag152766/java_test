@@ -944,55 +944,112 @@ Lesson22. Рефакторинг
 
 С помощью механизма рефакторинга научимся выделять вспомогательные методы.
 
-дать имя фрагменту кода 
-сделать именнованный фрагмент кода
-нужно превратить его в функцию
+Рекодер записывает сценарий, который трудно читать
+Для удобства пользования мы дадим имя фрагменту кода, сделаем именнованный фрагмент кода. Для этого нужно превратить его в функцию и в нужное время к этой функции обращаться.
 
+Выделяем фрагмент кода для превращения в именнованную функцию
 Refactor > Extract > Method 
 
 Фрагмент кода получил собственное имя - там выволняется логин
 
 @BeforeClass
 ...
-login(); // вызов созданного метода (место, где к этому фрагменту нужно обратиться)
+login(); // вызов созданного метода (место, в котором к этому фрагменту нужно обратиться)
 
 Почему метода, а не обычной функции?
-Внутри используется переменная driver, которая является атрибутом объекта типа GroupCreationTests.
+Внутри используется переменная driver, которая является атрибутом объекта типа GroupCreationTests.  
 
-private void login(String user, String admin, String pass, String secret, By xpath) {
+private void login() {
     driver.findElement(By.name(user)).click();
     driver.findElement(By.name(user)).clear();
 	
 	...
 }
 
-Тестовый фрейворк сначала создает объект класса private WebDriver driver;
-Выполняет метод setUp(){инициалируется атрибут объекта driver = new ChromeDriver();}
-
-Когда вызывается другой метод login() в объекте , он может этим атрибутом пользоваться.
-
+Тестовый фрейворк сначала создает объект класса ?
+Потом выполняет метод setUp(){инициалируется атрибут объекта driver = new ChromeDriver();}
+Когда вызывается другой метод login() в том же самом объекте, он может этим атрибутом пользоваться.
 Также нужно поступить с тестовым методом, выделить из него вспомогательные фукнции.
 
+Первый механизм рефакторинга - это выделение вспомогательных методов.
 
+Следующий шаг
 
+Делаем метод login() параметрализованным, чтобы имя пользователя и пароль передовались внутрь метода в качестве параметров. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Выделяем значение, которое необходимо превратить в передаваемый параметр
+Refactor > Extract > Parameter 
+Даем имя username
    
-with avoid to install c:\program files (missing with permissins)
-diactivate uac
-mscongig	
+
+login("admin"); //В точке вызова передается конкретное значение, которое подставляется в эту переменную параметр и используется в методе login
+private void login(String username){
+	driver.findElement(By.name(user)).sendKeys(username);
+}
+
+
+Тестовый метод создает группу с какими-то свойствами name("group_header") name("group_footer")
+Значение этих свойст явно прописаны в коде метода
+private void fillGroupForm() {
+    driver.findElement(By.name("group_name")).click();
+    driver.findElement(By.name("group_name")).clear();
+    driver.findElement(By.name("group_name")).sendKeys("test1");
+    driver.findElement(By.name("group_header")).click();
+    driver.findElement(By.name("group_header")).clear();
+    driver.findElement(By.name("group_header")).sendKeys("test2");
+    driver.findElement(By.name("group_footer")).clear();
+    driver.findElement(By.name("group_footer")).sendKeys("test3");
+}
+
+Было бы логично передавать их в качестве параметров, чтобы функция fillGroupForm стала универсальной. Ее можно было бы использовать для создания групп с разными параметрами, то есть заполнять форму разными данными. Конкретные значения передавались бы из @Test.
+
+private void fillGroupForm(String name, String header, String footer) {
+    driver.findElement(By.name("group_name")).sendKeys(name);
+    driver.findElement(By.name("group_header")).click();
+    driver.findElement(By.name("group_header")).clear();
+    driver.findElement(By.name("group_header")).sendKeys(header);
+    driver.findElement(By.name("group_footer")).clear();
+    driver.findElement(By.name("group_footer")).sendKeys(footer);
+  }
+
+
+Создаем новый контакт
+У формы контакта много параметров
+Как превратить много параметров в мало?
+
+Вместо того, чтобы передавать много разных значений, их можно объединить в один объект, который будет иметь много атрибутов. То есть создать вспомогательный класс, который описывает объект типа Group. Объекты этого типа имеют набор атрибутов.
+
+!В метод будет передаваться один объект
+Refactor > Extract > Parameter Object 
+
+@Test
+  public void testGroupCreation()
+	fillGroupForm(new GroupData("test1", "test2", "test3"));
+
+
+	private void fillGroupForm(GroupData groupData) {}
+	driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
+    driver.findElement(By.name("group_header")).sendKeys(groupData.getHeader());
+    driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
+	
+---
+Lesson23
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

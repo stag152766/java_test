@@ -1,14 +1,11 @@
 package ru.testjava.addressbook;
 
-import java.util.regex.Pattern;
 import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
 import org.openqa.selenium.*;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.Select;
 
 public class GroupCreationTests {
   private WebDriver driver;
@@ -18,7 +15,7 @@ public class GroupCreationTests {
 
   @BeforeClass(alwaysRun = true)
   public void setUp() throws Exception {
-    System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver_win32\\chromedriver.exe");
+    System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
     driver = new ChromeDriver();
     baseUrl = "https://www.katalon.com/";
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -26,12 +23,12 @@ public class GroupCreationTests {
     login("user", "admin", "pass", "secret", By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Password:'])[1]/following::input[2]"));
   }
 
-  private void login(String user, String admin, String pass, String secret, By xpath) {
+  private void login(String user, String username, String pass, String password, By xpath) {
     driver.findElement(By.name(user)).click();
     driver.findElement(By.name(user)).clear();
-    driver.findElement(By.name(user)).sendKeys(admin);
+    driver.findElement(By.name(user)).sendKeys(username);
     driver.findElement(By.name(pass)).clear();
-    driver.findElement(By.name(pass)).sendKeys(secret);
+    driver.findElement(By.name(pass)).sendKeys(password);
     driver.findElement(xpath).click();
   }
 
@@ -39,7 +36,14 @@ public class GroupCreationTests {
   public void testGroupCreation() throws Exception {
     gotoGroupPage("groups");
     initGroupCreation("new");
-    fillGroupForm();
+    fillGroupForm(new GroupData("test1", "test2", "test3")); //данные для передачи во вспомогательные методы
+    /*при вызове fillGroupForm создается новый объект,
+    атрибуты которого заполняются конкретными значениями,
+    которые потом используются в методе fillGroupForm
+    groupData.getName()
+    groupData.getHeader()
+    groupData.getFooter()
+    */
     submitGroupCreation("submit");
     returnToGroupPage("group page");
   }
@@ -52,15 +56,15 @@ public class GroupCreationTests {
     driver.findElement(By.name(submit)).click();
   }
 
-  private void fillGroupForm() {
+  private void fillGroupForm(GroupData groupData) { //метод принимает один параметр  - тип объект
     driver.findElement(By.name("group_name")).click();
     driver.findElement(By.name("group_name")).clear();
-    driver.findElement(By.name("group_name")).sendKeys("test1");
+    driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
     driver.findElement(By.name("group_header")).click();
     driver.findElement(By.name("group_header")).clear();
-    driver.findElement(By.name("group_header")).sendKeys("test2");
+    driver.findElement(By.name("group_header")).sendKeys(groupData.getHeader());
     driver.findElement(By.name("group_footer")).clear();
-    driver.findElement(By.name("group_footer")).sendKeys("test3");
+    driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
   }
 
   private void initGroupCreation(String s) {
