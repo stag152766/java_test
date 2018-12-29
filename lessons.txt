@@ -1232,25 +1232,49 @@ GroupData > model
 ---
 Lesson25. Расщепление и специализация
 
+Раздробим класс ApplicationManager на несколько более простых классов и раскидаем по ним вспомогательные функции. 
+
+Для этого используем механизм делегирования. Класс ApplicationManager будет делегировать какие-то действия своим помощникам. 
+Создавать помощников мы будем как в предыдущем уроке. 
+Создается временный базовый класс, в который переносятся какие то методы
+Потом наследование заменяется на делегирование
+
+Самое сложное это определить какие вспомогательные классы нам нужны, и какие методы куда переносить. 
+Промеще всего перенести те методы, которые используются при работе с группами initGroupCreation, initGroupForm, returnToGroupPage 
+
+public class ApplicationManager extends GroupHelper 
+ 
+Переносим в новый класс методы, связанные с группами 
+Заменяем наследование делегирвоанием 
+ПКМ ApplicationManager
+Refactor > Replace Inheritance With Delegations
+
+Поставить галочку Generate getter for delegated component
+
+Тестовые класса изменились, например GroupCreationTests
 
 
+  @Test
+  public void testGroupCreation() {
+    app.getGroupHelper().gotoGroupPage("groups"); /* 
+	Происходит делегирование в два этапа 
+	Сначала происходит обращение к ApplicationManager, чтобы он дал доступ к помошнику по работе с группами GroupHelper, и уже этому помощнику делегируется выполнение настоящего действия , где происходит взаимодействие с тестируемой системой gotoGroupPage("groups") 
+	*/
+	}
 
 
+Есть одно нежелательное изменение в ApplicationManager
 
+Ссылка на драйвер переехала в groupHelper
 
+ public void init() {
+    System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
+ groupHelper.driver = new ChromeDriver();
+ }
 
+Это неправильно, нужно вернуть ее обратно в ApplicationManager. Потому что она должна быть общей, ей хочет пользоваться  ApplicationManager и другие помощники тоже хотят работать с этой ссылкой.
 
-
-
-
-
-
-
-
-
-
-
-
+Вернуть ее обратно средствами рефакторинга не получится.   
 
 
 
