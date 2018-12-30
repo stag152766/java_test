@@ -2,13 +2,16 @@ package ru.testjava.addressbook.appmanager;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import ru.testjava.addressbook.modul.GroupData;
-
 import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.fail;
 
-public class ApplicationManager {
-  private WebDriver driver;
+public class ApplicationManager extends ContactHelper {
+
+  WebDriver driver;
+
+  private SessionHelper sessionHelper;
+  private NavigationHelper navigationHelper;
+  private GroupHelper groupHelper;
   private String baseUrl;
   private boolean acceptNextAlert = true;
   private StringBuffer verificationErrors = new StringBuffer();
@@ -19,47 +22,16 @@ public class ApplicationManager {
     baseUrl = "https://www.katalon.com/";
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     driver.get("http://localhost/addressbook/edit.php");
-    login("user", "admin", "pass", "secret", By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Password:'])[1]/following::input[2]"));
+    groupHelper = new GroupHelper(navigationHelper.driver);
+    navigationHelper = new NavigationHelper(driver);
+    sessionHelper = new SessionHelper(driver);
+    sessionHelper.login("user", "admin", "pass", "secret", By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Password:'])[1]/following::input[2]"));
   }
 
-  private void login(String user, String username, String pass, String password, By xpath) {
-    driver.findElement(By.name(user)).click();
-    driver.findElement(By.name(user)).clear();
-    driver.findElement(By.name(user)).sendKeys(username);
-    driver.findElement(By.name(pass)).clear();
-    driver.findElement(By.name(pass)).sendKeys(password);
-    driver.findElement(xpath).click();
-  }
 
-  public void returnToGroupPage(String s) {
-    gotoGroupPage(s);
-  }
-
-  public void submitGroupCreation(String submit) {
-    driver.findElement(By.name(submit)).click();
-  }
-
-  public void fillGroupForm(GroupData groupData) {
-    driver.findElement(By.name("group_name")).click();
-    driver.findElement(By.name("group_name")).clear();
-    driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
-    driver.findElement(By.name("group_header")).click();
-    driver.findElement(By.name("group_header")).clear();
-    driver.findElement(By.name("group_header")).sendKeys(groupData.getHeader());
-    driver.findElement(By.name("group_footer")).clear();
-    driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
-  }
-
-  public void initGroupCreation(String s) {
-    driver.findElement(By.name(s)).click();
-  }
-
-  public void gotoGroupPage(String groups) {
-    driver.findElement(By.linkText(groups)).click();
-  }
 
   public void stop() {
-    driver.quit();
+    navigationHelper.driver.quit();
     String verificationErrorString = verificationErrors.toString();
     if (!"".equals(verificationErrorString)) {
       fail(verificationErrorString);
@@ -68,7 +40,7 @@ public class ApplicationManager {
 
   private boolean isElementPresent(By by) {
     try {
-      driver.findElement(by);
+      navigationHelper.driver.findElement(by);
       return true;
     } catch (NoSuchElementException e) {
       return false;
@@ -77,7 +49,7 @@ public class ApplicationManager {
 
   private boolean isAlertPresent() {
     try {
-      driver.switchTo().alert();
+      navigationHelper.driver.switchTo().alert();
       return true;
     } catch (NoAlertPresentException e) {
       return false;
@@ -86,7 +58,7 @@ public class ApplicationManager {
 
   private String closeAlertAndGetItsText() {
     try {
-      Alert alert = driver.switchTo().alert();
+      Alert alert = navigationHelper.driver.switchTo().alert();
       String alertText = alert.getText();
       if (acceptNextAlert) {
         alert.accept();
@@ -99,40 +71,40 @@ public class ApplicationManager {
     }
   }
 
-  public void deleteSelectedGroups() {
-    driver.findElement(By.name("delete")).click();
-  }
-
-  public void selectGroup() {
-    driver.findElement(By.name("selected[]")).click();
-  }
-
   public void submitContactCreation() {
     driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Notes:'])[1]/following::input[1]")).click();
   }
 
   public void fillContactForm() {
-    driver.findElement(By.name("firstname")).click();
-    driver.findElement(By.name("firstname")).clear();
-    driver.findElement(By.name("firstname")).sendKeys("Fname");
-    driver.findElement(By.name("middlename")).click();
-    driver.findElement(By.name("middlename")).clear();
-    driver.findElement(By.name("middlename")).sendKeys("Mname");
-    driver.findElement(By.name("lastname")).click();
-    driver.findElement(By.name("lastname")).clear();
-    driver.findElement(By.name("lastname")).sendKeys("Lname");
-    driver.findElement(By.name("nickname")).click();
-    driver.findElement(By.name("nickname")).clear();
-    driver.findElement(By.name("nickname")).sendKeys("Mtnick");
-    driver.findElement(By.name("address")).click();
-    driver.findElement(By.name("address")).clear();
-    driver.findElement(By.name("address")).sendKeys("1st test");
-    driver.findElement(By.name("mobile")).click();
-    driver.findElement(By.name("mobile")).clear();
-    driver.findElement(By.name("mobile")).sendKeys("213215461");
+    groupHelper.driver.findElement(By.name("firstname")).click();
+    groupHelper.driver.findElement(By.name("firstname")).clear();
+    groupHelper.driver.findElement(By.name("firstname")).sendKeys("Fname");
+    groupHelper.driver.findElement(By.name("middlename")).click();
+    groupHelper.driver.findElement(By.name("middlename")).clear();
+    groupHelper.driver.findElement(By.name("middlename")).sendKeys("Mname");
+    groupHelper.driver.findElement(By.name("lastname")).click();
+    groupHelper.driver.findElement(By.name("lastname")).clear();
+    groupHelper.driver.findElement(By.name("lastname")).sendKeys("Lname");
+    groupHelper.driver.findElement(By.name("nickname")).click();
+    groupHelper.driver.findElement(By.name("nickname")).clear();
+    groupHelper.driver.findElement(By.name("nickname")).sendKeys("Mtnick");
+    groupHelper.driver.findElement(By.name("address")).click();
+    groupHelper.driver.findElement(By.name("address")).clear();
+    groupHelper.driver.findElement(By.name("address")).sendKeys("1st test");
+    groupHelper.driver.findElement(By.name("mobile")).click();
+    groupHelper.driver.findElement(By.name("mobile")).clear();
+    groupHelper.driver.findElement(By.name("mobile")).sendKeys("213215461");
   }
 
   public void gotoAddNew() {
-    driver.findElement(By.linkText("add new")).click();
+    groupHelper.driver.findElement(By.linkText("add new")).click();
+  }
+
+  public GroupHelper getGroupHelper() {
+    return groupHelper;
+  }
+
+  public NavigationHelper getNavigationHelper() {
+    return navigationHelper;
   }
 }
