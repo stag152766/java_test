@@ -1,6 +1,7 @@
-package ru.testjava.addressbook;
+package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.Test;
+import ru.testjava.addressbook.tests.TestBase;
 
 public class GroupDeletionTests extends TestBase {
 

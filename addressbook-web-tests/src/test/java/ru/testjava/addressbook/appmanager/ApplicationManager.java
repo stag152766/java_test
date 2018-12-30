@@ -1,10 +1,10 @@
-package ru.testjava.addressbook;
+package ru.testjava.addressbook.appmanager;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import ru.testjava.addressbook.modul.GroupData;
 
 import java.util.concurrent.TimeUnit;
-
 import static org.testng.Assert.fail;
 
 public class ApplicationManager {
@@ -13,7 +13,7 @@ public class ApplicationManager {
   private boolean acceptNextAlert = true;
   private StringBuffer verificationErrors = new StringBuffer();
 
-  protected void init() {
+  public void init() {
     System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
     driver = new ChromeDriver();
     baseUrl = "https://www.katalon.com/";
@@ -31,15 +31,15 @@ public class ApplicationManager {
     driver.findElement(xpath).click();
   }
 
-  protected void returnToGroupPage(String s) {
+  public void returnToGroupPage(String s) {
     gotoGroupPage(s);
   }
 
-  protected void submitGroupCreation(String submit) {
+  public void submitGroupCreation(String submit) {
     driver.findElement(By.name(submit)).click();
   }
 
-  protected void fillGroupForm(GroupData groupData) {
+  public void fillGroupForm(GroupData groupData) {
     driver.findElement(By.name("group_name")).click();
     driver.findElement(By.name("group_name")).clear();
     driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
@@ -50,15 +50,15 @@ public class ApplicationManager {
     driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
   }
 
-  protected void initGroupCreation(String s) {
+  public void initGroupCreation(String s) {
     driver.findElement(By.name(s)).click();
   }
 
-  protected void gotoGroupPage(String groups) {
+  public void gotoGroupPage(String groups) {
     driver.findElement(By.linkText(groups)).click();
   }
 
-  protected void stop() {
+  public void stop() {
     driver.quit();
     String verificationErrorString = verificationErrors.toString();
     if (!"".equals(verificationErrorString)) {
@@ -99,19 +99,19 @@ public class ApplicationManager {
     }
   }
 
-  protected void deleteSelectedGroups() {
+  public void deleteSelectedGroups() {
     driver.findElement(By.name("delete")).click();
   }
 
-  protected void selectGroup() {
+  public void selectGroup() {
     driver.findElement(By.name("selected[]")).click();
   }
 
-  protected void submitContactCreation() {
+  public void submitContactCreation() {
     driver.findElement(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Notes:'])[1]/following::input[1]")).click();
   }
 
-  protected void fillContactForm() {
+  public void fillContactForm() {
     driver.findElement(By.name("firstname")).click();
     driver.findElement(By.name("firstname")).clear();
     driver.findElement(By.name("firstname")).sendKeys("Fname");
@@ -132,7 +132,7 @@ public class ApplicationManager {
     driver.findElement(By.name("mobile")).sendKeys("213215461");
   }
 
-  protected void gotoAddNew() {
+  public void gotoAddNew() {
     driver.findElement(By.linkText("add new")).click();
   }
 }

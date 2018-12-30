@@ -1,4 +1,4 @@
-package ru.testjava.addressbook;
+package ru.testjava.addressbook.modul;
 
 public class GroupData { // объект
   private final String name; //у которого три атрибута

@@ -1,7 +1,8 @@
-package ru.testjava.addressbook;
+package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import ru.testjava.addressbook.appmanager.ApplicationManager;
 
 public class TestBase { //исчезла ссылка на расширение класса ApplicationManager
 
