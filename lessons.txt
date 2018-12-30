@@ -1245,18 +1245,19 @@ Lesson25. Расщепление и специализация
 public class ApplicationManager extends GroupHelper 
  
 Переносим в новый класс методы, связанные с группами 
-Заменяем наследование делегирвоанием 
+Заменяем наследование делегированием 
 ПКМ ApplicationManager
 Refactor > Replace Inheritance With Delegations
-
-Поставить галочку Generate getter for delegated component
+Среда сообщает, что после этого действия в тестах возникнут проблемы. Они не смогут получить доступ к перенесенным методам. 
+Нужно поставить галочку Generate getter for delegated component
 
 Тестовые класса изменились, например GroupCreationTests
 
 
   @Test
   public void testGroupCreation() {
-    app.getGroupHelper().gotoGroupPage("groups"); /* 
+	app.gotoGroupPage(); // если АМ может выполнять действие сам
+    app.getGroupHelper().gotoGroupPage("groups"); /* для других действий
 	Происходит делегирование в два этапа 
 	Сначала происходит обращение к ApplicationManager, чтобы он дал доступ к помошнику по работе с группами GroupHelper, и уже этому помощнику делегируется выполнение настоящего действия , где происходит взаимодействие с тестируемой системой gotoGroupPage("groups") 
 	*/
@@ -1265,27 +1266,45 @@ Refactor > Replace Inheritance With Delegations
 
 Есть одно нежелательное изменение в ApplicationManager
 
-Ссылка на драйвер переехала в groupHelper
-
- public void init() {
-    System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
- groupHelper.driver = new ChromeDriver();
- }
-
+Ссылка на драйвер WebDriver driver; переехала в groupHelper
 Это неправильно, нужно вернуть ее обратно в ApplicationManager. Потому что она должна быть общей, ей хочет пользоваться  ApplicationManager и другие помощники тоже хотят работать с этой ссылкой.
-
 Вернуть ее обратно средствами рефакторинга не получится.   
+Нужно перенести в ручную
+
+Отправляемся в GroupHelper 
+Копируем от туда ссылку 
+WebDriver driver;
+Вставляем в АМ в начало выражения
+Метод инициализации init() будет инициализировать именно эту ссылку. Атрибут который находится в классе AM
+удаляем groupHelper.
+Но тогда возникает вопрос. Как GroupHepler получит эту ссылку на драйвер?
+Нужно ее передать в конструктор, но не в private final GroupHelper = new GroupHelper(); а после того как выполнена инициализация (после  строк с атрибутом driver.)
 
 
+GroupHeldep должен конструироваться внутри метода init()
+Ссылка на драйвер должна передаваться в качества параметра в контструктор
+groupHelper = new GroupHelper(driver);
+И этот конструктор необходимо создать Alt+Enter
+
+  public GroupHelper(WebDriver driver) { //значение, которое передано в качестве параметра конструктора
+    this.driver = driver; //необходимо присвоить в поле класса GroupHelper
+  }
+Тем самым класс GroupHelper получит доступ к драйверу, который инициализирован в AM и передан помощнику. 
+  
+Но остались проблемы в АМ
 
 
+private final GroupHelper groupHelper = new GroupHelder(); //не нужна инициализация = new GroupHelder()
+private final GroupHelper groupHelper; //его нужно только декларировать
 
+final - пометка означает, что в это можно присвоить значение только один раз. А нас это не устраивает потому что метод init() может вызываться многократно.
 
+private GroupHelper groupHelper;
 
+Остались проблемы в других вспомогательных методах. Там тоже используется ссылка, которая находится внутри groupHelper. Чтобы определить где именно есть эта нежелательная ссылка , нужно в GroupHelper объявить атрибут , в котором он хранит свою личную ссылку на драйвер, private
 
-
-
-
+В АМ будут выделены те кто хочет получить доступ к атрибуту, находящимуся внутри GroupHelper. Удаляем ссылки.
+Пусть они пользуются ссылкой, которая находится внтури AM.
 
 
 

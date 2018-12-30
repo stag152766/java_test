@@ -22,9 +22,9 @@ public class ApplicationManager {
     baseUrl = "https://www.katalon.com/";
     driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
     driver.get("http://localhost/addressbook/edit.php");
+    sessionHelper = new SessionHelper(driver);
     groupHelper = new GroupHelper(driver);
     navigationHelper = new NavigationHelper(driver);
-    sessionHelper = new SessionHelper(driver);
     contactHelper = new ContactHelper(driver);
     navigationHelper.gotoAddNew();
     sessionHelper.login("admin", "secret");
