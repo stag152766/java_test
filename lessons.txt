@@ -577,7 +577,7 @@ s.l
 public class Square(){
 	public double l;
 	
-	public Square(double len){
+	public Square(double len){ //len параметр контсруктора
 	this.l = len;	
 	}
 }
@@ -589,11 +589,11 @@ public class Square(){
 	public double l;
 	
 	public Square(double l){
-	this.l = l;	//так выглядит присваемое значение в атрибут. название аргументов конструктора совпадает с названиями атрибутов 
+	this.l = l;	//так выглядит присваемое значение в атрибут. название аргумента конструктора совпадает с названием атрибута   
 	}
 }
 
-В первом случае l атрибут, во втором l - переменная, которая объявлена как аргумент функции. 
+В первом случае l атрибут, во втором l - переменная, которая объявлена как аргумент функции (переменная, являющаяся аргументом функции). 
 Написать l=l нельзя тогда в обоих случах будет использоваться переменная  (double l)
 Для того, чтобы присвоить переданное значение именно в атрибут объекта, нужно сослаться на этот объект this.l 
 Значение атрибута создаваемого объекта, равно значению параметра переданного в конструктор.
@@ -606,40 +606,33 @@ package ru.testjava.sandBox;
 public class MyFirstProject {
 
 	public static void main(String[] args) {
-		hello("world");
-		hello("user");
-		hello("Max");
+	Square s = new Square(5);
+	System.out.println("Площадь квадрата со стороной " + s.l + " = " + area(s));
 
-		Square s = new Square();
-		s.l = 5; // обращаемся к первой area: устанавливаем значение атрибута равное 5
-		System.out.println("Площадь квадрата со стороной " + s.l + " = " + area(s)); /* передаем объект, в качестве параметра функции; s.1 используем объект, у которого мы берем атрибут s.l */
-		Rectangle r = new Rectangle(); // чать когда, где функция вызывается
-		r.a = 4; // обращаемся ко второй area
-		r.b = 6;
-		System.out.println("Площадь прямоугольника со сторонами " + r.a + " и " + r.b + " = " + area(r));
-
-
+	Rectangle r = new Rectangle(4,6); //длины сторон прямоугольника передаются в качестве параметра в конструктор 
+	System.out.println("Площадь прямоугольника со сторонами " + r.a + " и " + r.b + " = " + area(r));
 	}
 
-	public static void hello(String somebody) {
-		System.out.println("Hello, " + somebody + "!");
-	}
 
 	public static double area(Square s){ // функция принимает не сторону квадрата, а объект типа Квадрат
-		return s.l * s.l; // для того чтобы получить доступ к атрибуту объекта, необходимо написать объект.атрибут
+	return s.l * s.l; // для того чтобы получить доступ к атрибуту объекта, необходимо написать объект.атрибут
 	}
 
 	public static double area(Rectangle r) {
-		return r.a * r.b;
+	return r.a * r.b;
 	}
 }
 
 
- public Square(double l) { //
-        this.l = l;
-    }
+public Square(double l) { 
+    this.l = l;
+}
 	
-
+public Rectangle(double a, double b) {
+	this.a = a;
+	this.b = b;
+	
+}
 	
 ---
 
