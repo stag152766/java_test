@@ -26,7 +26,6 @@ public class ApplicationManager {
     groupHelper = new GroupHelper(driver);
     navigationHelper = new NavigationHelper(driver);
     contactHelper = new ContactHelper(driver);
-    navigationHelper.gotoAddNew();
     sessionHelper.login("admin", "secret");
   }
 
