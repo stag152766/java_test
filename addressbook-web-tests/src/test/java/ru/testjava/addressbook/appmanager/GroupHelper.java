@@ -45,7 +45,7 @@ public class GroupHelper extends HelperBase {
   }
 
   public void selectContact() {
-    click(By.id("5"));
+    click(By.id("7"));
 
   }
 
@@ -55,4 +55,11 @@ public class GroupHelper extends HelperBase {
   }
 
 
+  public void editContact() {
+    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='WAe'])[1]/following::img[2]"));
+    }
+
+  public void updateContact() {
+    click(By.name("update"));
+  }
 }
