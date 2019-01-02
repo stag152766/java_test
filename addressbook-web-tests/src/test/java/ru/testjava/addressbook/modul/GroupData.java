@@ -1,19 +1,19 @@
 package ru.testjava.addressbook.modul;
 
-public class GroupData { // объект
-  private final String name; //у которого три атрибута
+public class GroupData {
+  private final String name;
   private final String header;
   private final String footer;
 
   public GroupData(String name, String header, String footer) {
-    this.name = name; // в классе есть конструктор, который позволяет проинициализировать объект какими то значениями
+    this.name = name;
     this.header = header;
     this.footer = footer;
   }
 
   public String getName() {
     return name;
-  } //методы которые возвращают эти атрибуты
+  }
 
   public String getHeader() {
     return header;

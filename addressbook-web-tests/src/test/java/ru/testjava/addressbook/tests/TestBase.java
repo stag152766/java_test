@@ -4,15 +4,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import ru.testjava.addressbook.appmanager.ApplicationManager;
 
-public class TestBase { //исчезла ссылка на расширение класса ApplicationManager
+public class TestBase {
 
-  protected final ApplicationManager app = new ApplicationManager(); // создается ссылка на новый объект типа ApplicationManager
+  protected final ApplicationManager app = new ApplicationManager();
 
   @BeforeClass(alwaysRun = true)
   public void setUp()  {
-    app.init(); /* те вызовы , которые выполнялись в текущем классе
-    (как бы this.init()) теперь вместо этого вызываются методы, которые находятся в объекте  типа ApplicationManager
-    */
+    app.init();
   }
 
   @AfterClass(alwaysRun = true)
