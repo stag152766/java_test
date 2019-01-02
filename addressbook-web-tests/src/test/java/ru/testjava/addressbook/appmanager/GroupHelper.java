@@ -43,4 +43,16 @@ public class GroupHelper extends HelperBase {
   public void submitGroupModification() {
     click(By.name("update"));
   }
+
+  public void selectContact() {
+    click(By.id("5"));
+
+  }
+
+  public void deleteContact() {
+    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Select all'])[1]/following::input[2]"));
+    driver.switchTo().alert().accept();
+  }
+
+
 }
