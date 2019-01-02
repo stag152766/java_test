@@ -1579,6 +1579,61 @@ public void login(String username, String password) {
   }
 
 
+Метод может пользоваться теми данными, которые храняться в объекте этого класса.
+
+---
+
+Lesson27. Новый тест без использования рекодера
+
+Добавим тест в котором проверяется возможность модификации какой то существующей группы
+
+
+package ru.testjava.addressbook.tests;
+
+import org.testng.annotations.Test;
+import ru.testjava.addressbook.modul.GroupData;
+
+public class GroupModificationTests extends TestBase{
+
+  GroupModificationTests() {
+
+  }
+
+  @Test
+  public void testGroupModification() {
+    app.getNavigationHelper().gotoGroupPage();
+    app.getGroupHelper().selectGroup();
+    app.getGroupHelper().initGroupModification(); //новый
+    app.getGroupHelper().fillGroupForm(new GroupData("test1", "test2", "test3"));
+    app.getGroupHelper().submitGroupModification();//новый
+    app.getGroupHelper().returnToGroupPage();
+  }
+}
+
+Новые методы создаем в классе GroupHelper
+
+---
+Занятие 3
+Lesson28.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
