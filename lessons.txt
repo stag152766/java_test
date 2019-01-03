@@ -1722,21 +1722,47 @@ else {
 При написании кода пробуйте эксперементируйте, меняйте проверяемые условия, переставляйте блоки местами, стараясь добиться максимальной понятности того, что проверяется и когда что должно выполняться.
 
 ---
-Lesson30.  
+Lesson30. Браузер на выбор
 
+public class ApplicationManager {
+  private WebDriver driver; //тип переменной интерфейс WebDriver - это проявление механизма наследования
  
+public void init() {
+    System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
+    driver = new ChromeDriver(); //создается экземпляр класса ChromeDriver
+
+	}	
 	
+В интерфейсе методы только декларируются, объявляются имена и типы параметров возвращаемого значения. А конкретная реализация этих методов должна быть написана в классе наследнике.	
+Разные классы могут реализовывать один и тот же интерфейс, но по разному 	
 	
+Выбор типа браузера нужно указать при инициализации в TestBase. 	
+Поэтому тип браузера нужно следать параметром.
+
+Можно сделать параметром метода init()	
 	
+Тогда в TestBase при вызове этого метода нужно указать тип браузера
+@BeforeMethod
+public void setUp()
+app.init(CHROME)
+
+Можно сделать тип бразузера параметром конструктора AM
+
+public class TestBase {
+protected final ApplicationManager app = new ApplicationManager(BrowserType.CHROME);
+...
+}
+
+Создаем конструктор
+public ApplicationManager(String browser) {
+
+    this.browser = browser; //значение параметра сохраняем в поле
+  }
 	
-	
-	
-	
-	
-	
-	
-	
-	
+Убираем локальную переменную String browser = BrowserType.CHROME; вместо нее будет использоваться атрибут объекта АМ, тот который был установлен при конструировании этого объекта.
+public void init() {
+    String browser = BrowserType.CHROME;
+    if (browser == BrowserType.CHROME) {	
 	
 	
 	
