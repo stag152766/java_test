@@ -27,9 +27,9 @@ public class HelperBase {
 
     public boolean isAlertPresent() {
       try {
-        driver.switchTo().alert();
+        driver.switchTo().alert(); //если окно есть, то успешно переключимся
         return true;
-      } catch (NoAlertPresentException e) {
+      } catch (NoAlertPresentException e) { // если нет, то возникает исключения типа NoAlertPresentException
         return false;
       }
     }
