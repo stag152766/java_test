@@ -28,7 +28,7 @@ public class ApplicationManager {
 
   public void init() {
     if (browser.equals(BrowserType.CHROME)) {
-      driver = new ChromeDriver(); //создается экземпляр класса ChromeDriver
+      driver = new ChromeDriver();
     } else if (browser.equals(BrowserType.FIREFOX)) {
       driver = new FirefoxDriver();
     } else if (browser == BrowserType.IE) {

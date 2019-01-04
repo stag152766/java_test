@@ -17,11 +17,14 @@ public class HelperBase {
 
   protected void type(By locator, String text) {
     click(locator);
-    if (text != null) { // нужно проверить храниться ли в переменной ссылка на какой то объект (физ сравнение)
-      driver.findElement(locator).clear();
-      driver.findElement(locator).sendKeys(text);
+    if (text != null) {
+      String existingText = driver.findElement(locator).getAttribute("value"); //извлекаем из поля то значение, которое храниться
+      if (! text.equals(existingText)) { //сравниваем по смыслу существующий текст с новым текстом
+        driver.findElement(locator).clear();
+        driver.findElement(locator).sendKeys(text);}
+      }
     }
-  }
+
     public boolean isAlertPresent() {
       try {
         driver.switchTo().alert();

@@ -5,10 +5,6 @@ import ru.testjava.addressbook.modul.GroupData;
 
 public class GroupModificationTests extends TestBase{
 
-  GroupModificationTests() {
-
-  }
-
   @Test
   public void testGroupModification() {
     app.getNavigationHelper().gotoGroupPage();
