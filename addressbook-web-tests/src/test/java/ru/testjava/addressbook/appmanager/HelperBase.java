@@ -17,16 +17,18 @@ public class HelperBase {
 
   protected void type(By locator, String text) {
     click(locator);
-    driver.findElement(locator).clear();
-    driver.findElement(locator).sendKeys(text);
-  }
-
-  public boolean isAlertPresent() {
-    try {
-      driver.switchTo().alert();
-      return true;
-    } catch (NoAlertPresentException e) {
-      return false;
+    if (text != null) { // нужно проверить храниться ли в переменной ссылка на какой то объект (физ сравнение)
+      driver.findElement(locator).clear();
+      driver.findElement(locator).sendKeys(text);
     }
   }
+    public boolean isAlertPresent() {
+      try {
+        driver.switchTo().alert();
+        return true;
+      } catch (NoAlertPresentException e) {
+        return false;
+      }
+    }
 }
+
