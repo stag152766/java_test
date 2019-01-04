@@ -1721,6 +1721,8 @@ else {
 
 При написании кода пробуйте эксперементируйте, меняйте проверяемые условия, переставляйте блоки местами, стараясь добиться максимальной понятности того, что проверяется и когда что должно выполняться.
 
+
+
 ---
 Lesson30. Браузер на выбор
 
@@ -1736,9 +1738,9 @@ public void init() {
 В интерфейсе методы только декларируются, объявляются имена и типы параметров возвращаемого значения. А конкретная реализация этих методов должна быть написана в классе наследнике.	
 Разные классы могут реализовывать один и тот же интерфейс, но по разному 	
 	
-Выбор типа браузера нужно указать при инициализации в TestBase. 	
-Поэтому тип браузера нужно следать параметром.
+Выбор типа браузера нужно указать при инициализации в TestBase. Поэтому тип браузера нужно следать параметром.
 
+Способ 1
 Можно сделать параметром метода init()	
 	
 Тогда в TestBase при вызове этого метода нужно указать тип браузера
@@ -1746,6 +1748,7 @@ public void init() {
 public void setUp()
 app.init(CHROME)
 
+Способ 2
 Можно сделать тип бразузера параметром конструктора AM
 
 public class TestBase {
@@ -1763,6 +1766,44 @@ public ApplicationManager(String browser) {
 public void init() {
     String browser = BrowserType.CHROME;
     if (browser == BrowserType.CHROME) {	
+	}	
+
+public void init() {
+    if (browser == BrowserType.CHROME) {
+      driver = new ChromeDriver(); 
+    } else if (browser == BrowserType.FIREFOX) {
+      driver = new FirefoxDriver();
+    } else if (browser == BrowserType.IE) {
+      driver = new InternetExplorerDriver();
+    }
+}
+
+Драйверы помещены в папку c:\Tools\
+В переменную окружения PATH добавлен путь c:\Tools\ 
+	
+http://software-testing.ru/forum/index.php?/topic/33657-udaetsia-podkliuchit-chromedriver-tolko-cherez-systemsetproperty/?p=154278
+
+---
+Lesson31. 	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

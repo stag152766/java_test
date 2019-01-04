@@ -27,9 +27,7 @@ public class ApplicationManager {
   }
 
   public void init() {
-    String browser = BrowserType.CHROME;
     if (browser == BrowserType.CHROME) {
-      System.setProperty("webdriver.chrome.driver", "c:\\Tools\\chromedriver.exe");
       driver = new ChromeDriver(); //создается экземпляр класса ChromeDriver
     } else if (browser == BrowserType.FIREFOX) {
       driver = new FirefoxDriver();
