@@ -44,18 +44,9 @@ public class GroupHelper extends HelperBase {
     click(By.name("update"));
   }
 
-  public void selectContact() {
+
+  public void initContactModification() {
     click(By.name("selected[]"));
-
-  }
-
-  public void deleteContact() {
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Select all'])[1]/following::input[2]"));
-    driver.switchTo().alert().accept();
-  }
-
-
-  public void editContact() {
     click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='WAe'])[1]/following::img[2]"));
     }
 

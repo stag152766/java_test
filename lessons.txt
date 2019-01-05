@@ -1096,7 +1096,7 @@ private void login(String username){
 }
 
 
-Тестовый метод создает группу с какими-то свойствами name("group_header") name("group_footer")
+Тестовый метод создает группу с какими-то свойствами name, header, footer
 Значение этих свойств явно прописаны в коде метода
 private void fillGroupForm() {
     driver.findElement(By.name("group_name")).click();
@@ -1109,7 +1109,7 @@ private void fillGroupForm() {
     driver.findElement(By.name("group_footer")).sendKeys("test3");
 }
 
-Было бы логично передавать их в качестве параметров, чтобы функция fillGroupForm стала универсальной. Ее можно было бы использовать для создания групп с разными параметрами, то есть заполнять форму разными данными. Конкретные значения передавались бы из @Test.
+Было бы более логично передавать их в качестве параметров, чтобы функция fillGroupForm стала универсальной. Ее можно было бы использовать для создания групп с разными параметрами, то есть заполнять форму разными данными. Конкретные значения передавались бы из @Test.
 
 private void fillGroupForm(String name, String header, String footer) {
     driver.findElement(By.name("group_name")).sendKeys(name);
@@ -1125,29 +1125,82 @@ private void fillGroupForm(String name, String header, String footer) {
 У формы контакта много параметров
 Как превратить много параметров в мало?
 
-Вместо того, чтобы передавать много разных значений, их можно объединить в один объект, который будет иметь много атрибутов. То есть создать вспомогательный класс, который описывает объект типа Group. Объекты этого типа имеют набор атрибутов.
+Вместо того, чтобы передавать много отдельных значений, их можно объединить в один объект, который будет иметь много атрибутов. То есть создать вспомогательный класс, который описывает объект типа Group. Объекты этого типа имеют набор атрибутов.
 
 !В метод будет передаваться один объект
+ПКМ на fillGroupForm
 Refactor > Extract > Parameter Object 
 
-  @Test
-  public void testGroupCreation() throws Exception {
-    returnToGroupPage("groups");
-    initGroupCreation("new");
-    fillGroupForm(new GroupData("test1", "test2", "test3")); //данные для передачи во вспомогательные методы
-    /*при вызове fillGroupForm создается новый объект,
-    атрибуты которого заполняются конкретными значениями,
-    которые потом используются в методе fillGroupForm
-    groupData.getName()
-    groupData.getHeader()
-    groupData.getFooter()
-    */	
+Указываем имя классу, который будет описывать совокупность значений GroupData
+Отмечаем те значения которые должны быть объеденены
+Default valuse for parameter -  Leave blank
 
-	private void fillGroupForm(GroupData groupData) {}
-	driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
-    driver.findElement(By.name("group_header")).sendKeys(groupData.getHeader());
-    driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
-	
+
+Рефакторинг закончен
+
+Теперь метод принимает один объект типа GroupData
+public void fillGroupForm(GroupData groupData) {
+    type(By.name("group_name"), groupData.getName());
+    type(By.name("group_header"), groupData.getHeader());
+    type(By.name("group_footer"),groupData.getFooter());
+  }
+
+Это объект 
+
+public class GroupData {
+  private final String name; //три атрибута
+  private final String header;
+  private final String footer;
+
+  //конструктор, который позволяет проинициализировать объект какими то значениями
+  public GroupData(String name, String header, String footer) { 
+    this.name = name;
+    this.header = header;
+    this.footer = footer;
+  }
+
+  //методы, которые возвращают эти атрибуты
+  public String getName() {
+    return name;
+  }
+
+  public String getHeader() {
+    return header;
+  }
+
+  public String getFooter() {
+    return footer;
+  }
+}  
+ 
+
+
+А в @Test при вызове fillGroupForm создается новый объект, атрибуты которого заполняются конкретными значениями. 
+Эти значения потом используются в методе fillGroupForm
+groupData.getName()
+groupData.getHeader()
+groupData.getFooter()
+
+
+@Test
+public void testGroupCreation() throws Exception {
+returnToGroupPage("groups");
+initGroupCreation("new");
+fillGroupForm(new GroupData("test1", "test2", "test3")); //данные для передачи во вспомогательные методы
+...
+}
+
+
+
+private void fillGroupForm(GroupData groupData) {
+driver.findElement(By.name("group_name")).sendKeys(groupData.getName());
+driver.findElement(By.name("group_header")).sendKeys(groupData.getHeader());
+driver.findElement(By.name("group_footer")).sendKeys(groupData.getFooter());
+...	
+}
+
+
+
 
 	
 ---
@@ -2002,8 +2055,38 @@ public boolean isAlertPresent() {
 - при поиске несуществующего элемента 
 
 ---
-Lesson 35. 
-	
+Lesson 35. Почти одикановые формы
+
+Имеется две почти одинаковые формы. В форме для редактирования контакта отсутствует поле выбора группы с выподающим списком.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 	
 	

@@ -1,14 +1,17 @@
 package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.Test;
+import ru.testjava.addressbook.modul.ContactData;
 
 public class ContactCreationTests extends TestBase {
 
   @Test
-  public void testContactCreationTests() {
+  public void testContactCreation() {
+    app.getNavigationHelper().gotoHomePage();
     app.getNavigationHelper().gotoAddNew();
-    app.getContactHelper().fillContactForm("Fname", "Mname", "Lname", "Mtnick", "1st test", "213215461");
+    app.getContactHelper().fillContactForm(new ContactData( "Alex",null, "Jackson", "My street", "+79135467841"));
     app.getContactHelper().submitContactCreation();
+    app.getNavigationHelper().returnToHomePage();
   }
 
 }

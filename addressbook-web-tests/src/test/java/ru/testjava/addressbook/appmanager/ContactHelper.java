@@ -2,6 +2,7 @@ package ru.testjava.addressbook.appmanager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import ru.testjava.addressbook.modul.ContactData;
 
 public class ContactHelper extends HelperBase {
 
@@ -14,11 +15,21 @@ public class ContactHelper extends HelperBase {
     click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Notes:'])[1]/following::input[1]"));
   }
 
-  public void fillContactForm(String fname, String mname, String lname, String mtnick, String strname, String mnumber) {
-    type(By.name("firstname"),fname);
-    type(By.name("middlename"),mname);
-    type(By.name("nickname"),lname);
-    type(By.name("address"),strname);
-    type(By.name("mobile"),mnumber);
+
+  public void fillContactForm(ContactData contactData) {
+    type(By.name("firstname"), contactData.getFirstname());
+    type(By.name("middlename"), contactData.getMiddlename());
+    type(By.name("lastname"), contactData.getLastname());
+    type(By.name("address"), contactData.getAddress());
+    type(By.name("mobile"), contactData.getMobile());
+  }
+
+  public void selectContact() {
+    click(By.name("selected[]"));
+  }
+
+  public void deleteContact() {
+    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Select all'])[1]/following::input[2]"));
+    driver.switchTo().alert().accept();
   }
 }
