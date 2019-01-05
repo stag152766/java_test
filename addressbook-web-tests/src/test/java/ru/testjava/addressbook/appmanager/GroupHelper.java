@@ -47,7 +47,7 @@ public class GroupHelper extends HelperBase {
 
   public void initContactModification() {
     click(By.name("selected[]"));
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='WAe'])[1]/following::img[2]"));
+    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Fname'])[1]/following::img[2]"));
     }
 
   public void submitContactModification() {
