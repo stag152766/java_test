@@ -1132,10 +1132,8 @@ private void fillGroupForm(String name, String header, String footer) {
 Refactor > Extract > Parameter Object 
 
 Указываем имя классу, который будет описывать совокупность значений GroupData
-Отмечаем те значения которые должны быть объеденены
+Отмечаем те значения, которые должны быть объеденены
 Default valuse for parameter -  Leave blank
-
-
 Рефакторинг закончен
 
 Теперь метод принимает один объект типа GroupData
@@ -1148,7 +1146,7 @@ public void fillGroupForm(GroupData groupData) {
 Это объект 
 
 public class GroupData {
-  private final String name; //три атрибута
+  private final String name; //имеет три атрибута
   private final String header;
   private final String footer;
 
@@ -1175,11 +1173,7 @@ public class GroupData {
  
 
 
-А в @Test при вызове fillGroupForm создается новый объект, атрибуты которого заполняются конкретными значениями. 
-Эти значения потом используются в методе fillGroupForm
-groupData.getName()
-groupData.getHeader()
-groupData.getFooter()
+А в @Test при вызове fillGroupForm создается новый объект, атрибуты которого заполняются конкретными значениями
 
 
 @Test
@@ -1189,6 +1183,9 @@ initGroupCreation("new");
 fillGroupForm(new GroupData("test1", "test2", "test3")); //данные для передачи во вспомогательные методы
 ...
 }
+
+
+Эти значения потом используются в методе fillGroupForm()
 
 
 
@@ -2059,15 +2056,71 @@ Lesson 35. Почти одикановые формы
 
 Имеется две почти одинаковые формы. В форме для редактирования контакта отсутствует поле выбора группы с выподающим списком.
 
+В обоих тестах CreateContact и ContactModification используется метод fillContactForm()
+Добавим в него функционал для работы с группами
+
+Во первых нужно добавить поле String group в класс ContactData, который хранит информацию о контакте
+
+Добавляем параметр в конструктор, сохраняем его значение в какое то поле 
+
+Делаем для этого поля метод getter, которое позволяет получить значение поля. 
 
 
+public class ContactData {
+	...
+    private String group;
 
+  public ContactData(...String group) {
+	...
+    this.group = group;
+  }
 
+  ...
+  public String getGroup() {
+    return group;
+  }
+}
 
+Указываем существущее значение group в тестах 
+В ContactModification нет поля group, поэтому указываем null
 
+На этом доработка тестов завершена, теперь доработаем метод который заполняет форму.
 
+Как выбрать элемент из выпадающего списка
 
+Используем вспомогательный класс 
+new Select(driver.findElement(By.name("new_group"))) //в качестве параметра указан элемент, который найден на странице приложения - листбокс со списком групп
 
+Теперь в этом объекте типа select вызвать какой то из методов
+new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
+
+Но при попытке запустить тест ContactModification, то в этой строчке возникнет исключение
+
+Потому что драйвер не сможет найти элемент с таким локатором
+
+Для того, чтобы предотвратить это исключение можно сделать проверку
+
+if (isElementPresent(By.name("new_group"))) {
+      new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
+    } 
+//в противном случае, если такого элемента нет, то делать ничего не нужно - блока else не будет
+
+Создаем метод isElementPresent()
+
+private boolean isElementPresent(By locator) { //параметру даем общее имя, для проверки произвольного локатора
+	return  ; //нельзя предотвратить возникновение исключения 
+}
+  
+Драйвер селениум не предоставляет возможности узнать заранее есть ли на странице элемент или нет.
+Единственное что можно сделать это его поискать
+
+private boolean isElementPresent(By locator) {
+	driver.findElement(locator);
+}
+
+Если элемент есть, то он успешно найдется. 
+Если элемента нет, то будет выбрашено исключение.
+Поэтому нужно обернуть попытку 
 
 
 

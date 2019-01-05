@@ -50,7 +50,7 @@ public class GroupHelper extends HelperBase {
     click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='WAe'])[1]/following::img[2]"));
     }
 
-  public void updateContact() {
+  public void submitContactModification() {
     click(By.name("update"));
   }
 }

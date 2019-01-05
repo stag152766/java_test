@@ -1,5 +1,7 @@
 package ru.testjava.addressbook.modul;
 
+//вспомогательный класс, который описывает объект типа группа
+
 public class GroupData {
   private final String name;
   private final String header;
