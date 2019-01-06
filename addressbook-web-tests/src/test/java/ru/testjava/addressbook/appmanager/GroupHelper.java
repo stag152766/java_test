@@ -17,11 +17,11 @@ public class GroupHelper extends HelperBase {
   public void fillGroupForm(GroupData groupData) {
     type(By.name("group_name"), groupData.getName());
     type(By.name("group_header"), groupData.getHeader());
-    type(By.name("group_footer"),groupData.getFooter());
+    type(By.name("group_footer"), groupData.getFooter());
   }
 
-  public void initGroupCreation(String s) {
-    click(By.name(s));
+  public void initGroupCreation() {
+    click(By.name("new"));
   }
 
   public void deleteSelectedGroups() {
@@ -48,9 +48,16 @@ public class GroupHelper extends HelperBase {
   public void initContactModification() {
     click(By.name("selected[]"));
     click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Fname'])[1]/following::img[2]"));
-    }
+  }
 
   public void submitContactModification() {
     click(By.name("update"));
+  }
+
+  public void createGroup(GroupData group) { //параметру дали любое имя, значение задается в тесте
+    initGroupCreation();
+    fillGroupForm(group);
+    submitGroupCreation();
+    returnToGroupPage();
   }
 }
