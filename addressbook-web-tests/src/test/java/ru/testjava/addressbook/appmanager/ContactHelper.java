@@ -42,4 +42,5 @@ public class ContactHelper extends HelperBase {
     click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Select all'])[1]/following::input[2]"));
     driver.switchTo().alert().accept();
   }
+
 }
