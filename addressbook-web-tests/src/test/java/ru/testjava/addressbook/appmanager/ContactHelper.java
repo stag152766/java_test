@@ -43,4 +43,23 @@ public class ContactHelper extends HelperBase {
     driver.switchTo().alert().accept();
   }
 
+  public boolean isThereAContact() {
+    return isElementPresent(By.name("selected[]"));
+  }
+
+  public void ContactCreation(ContactData contact, boolean creation) {
+    click(By.linkText("add new"));
+    fillContactForm(contact, creation);
+    submitContactCreation();
+    click(By.linkText("home"));
+  }
+
+  public void initContactModification() {
+    click(By.name("selected[]"));
+    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Alex'])[1]/following::img[2]"));
+  }
+
+  public void submitContactModification() {
+    click(By.name("update"));
+  }
 }

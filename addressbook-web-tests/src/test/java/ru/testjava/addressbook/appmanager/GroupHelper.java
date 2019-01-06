@@ -45,14 +45,7 @@ public class GroupHelper extends HelperBase {
   }
 
 
-  public void initContactModification() {
-    click(By.name("selected[]"));
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Fname'])[1]/following::img[2]"));
-  }
 
-  public void submitContactModification() {
-    click(By.name("update"));
-  }
 
   public void createGroup(GroupData group) { //параметру дали любое имя, значение задается в тесте
     initGroupCreation();
