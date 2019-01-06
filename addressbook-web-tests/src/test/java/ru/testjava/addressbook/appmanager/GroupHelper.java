@@ -60,4 +60,8 @@ public class GroupHelper extends HelperBase {
     submitGroupCreation();
     returnToGroupPage();
   }
+
+  public boolean isThereAGroup() { //будет проверяться наличие какого то элемента, который мы пытаемся выбирать в методе SelectGroup (соответствует включенному чекбоксу)
+    return isElementPresent(By.name("selected[]"));
+  }
 }
