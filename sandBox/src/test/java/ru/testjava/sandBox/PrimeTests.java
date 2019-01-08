@@ -10,7 +10,7 @@ public class PrimeTests {
     Assert.assertTrue(Primes.isPrime(Integer.MAX_VALUE)); //Integer.MAX_VALUE - простое число
   }
 
-  @Test
+  @Test(enabled = false)
   public void testNonPrimes() {
     Assert.assertFalse(Primes.isPrime(Integer.MAX_VALUE-2)); //Integer.MAX_VALUE - простое число
   }
@@ -22,8 +22,13 @@ public class PrimeTests {
     Assert.assertTrue(Primes.isPrime(n));
   }
 
-  @Test
+  @Test(enabled = false)
   public void testPrimesFast() {
     Assert.assertTrue(Primes.isPrimeFast(Integer.MAX_VALUE));
+  }
+
+  @Test(enabled = true)
+  public void testPrime2Fast() {
+    Assert.assertTrue(Primes.isPrime2Fast(Integer.MAX_VALUE));
   }
 }

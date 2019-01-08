@@ -42,7 +42,7 @@ public class Primes {
   }
 
   public static boolean isPrime2Fast(int n) {
-    int m = (int) Math.sqrt(n);
+    int m = (int) Math.sqrt(n); // явно преобразуем значение к целому типу, посколько корень может быть не целым
     for (int i = 2; i < m / 2; i++) {
       if (n % i == 0) {
         return false;
