@@ -2687,7 +2687,7 @@ public class GroupCreationTests extends TestBase {
     app.getNavigationHelper().gotoGroupPage();
     app.getGroupHelper().createGroup(new GroupData("test1", null, null));
     int after = app.getGroupHelper().getGroupCount(); //количество групп до добавления
-    Assert.assertEquals(after, before + 1); //проверка 
+    Assert.assertEquals(after, before + 1); //проверка количества элементов 
   }
 
 }
@@ -2695,11 +2695,16 @@ public class GroupCreationTests extends TestBase {
 
 Для реализации новых методов воспользуемся методом драйвера (с локатором в качестве параметра)
 
-ublic int getGroupCount() {
-    return driver.findElements(By.name("selected[]")).size(); //метод findElements возвращаем список элементов т.е. объект типа лист . У этого списка нужно получить размер и вернуть размер
+public int getGroupCount() {
+    return driver.findElements(By.name("selected[]")).size(); //метод findElements возвращает список элементов т.е. объект типа лист . У этого списка нужно получить размер и затем вернуть размер
 
   }
 
+В отличии от метода findElement(), который падает и выбрасывает исключение NoSuchElementException если элемент не найден,
+метод findElements() возвращает пустой список.
+
+---
+Урок 41. Выбор элемента списка по порядковому номеру 
 
 
 
@@ -2716,7 +2721,18 @@ ublic int getGroupCount() {
 
 
 
-Урок 41. Выбор элемента списка по порядковому номеру 00:02:55
+
+
+
+
+
+
+
+
+
+
+
+---
 
 Урок 42. Формирование коллекции 00:08:18
 
