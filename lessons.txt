@@ -2666,13 +2666,39 @@ public static void main(String[] args) {
 ---
 Урок 40. Количество элементов в коллекции 
 
+В качестве первого примера использования коллекций, мы научимся получать список элементов со страницы веб приложения и определять их количество.
+
+Начнем с теста для создания групп
+
+Создадим метод позволяющий узнать количество групп и добавим проверку 
 
 
+package ru.testjava.addressbook.tests;
+
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import ru.testjava.addressbook.modul.GroupData;
+
+public class GroupCreationTests extends TestBase {
+
+  @Test
+  public void testGroupCreation() {
+    int before = app.getGroupHelper().getGroupCount(); //количество групп до добавления
+    app.getNavigationHelper().gotoGroupPage();
+    app.getGroupHelper().createGroup(new GroupData("test1", null, null));
+    int after = app.getGroupHelper().getGroupCount(); //количество групп до добавления
+    Assert.assertEquals(after, before + 1); //проверка 
+  }
+
+}
 
 
+Для реализации новых методов воспользуемся методом драйвера (с локатором в качестве параметра)
 
+ublic int getGroupCount() {
+    return driver.findElements(By.name("selected[]")).size(); //метод findElements возвращаем список элементов т.е. объект типа лист . У этого списка нужно получить размер и вернуть размер
 
-
+  }
 
 
 

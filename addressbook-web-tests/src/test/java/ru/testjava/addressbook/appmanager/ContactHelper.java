@@ -15,7 +15,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public void submitContactCreation() {
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Notes:'])[1]/following::input[1]"));
+    click(By.name("submit"));
   }
 
 
@@ -39,7 +39,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public void deleteContact() {
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Select all'])[1]/following::input[2]"));
+    click(By.xpath("//input[@value='Delete']"));
     driver.switchTo().alert().accept();
   }
 
@@ -56,10 +56,14 @@ public class ContactHelper extends HelperBase {
 
   public void initContactModification() {
     click(By.name("selected[]"));
-    click(By.xpath("(.//*[normalize-space(text()) and normalize-space(.)='Alex'])[1]/following::img[2]"));
+    click(By.xpath("//img[@title='Edit']"));
   }
 
   public void submitContactModification() {
     click(By.name("update"));
+  }
+
+  public int getContactCount() {
+    return driver.findElements(By.name("selected[]")).size();
   }
 }

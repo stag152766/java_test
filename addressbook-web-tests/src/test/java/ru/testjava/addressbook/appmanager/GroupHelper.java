@@ -57,4 +57,8 @@ public class GroupHelper extends HelperBase {
   public boolean isThereAGroup() { //будет проверяться наличие какого то элемента, который мы пытаемся выбирать в методе SelectGroup (соответствует включенному чекбоксу)
     return isElementPresent(By.name("selected[]"));
   }
+
+  public int getGroupCount() {
+     return driver.findElements(By.name("selected[]")).size();
+  }
 }
