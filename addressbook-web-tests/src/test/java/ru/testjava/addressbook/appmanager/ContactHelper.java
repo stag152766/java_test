@@ -60,7 +60,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public void submitContactModification() {
-    click(By.name("update"));
+    click(By.xpath("/html[1]/body[1]/div[1]/div[4]/form[1]/input[1]"));
   }
 
   public int getContactCount() {
