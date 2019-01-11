@@ -2728,34 +2728,63 @@ public void selectGroup(int index) {
 ---
 Урок 42. Формирование коллекции 
 
+Будем получать со страницы веб приложения список элементов, который содержит информацию о группах. В цикле будем последовательно перебирать эти элементы, извлекать из каждого элемента текст и другую информацию. 
+На основании полученной информации строить собственные объекты типа GroupData (модельные объекты) и формировать из этих объектов список. Список будет использоваться в тестах для сравнения.
+
+
+Начнем с теста создания группы //Как будет выглядеть тест после того как нужный метод будет реализован?
+
+  @Test
+  public void testGroupCreation() {
+    app.getNavigationHelper().gotoGroupPage();
+    List<GroupData> before = app.getGroupHelper().getGroupList(); //переменная before раньше содержала количество элементов, теперь будет содержать список элементов (объектов) типа GroupData
+    app.getGroupHelper().createGroup(new GroupData("test1", null, null));
+    List<GroupData> after = app.getGroupHelper().getGroupList(); //содержит список элементов после того как будет создана новая группа
+    Assert.assertEquals(after.size(), before.size() + 1);
+  }
 
 
 
+Выполним реализацию метода getGroupList()
+
+  public List<GroupData> getGroupList() {
+    List<GroupData> groups = new ArrayList<GroupData>();//создадим список, который будем заполнять
+    return groups; //в конце метода этот список будет возвращаться
+  }
+
+ArrayList<> потому что мы должны указать конкретный класс, который реализует интерфейс List
 
 
+Далее нужно заполнить список объектами. Данные для создания этих объектов будут извлекаться со странице веб приложения.
 
+Для этого нужно понять откуда, из какого элемента со странице можно извлечь нужную информацию
 
+Возьмем элемент span, который имеет class group и получить его текст. Тем самым мы сразу получаем название группы. 
 
+  public List<GroupData> getGroupList() {
+    List<GroupData> groups = new ArrayList<GroupData>();//создадим список, который будем заполнять
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group")); //найти все элементы, которые имеют тег span и класс group
+    return groups;
+  }
 
+Теперь нужно по этим элементам пройти в цикле и для каждого из них выполнить какие то дейсвия
 
+  public List<GroupData> getGroupList() {
+    List<GroupData> groups = new ArrayList<GroupData>();//создадим список, который будем заполнять
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group")); //найти все элементы, которые имеют тег span и класс group
+    for (WebElement element: elements) {//переменная пробегает по списку
+      String name = element.getText(); //из каждого элемента получаем текст, это будет имя группы
+      GroupData group = new GroupData(name, null,null); //создаем объект типа GroupData, header & footer нам неизвестны
+      groups.add(group);//добавляем созданный объект в список
+    }
+      return groups;
+  }
 
+//теперь сравниваем размеры списков, которые получены с помощью метода getGroupList() Фактически проверяется тоже самое (количество групп) Следующий шаг - сравнение списка целиком 
 
+Переходим в тест удаления групп
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Перепишем тест, чтобы в нем использовался новый метод, возвращащий список групп
 
 
 

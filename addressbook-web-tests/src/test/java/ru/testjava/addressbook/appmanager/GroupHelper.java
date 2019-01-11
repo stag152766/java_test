@@ -2,7 +2,11 @@ package ru.testjava.addressbook.appmanager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import ru.testjava.addressbook.modul.GroupData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GroupHelper extends HelperBase {
 
@@ -60,5 +64,16 @@ public class GroupHelper extends HelperBase {
 
   public int getGroupCount() {
      return driver.findElements(By.name("selected[]")).size();
+  }
+
+  public List<GroupData> getGroupList() {
+    List<GroupData> groups = new ArrayList<GroupData>();//создадим список, который будем заполнять
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group")); //найти все элементы, которые имеют тег span и класс group
+    for (WebElement element: elements) {//переменная пробегает по списку
+      String name = element.getText(); //из каждого элемента получаем текст, это будет имя группы
+      GroupData group = new GroupData(name, null,null); //создаем объект типа GroupData, header & footer нам неизвестны
+      groups.add(group);//добавляем созданный объект в список
+    }
+      return groups;
   }
 }
