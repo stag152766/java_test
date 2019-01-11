@@ -34,8 +34,8 @@ public class ContactHelper extends HelperBase {
     }
   }
 
-  public void selectContact() {
-    click(By.name("selected[]"));
+  public void selectContact(int index) {
+    driver.findElements(By.name("selected[]")).get(index).click();
   }
 
   public void deleteContact() {
@@ -54,8 +54,8 @@ public class ContactHelper extends HelperBase {
     click(By.linkText("home"));
   }
 
-  public void initContactModification() {
-    click(By.name("selected[]"));
+  public void initContactModification(int index) {
+    driver.findElements(By.name("selected[]")).get(index).click();
     click(By.xpath("//img[@title='Edit']"));
   }
 
