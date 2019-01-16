@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 
 public class GroupModificationTests extends TestBase{
-
   @Test
   public void testGroupModification() {
     app.getNavigationHelper().gotoGroupPage();
@@ -30,4 +29,5 @@ public class GroupModificationTests extends TestBase{
 
     Assert.assertEquals(new HashSet<Object>(before), new HashSet<Object>(after));
   }
+
 }

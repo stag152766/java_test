@@ -2901,7 +2901,7 @@ Code > Generate > equals() and hashCode()
 Урок 44. Множества. Неупорядоченные коллекции
 
 
-Реализуем аналогичную проверку для теста модификации групп. Необходимо учесть, что при модификации группы меняется ее имя. Группа может перепрыгнуть на другое место в списке, потому что в тестируемом приложении группы сортируются по именам. 
+Реализуем аналогичную проверку для теста модификации групп. Необходимо учесть, что при модификации группы меняется ее имя. Группа может перепрыгнуть на другое место в списке, потому что в тестируемом приложении группы сортируются по именам. Поэтому нужно сравнивать без учета порядка.  
 
 Нужно преобразовать эти списки в множества и сравнить их.
 
@@ -2917,14 +2917,14 @@ public class GroupModificationTests extends TestBase{
     List<GroupData> before = app.getGroupHelper().getGroupList();
     app.getGroupHelper().selectGroup(before.size() -1);
     app.getGroupHelper().initGroupModification();
-    GroupData group = new GroupData("test1", "test2", "test3"); //3- добавили локальную переменную
+    GroupData group = new GroupData("test1", "test2", "test3"); //4- добавили локальную переменную
     app.getGroupHelper().fillGroupForm(group);
     app.getGroupHelper().submitGroupModification();
     app.getGroupHelper().returnToGroupPage();
     List<GroupData> after = app.getGroupHelper().getGroupList();
     Assert.assertEquals(after.size(),before.size());
 
-    //2 - ниже модифицируем старый спискок, чтобы предсказать ожидаемый результат
+    //3 - ниже модифицируем старый спискок, чтобы предсказать ожидаемый результат
 
     before.remove(before.size() -1); //удаляли последний элемент
     before.add(group); //вместо него добавим тот, который должен появится после модификации
@@ -2932,17 +2932,156 @@ public class GroupModificationTests extends TestBase{
 
     //1 - добавим сравнение множеств
 
-    Assert.assertEquals(new HashSet<Object>(before), new HashSet<>(after)); //преобразуем списки в множества
+    Assert.assertEquals(new HashSet<Object>(before), new HashSet<Object>(after)); // 2 - преобразуем списки в множества
   }
 } 
 
 
 Можно было модифицировать объект, который находится в этом списке, не удаляя его от туда и не добавляя вместо него другой. Но с логической точки зрения никакой разницы нет. Проще удалить не нужный и вместо него добавить тот, который нам требуется. А уже после того как это сделано, можно преобразовать полученнные списки в множества и сравнивать их друг с другом.        
 
+Запускаем тест, он зеленый. Но не все так хорошо на самом деле. 
 
-Запускаем тест, тест зеленый. 
+Модифицируем состояние тестируемой системы, создадим список из трех групп test1, test2, test3
 
-Если модифицировать состояние тестируемой системы, создать группы test1, test2, test3
+Что сделает тест? 
+Он меняет последнюю группу test3, давая ей имя test1
+Теперь у нас две группы с именем test1 и одна с test2
+
+Поставим точку остановы в строке и выполним тест в отладчике 
+Assert.assertEquals(new HashSet<Object>(before), new HashSet<Object>(after));
+
+
+У нас есть before и after, в каждом из них находится по 3 элемента.
+  
+Провалимся во внутрь метода assertEquals()
+и поставим точку остановки внутри него 
+
+public static void assertEquals(Set<?> actual, Set<?> expected) { //сравниваются два множества, построенных из разных списков
+    assertEquals(actual, expected, null);
+  }
+  
+Продолжаем выполнение и видим, что здесь сравниваются 2 множества, имеющих размер 2.
+
+Куда пропал третий элемент?
+Проблема в том что множества не позволяют дублирование элементов, а мы сравниваем объекты (группы) по именам. Следовательно, все группы с одинаковыми именами схлопываются.
+ 
+Вывод: если группа test3 получила бы имя test2 вместо test1, то наш тест решил бы что множества равны. 
+
+test1		test1
+test1		test2
+test2		test2
+
+Это некорректная проверка.
+
+Решение 
+Если бы группы имели уникальные идентификаторы, тогда бы при преобразовании списка в множества схлопывания не происходило.
+Нужен уникальный идентификатор для каждого объекта. 
+
+
+<input type="checkbox" name="selected[]" value="1" title="Select (test1)"> //value="1" 
+
+
+Извлечем эти идентификаторы и будем их использовать при сравнении объектов
+
+1 часть
+ 
+public class GroupData {
+  private final String id; //добавим атрибут 
+  private final String name;
+  private final String header;
+  private final String footer;
+
+  public GroupData(String id, String name, String header, String footer) { //добавим параметр в конструктор
+    this.id = id; //присваивать значение параментра в атрибут - в поле объекта
+    this.name = name;
+    this.header = header;
+    this.footer = footer;
+  }
+
+
+2 часть
+Делаем для этого поля метод getter, которое позволяет получить значение поля 
+Code > Generate > Getter
+
+public class GroupData {
+  public String getId() {
+    return id;
+  }
+
+Перегенерируем методы toString() / equals() 
+
+Code > Generate > toString //указываем для id и name и заменяем для всех
+Code > Generate > equals and hashCode //заменить существующие, default, указываем для id и name
+
+3 часть
+
+Модификация GroupHelder
+
+  public List<GroupData> getGroupList() {
+    List<GroupData> groups = new ArrayList<GroupData>();
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));// 3 - получили элемент, который является частью списка
+    for (WebElement element: elements) {
+      String name = element.getText();
+	  String id = element.findElement(By.tagName("input")).getAttribute("value");  //2 - откуда взять id?  4 - Ищем внутри одного элемента другой и берем из него атрибут value
+      GroupData group = new GroupData(id ,name, null,null); //1 - GroupHelper должен откуда то id извлекать, и передавать его в качестве параметра в конструктор, он используется при сравнении
+      groups.add(group);
+    }
+      return groups;
+  }
+
+//**но это не чек-бокс - это элемент внутри которого, находится чек-бокс
+<span class="group">
+	<input type="checkbox" name="selected[]" value="5" title="Select (test2)">
+	"test2"
+	<br>
+</span>
+
+
+После модификации, появились ошибки компиляции
+- можно их исправлять, везде передавать вкачестве идентификатора null 
+- можно добавить конструктор в классе GroupDate
+
+//группа с неизвестным идентификатором, она не прочитана из веб интерфейса, а создана искусственно 	
+  public GroupData(String name, String header, String footer) { //не принимает идентификатор (String id) в качестве параметра 
+    this.id = null; //если вызывается этот конструктор, то присваивается null в качестве идентификатора
+    this.name = name;
+    this.header = header;
+    this.footer = footer;
+  }
+
+  public GroupData(String id, String name, String header, String footer) {
+    this.id = id;
+    this.name = name;
+    this.header = header;
+    this.footer = footer;
+  }
+
+Повторяем запуск отладчика с выставленными ранее точками остановы
+
+В методе assertEquals() видим что сравниваются два множества, которые имеют размер 3
+Схлопывания нет, потому что все элементы различные. У них разные идентификаторы. Но с логической точки зрения, они должны быть равны. 
+
+Тест падает. Проблема в том, что множества оказываются разными. Во втором множестве, есть элемент, у которого id = null. Этот тот самый который модифицировали.  
+ 
+Нужно ему установить правильный идентификатор. 
+А откуда его узнать? Из уже существующего объекта, это будет последний элемент списка before
+
+GroupData group = new GroupData(before.get(before.size() -1).getId(),"test1", "test2", "test3"); //добавили локальную переменную 
+
+При модификации группы мы указываем новые name, header, footer, а идентификатор оставляем старый.
+
+---
+Урок 45. Поиск максимального элемента в коллекции
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2980,7 +3119,6 @@ public class GroupModificationTests extends TestBase{
 
 
 ---
-Урок 45. Поиск максимального элемента в коллекции 00:08:31
 
 Урок 46. Лямбда-выражения (анонимные функции) и элементы функционального программирования 00:10:37
 
