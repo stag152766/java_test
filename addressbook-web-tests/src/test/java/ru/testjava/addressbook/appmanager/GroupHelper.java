@@ -67,12 +67,12 @@ public class GroupHelper extends HelperBase {
   }
 
   public List<GroupData> getGroupList() {
-    List<GroupData> groups = new ArrayList<GroupData>();//создадим список, который будем заполнять
-    List<WebElement> elements = driver.findElements(By.cssSelector("span.group")); //найти все элементы, которые имеют тег span и класс group
-    for (WebElement element: elements) {//переменная пробегает по списку
-      String name = element.getText(); //из каждого элемента получаем текст, это будет имя группы
-      GroupData group = new GroupData(name, null,null); //создаем объект типа GroupData, header & footer нам неизвестны
-      groups.add(group);//добавляем созданный объект в список
+    List<GroupData> groups = new ArrayList<GroupData>();
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));
+    for (WebElement element: elements) {
+      String name = element.getText();
+      GroupData group = new GroupData(name, null,null);
+      groups.add(group);
     }
       return groups;
   }
