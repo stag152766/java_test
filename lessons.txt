@@ -3292,6 +3292,81 @@ int max1 = after.stream().max((o1, o2) -> Integer.compare(o1.getId(),o2.getId())
 ---
 Урок 47. Сортировка списков
 
+В тесте для модификации групп реализуем другой способ решения проблемы сортировки.
+Вместо того, чтобы игнорировать порядок, мы наведем свой собственный. Например, упорядочим группы по идентификаторам. 
+
+
+  @Test
+  public void testGroupModification() {
+    app.getNavigationHelper().gotoGroupPage();
+    if (! app.getGroupHelper().isThereAGroup()) {
+      app.getGroupHelper().createGroup(new GroupData("test1", null, null));
+    }
+    List<GroupData> before = app.getGroupHelper().getGroupList();
+    app.getGroupHelper().selectGroup(before.size() -1);
+    app.getGroupHelper().initGroupModification();
+    GroupData group = new GroupData(before.get(before.size() -1).getId(),"test1", "test2", "test3");
+    app.getGroupHelper().fillGroupForm(group);
+    app.getGroupHelper().submitGroupModification();
+    app.getGroupHelper().returnToGroupPage();
+    List<GroupData> after = app.getGroupHelper().getGroupList();
+    Assert.assertEquals(after.size(),before.size());
+
+    before.remove(before.size() -1);
+    before.add(group);
+    Assert.assertEquals(new HashSet<Object>(before), new HashSet<Object>(after));
+  }
+/* 
+Мы не знали в каком порядке находятся элементы. После модификации группы она могла находится в другом месте. 
+Потому что сортировка в тестируемом приложении выполняется по неизвестному правилу. 
+Мы решили полностью игнорировать порядок и сравнивать множества вместо списков.
+*/
+
+Как сортировать список?
+
+// Старый способ Collections.sort()
+
+В Java 8 у списка появился метод sort(), который в качестве параметра принимает компаратор т.е. описание правил сравнения объектов 
+
+before.sort(byId); //сравниваем по идентификаторам
+
+Просим среду разработки, чтобы она создала локальную переменную byId
+
+Сразу пишем лямбда-выражение
+ 
+Comparator<? super GroupData> byId = (g1, g2) -> Integer.compare(g1.getId(),g2.getId()); 
+/*
+= анонимная функция, которая на вход принимает два параметра(группы g1, g2) 
+и выполняет сравнение идентификаторов Integer.compare(первый_идентификатор,второй_идентификатор) 
+это и будет возвращаемый результат этой аннонимной функции
+*/
+
+
+  @Test
+  public void testGroupModification() {
+    app.getNavigationHelper().gotoGroupPage();
+    if (! app.getGroupHelper().isThereAGroup()) {
+      app.getGroupHelper().createGroup(new GroupData("test1", null, null));
+    }
+    List<GroupData> before = app.getGroupHelper().getGroupList();
+    app.getGroupHelper().selectGroup(before.size() -1);
+    app.getGroupHelper().initGroupModification();
+    GroupData group = new GroupData(before.get(before.size() -1).getId(),"test1", "test2", "test3"); 
+    app.getGroupHelper().fillGroupForm(group);
+    app.getGroupHelper().submitGroupModification();
+    app.getGroupHelper().returnToGroupPage();
+    List<GroupData> after = app.getGroupHelper().getGroupList();
+    Assert.assertEquals(after.size(),before.size());
+
+    before.remove(before.size() -1);
+    before.add(group);
+    Comparator<? super GroupData> byId = (g1, g2) -> Integer.compare(g1.getId(),g2.getId());
+    before.sort(byId);
+    after.sort(byId);
+    Assert.assertEquals(before, after);
+  }
+
+Переходим к тесту создания группы
 
 
 
@@ -3322,6 +3397,10 @@ int max1 = after.stream().max((o1, o2) -> Integer.compare(o1.getId(),o2.getId())
 
 
 
+---
+Занятие 5. Улучшение кода тестов. Работа со строками
+
+Урок 48. Как правильно запускать браузер 
 
 
 
@@ -3336,7 +3415,15 @@ int max1 = after.stream().max((o1, o2) -> Integer.compare(o1.getId(),o2.getId())
 
 
 
-Урок 48. Как правильно запускать браузер 00:13:08
+
+
+
+
+
+
+
+
+
 
 Урок 49. Улучшение кода тестов - ещё немного реструктуризации кода 00:07:39
 
