@@ -1,13 +1,11 @@
 package ru.testjava.addressbook.appmanager;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import ru.testjava.addressbook.modul.ContactData;
-import ru.testjava.addressbook.modul.GroupData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +17,10 @@ public class ContactHelper extends HelperBase {
     super(driver);
   }
 
+
   public void submitContactCreation() {
     click(By.name("submit"));
   }
-
 
   public void fillContactForm(ContactData contactData, boolean creation) {
     type(By.name("firstname"), contactData.getFirstname());
@@ -74,10 +72,12 @@ public class ContactHelper extends HelperBase {
 
   public List<ContactData> getContactList() {
     List<ContactData> contacts = new ArrayList<ContactData>();
-    List<WebElement> elements = driver.findElements(By.cssSelector("td:nth-child(3)"));
+    List<WebElement> elements = driver.findElements(By.name("entry"));
     for (WebElement element : elements) {
-      String firstname = element.getText();
-      ContactData contact = new ContactData(firstname, null, null, null, null, null);
+      String firstname = element.findElement(By.cssSelector("td:nth-child(3)")).getText();
+      String lastname = element.findElement(By.cssSelector("td:nth-child(2)")).getText();
+      int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
+      ContactData contact = new ContactData(id, firstname, null, lastname, null, null, null);
       contacts.add(contact);
     }
     return contacts;
