@@ -52,7 +52,7 @@ public class ContactHelper extends HelperBase {
     return isElementPresent(By.name("selected[]"));
   }
 
-  public void ContactCreation(ContactData contact, boolean creation) {
+  public void createContact(ContactData contact, boolean creation) {
     click(By.linkText("add new"));
     fillContactForm(contact, creation);
     submitContactCreation();

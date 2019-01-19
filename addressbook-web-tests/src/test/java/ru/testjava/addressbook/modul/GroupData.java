@@ -5,7 +5,6 @@ package ru.testjava.addressbook.modul;
 import java.util.Objects;
 
 public class GroupData {
-
   private int id;
   private final String name;
   private final String header;
