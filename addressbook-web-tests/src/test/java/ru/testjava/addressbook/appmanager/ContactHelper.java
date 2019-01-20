@@ -58,7 +58,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public void initContactModification(int index) {
-    driver.findElements(By.name("selected[]")).get(index).click();
+    driver.findElements(By.name("entry")).get(index).click();
     click(By.xpath("//img[@title='Edit']"));
   }
 
