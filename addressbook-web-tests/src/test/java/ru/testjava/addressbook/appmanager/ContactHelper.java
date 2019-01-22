@@ -29,10 +29,10 @@ public class ContactHelper extends HelperBase {
     type(By.name("address"), contactData.getAddress());
     type(By.name("mobile"), contactData.getMobile());
 
-    if (creation) { //если это форма создания, значит элемент должен быть, поэтому нужно выбирать элемент из выпадающего списка
+    if (creation) {
       new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
-    } //если вдруг этого элемента нет, то тест упадет - и так должно быть
-    else { //а иначе , это форма модификации, в этом случае элемента быть не должно
+    }
+    else {
       Assert.assertFalse(isElementPresent(By.name("new_group")));
     }
   }
@@ -47,7 +47,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public boolean isThereAContact() {
-    return isElementPresent(By.name("selected[]"));
+    return isElementPresent(By.name("entry"));
   }
 
   public void createContact(ContactData contact, boolean creation) {
@@ -57,17 +57,15 @@ public class ContactHelper extends HelperBase {
     click(By.linkText("home"));
   }
 
-  public void initContactModification() {
-    click(By.xpath("//img[@title='Edit']"));
+  public void initContactModification(int index) {
+    driver.findElements(By.xpath("//img[@title='Edit']")).get(index).click();
+
   }
 
   public void submitContactModification() {
     click(By.xpath("/html[1]/body[1]/div[1]/div[4]/form[1]/input[1]"));
   }
 
-  public int getContactCount() {
-    return driver.findElements(By.name("selected[]")).size();
-  }
 
   public List<ContactData> getContactList() {
     List<ContactData> contacts = new ArrayList<ContactData>();
