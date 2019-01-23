@@ -3485,25 +3485,89 @@ TestNG в самом начале создает экземляр класса T
 
 Код тестовых сценариев - фасадная часть работы тестировщика автоматизатора 
 
-В TestBase реализована глобальная инициализация **
+В TestBase есть глобальная инициализация @BeforeSuite
 
-Для одного теста или группы тестов может существовать локальные инициализации, которые нужны чтобы подготовить состояние именно 
+Для одного теста или группы тестов может существовать локальные инициализации, которые нужны чтобы подготовить состояние именно для конкретного теста.
 
+//данный фрагмент кода будет общий для всех тестов проверки модификации групп 
+    app.getNavigationHelper().gotoGroupPage();  
+    if (!app.getGroupHelper().isThereAGroup()) { //проверка предусловия
+      app.getGroupHelper().createGroup(new GroupData("test1", null, null)); //если предусловие не выполняется, то подготовка состояния
+    } 
 
-
-
-
-
-
-
-
-
+Поместим его в отдельный метод с анатацией @BeforeMethod
 
 
+public class GroupModificationTests extends TestBase {
+
+  @BeforeMethod //перед каждым тестовым методом должна выполняться проверка предусловия
+  public void ensurePreconditions() {
+    app.getNavigationHelper().gotoGroupPage();
+    if (!app.getGroupHelper().isThereAGroup()) {
+      app.getGroupHelper().createGroup(new GroupData("test1", null, null));
+    }
+  }
+
+  @Test
+  public void testGroupModification() {
+    List<GroupData> before = app.getGroupHelper().getGroupList();
+    int index = before.size() - 1;
+    GroupData group = new GroupData(index, "test1", "test2", "test3");
+    app.getGroupHelper().modifyGroup(index, group);
+    List<GroupData> after = app.getGroupHelper().getGroupList();
+    Assert.assertEquals(after.size(), before.size());
+
+    before.remove(index);
+    before.add(group);
+    Comparator<? super GroupData> byId = (g1, g2) -> Integer.compare(g1.getId(), g2.getId());
+    before.sort(byId);
+    after.sort(byId);
+    Assert.assertEquals(before, after);
+  }
+
+
+}
+
+Самое главное требование, которое предъявляется к тестам - это легкость их восприятия / понятность. 
+
+А когда инициализация находится в другом классе, это негативно складывается на восприятии. 
 
 
 
-Урок 50. Улучшение названий методов 00:07:30
+---
+Урок 50. Улучшение названий методов 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Урок 51. Fluent-интерфейсы 00:07:34
 

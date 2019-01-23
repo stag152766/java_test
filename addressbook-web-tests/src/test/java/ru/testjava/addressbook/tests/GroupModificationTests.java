@@ -1,6 +1,7 @@
 package ru.testjava.addressbook.tests;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.testjava.addressbook.modul.GroupData;
 
@@ -8,15 +9,20 @@ import java.util.Comparator;
 import java.util.List;
 
 public class GroupModificationTests extends TestBase {
-  @Test
-  public void testGroupModification() {
+
+  @BeforeMethod
+  public void ensurePreconditions() {
     app.getNavigationHelper().gotoGroupPage();
     if (!app.getGroupHelper().isThereAGroup()) {
       app.getGroupHelper().createGroup(new GroupData("test1", null, null));
     }
+  }
+
+  @Test
+  public void testGroupModification() {
     List<GroupData> before = app.getGroupHelper().getGroupList();
     int index = before.size() - 1;
-    GroupData group = new GroupData(index, "test1", "test2", "test3");
+    GroupData group = new GroupData(before.get(index).getId(), "new1", "new2", "new3");
     app.getGroupHelper().modifyGroup(index, group);
     List<GroupData> after = app.getGroupHelper().getGroupList();
     Assert.assertEquals(after.size(), before.size());
@@ -28,7 +34,6 @@ public class GroupModificationTests extends TestBase {
     after.sort(byId);
     Assert.assertEquals(before, after);
   }
-
 
 
 }

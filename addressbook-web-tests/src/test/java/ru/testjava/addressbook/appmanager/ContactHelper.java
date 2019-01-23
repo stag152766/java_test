@@ -57,6 +57,21 @@ public class ContactHelper extends HelperBase {
     click(By.linkText("home"));
   }
 
+
+  public void modifyContact(int index, ContactData contact) {
+    initContactModification(index);
+    fillContactForm(contact, false);
+    submitContactModification();
+    returnToHomePage();
+  }
+
+  public void returnToHomePage() {
+    if (isElementPresent(By.tagName("maintable"))) {
+      return;
+    }
+    click(By.linkText("home"));
+  }
+
   public void initContactModification(int index) {
     driver.findElements(By.xpath("//img[@title='Edit']")).get(index).click();
 
