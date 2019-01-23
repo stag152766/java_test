@@ -3538,6 +3538,14 @@ public class GroupModificationTests extends TestBase {
 Урок 50. Улучшение названий методов 
 
 
+Называйте методы так, чтобы их было легко читать. 
+
+
+
+
+
+---
+Урок 51. Fluent-интерфейсы
 
 
 
@@ -3562,14 +3570,6 @@ public class GroupModificationTests extends TestBase {
 
 
 
-
-
-
-
-
-
-
-Урок 51. Fluent-интерфейсы 00:07:34
 
 Урок 52. Повсеместное использование уникальных идентификаторов объектов 00:17:38
 
