@@ -50,7 +50,7 @@ public class ContactHelper extends HelperBase {
     return isElementPresent(By.name("entry"));
   }
 
-  public void createContact(ContactData contact, boolean creation) {
+  public void create(ContactData contact, boolean creation) {
     click(By.linkText("add new"));
     fillContactForm(contact, creation);
     submitContactCreation();
@@ -58,7 +58,7 @@ public class ContactHelper extends HelperBase {
   }
 
 
-  public void modifyContact(int index, ContactData contact) {
+  public void modify(int index, ContactData contact) {
     initContactModification(index);
     fillContactForm(contact, false);
     submitContactModification();
@@ -82,7 +82,7 @@ public class ContactHelper extends HelperBase {
   }
 
 
-  public List<ContactData> getContactList() {
+  public List<ContactData> list() {
     List<ContactData> contacts = new ArrayList<ContactData>();
     List<WebElement> elements = driver.findElements(By.name("entry"));
     for (WebElement element : elements) {

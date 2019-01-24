@@ -56,7 +56,7 @@ public class GroupHelper extends HelperBase {
     click(By.name("update"));
   }
 
-  public void createGroup(GroupData group) { //параметру дали любое имя, значение задается в тесте
+  public void create(GroupData group) { //параметру дали любое имя, значение задается в тесте
     initGroupCreation();
     fillGroupForm(group);
     submitGroupCreation();
