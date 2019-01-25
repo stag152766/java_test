@@ -3598,7 +3598,80 @@ public List<GroupData> list() {
 
 
 }
-Урок 52. Повсеместное использование уникальных идентификаторов объектов 
+Урок 52. Повсеместное использование уникальных идентификаторов объектов {
+
+
+Нужно определить способ для того, чтобы найти нужный элемент, который нужно удалить /модифицировать. 
+
+Можно искать элементы по уникальным идентификаторам, вместо порядковых номеров. 
+
+Перейдем к тесту для создания групп
+
+Как опредилить максимальный идентификатор (нового элемента)?
+
+Переделаем GroupHelper
+
+Создадим метод, который возвращает не список, а уже готовое множество 
+
+  public Set<GroupData> all() {
+    Set<GroupData> groups = new HashSet<GroupData>();
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));
+    for (WebElement element: elements) {
+      String name = element.getText();
+      int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
+      groups.add(new GroupData().withId(id).withName(name));
+    }
+    return groups;
+  }
+
+
+
+
+public class GroupCreationTests extends TestBase {
+
+  @Test
+  public void testGroupCreation() {
+    app.goTo().groupPage();
+    Set<GroupData> before = app.group().all();
+    GroupData group = new GroupData().withName("test2");
+    app.group().create(group);
+    Set<GroupData> after = app.group().all();
+    Assert.assertEquals(after.size(), before.size() + 1);
+
+    before.add(group);
+    Assert.assertEquals(before, after);
+  }
+
+}
+
+В классе GroupData указываем сравнение по id и name
+
+
+В тесте новой добавленной группе нужно присвоить идентификатор
+
+group.withId(вычисляем максимальный идентификатор)
+
+group.withId(after.stream().mapToInt((g) -> g.getId()).max().getAsInt(); //поток типа GroupDate превратив в поток идентификаторов (чисел)
+before.add(group);
+Assert.assertEquals(before, after);
+
+
+Функция mapToInt() в качестве параметра принимает описание того, как объект преобразуется в число. 
+То есть туда мы должны передать аннонимную функцию, которая будет последовательно применяться ко всем элементам потока и каждый из них будет последовательно преобразовать в число. 
+В результате, из потока объекта типа GroupData получаем поток целых чисел.   
+ 
+
+(g) -> g.getId() //аннонимная функция, которая в качестве параметра принимает аннонимную функцию, а в качестве результата выдает идентификатор этой группы, то есть преобразует объект в число 
+
+поток целых чисел. max() //не принимает никаких параметров, потому что Java сама умеет сравнивать числа 
+
+getAsInt() //преобразуем в обычное целое число  
+
+Модифицируем тест для удаления групп
+
+заменяем list() на all()
+
+меняем тип переменной List на Set
 
 
 
@@ -3636,6 +3709,7 @@ public List<GroupData> list() {
 
 
 
+}
 Урок 53. Hamcrest - улучшение внешнего вида проверок 00:14:59
 
 Урок 54. Кеширование результатов длительных операций 00:06:21
