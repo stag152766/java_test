@@ -4,10 +4,16 @@ import com.google.common.collect.ForwardingSet;
 
 import java.util.Set;
 
-public class Group extends ForwardingSet<GroupData> {
+public class Groups extends ForwardingSet<GroupData> {
+
+  private Set<GroupData> delegateO;
 
   @Override
   protected Set<GroupData> delegate() {
-    return null;
+    return delegateO;
+  }
+
+  public Groups withAdded(GroupData group) { //добавили свой метод
+
   }
 }
