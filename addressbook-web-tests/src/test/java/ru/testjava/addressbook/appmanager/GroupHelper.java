@@ -47,7 +47,7 @@ public class GroupHelper extends HelperBase {
   }
 
   public void selectGroupById(int id) {
-    driver.findElements(By.name("selected[]")).get(index).click();
+    driver.findElement(By.cssSelector("input[value='" + id + "']")).click();
   }
 
 
@@ -108,5 +108,5 @@ public class GroupHelper extends HelperBase {
     deleteSelectedGroups();
     returnToGroupPage();
   }
-  }
 }
+
