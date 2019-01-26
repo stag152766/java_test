@@ -3500,7 +3500,6 @@ public class GroupModificationTests extends TestBase {
 
 
 }
----
 Урок 50. Улучшение названий методов {
 
  
@@ -3728,34 +3727,36 @@ app.group().delete(deletedGroup);
 
 Перейдем к тесту для модификации групп
 
+	//теперь мы работаем с несортированными наборами элементов
+	
+  public void testGroupModification() {
+    Set<GroupData> before = app.group().all(); //set , all
+    GroupData modifiedGroup = before.iterator().next(); // select random object
+    GroupData group = new GroupData().withId(modifiedGroup.getId()).withName("new1").withHeader("new2").withFooter("new3");
+    app.group().modify(group);  
+    Set<GroupData> after = app.group().all();
+    Assert.assertEquals(after.size(), before.size());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    before.remove(modifiedGroup);
+    before.add(group);
+    Assert.assertEquals(before, after);
+  }
 
 
 }
-Урок 53. Hamcrest - улучшение внешнего вида проверок 00:14:59
+Урок 53. Hamcrest - улучшение внешнего вида проверок {
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 Урок 54. Кеширование результатов длительных операций 00:06:21
 
