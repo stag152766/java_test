@@ -3746,18 +3746,83 @@ app.group().delete(deletedGroup);
 }
 Урок 53. Hamcrest - улучшение внешнего вида проверок {
 	
+Вместо класса Assert используется класс MatcherAssert
+
+
+MatcherAssert.assertThat(after, CoreMatchers.equalTo(before));
+	
+//ctrl + space чтобы подтянулись названия методов, а не только классов
+
+//CoreMatchers проверялка	
 	
 	
+Указывать префекс необязательно, вместо этого можно выполнить статический импорт. 
+
+Alt + enter > add static import //Добавляется импорт не класса а конкретного метода.
+
+Это можно делать только для статических, глобальных функций.
+
+  @Test
+  public void testGroupCreation() {
+    app.goTo().groupPage();
+    Set<GroupData> before = app.group().all();
+    GroupData group = new GroupData().withName("test2");
+    app.group().create(group);
+    Set<GroupData> after = app.group().all();
+    assertThat(after.size(),equalTo(before.size() + 1));
+
+    group.withId(after.stream().mapToInt((g) -> g.getId()).max().getAsInt());
+    before.add(group);
+    assertThat(after, equalTo(before));
+  }
+
+Сделаем следующий шаг, прикрутим флуент интерфейс к спискам
+
+
+ assertThat(after, equalTo(before).withAdded(group));
+	
+Но добавить метод, в уже существующий интерфейс Set и класс нельзя. Поэтому нам придется сделать свой собственный класс. Который с одной стороны, ведет себя как обычный традиционный Set (множество), с другой в него можно добавить свой собственные методы. 	
 	
 	
-	
-	
-	
-	
-	
-	
+Добавим класс Groups в пакет modul
+
+
+package ru.testjava.addressbook.modul;
+
+public class Group extends For  { //предназначена для построения коллекций с расширенным наборов методов. Forwarding Set / List 
+}
+ 	
+Alt+enter > Implement methods 	//нужно реализовать обязательный метод delegat() 
+
+
+
+
 	
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+}
 Урок 54. Кеширование результатов длительных операций 00:06:21
 
 Урок 55. Хеширование и предварительные проверки 00:07:29

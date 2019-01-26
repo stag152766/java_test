@@ -10,4 +10,6 @@ dependencies {
     implementation 'org.testng:testng:6.14.3'
     implementation 'com.katalon:com.katalon.platform.parent:1.0.1'
     implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    implementation 'org.hamcrest:hamcrest:2.1'
+
 }
