@@ -3745,7 +3745,8 @@ app.group().delete(deletedGroup);
 
 }
 Урок 53. Hamcrest - улучшение внешнего вида проверок {
-	
+
+Библиотека Hamcrest предоставляет флуент интерфейс. 
 Вместо класса Assert используется класс MatcherAssert
 
 
@@ -3760,7 +3761,7 @@ MatcherAssert.assertThat(after, CoreMatchers.equalTo(before));
 
 Alt + enter > add static import //Добавляется импорт не класса, а конкретного метода
 
-Это можно делать только для статических, глобальных функций
+Это можно делать только для статических (глобальных) функций
 
   @Test
   public void testGroupCreation() {
@@ -3790,7 +3791,7 @@ Alt + enter > add static import //Добавляется импорт не кл�
 
 package ru.testjava.addressbook.modul;
 
-public class Group extends ForwardingSet<GroupData> { //предназначена для построения коллекций с расширенным наборов методов это ForwardingSet и ForwardingList
+public class Group extends ForwardingSet<GroupData> { //предназначена для построения коллекций с расширенным наборов методов: ForwardingSet и ForwardingList
 }
  	
 Alt+enter > Implement methods 	//нужно реализовать обязательный метод delegat() 
@@ -3807,16 +3808,16 @@ http://github.com/google/guava/wiki/collectionhelpersexplained
 
 При помощи этого механизма, можно предопределить поведение уже существующих методов.
 
-Мы хотим чтобы стандартные методы делегировались вложенному списку / множеству //этим займется ForwardingSet()
+Мы хотим, чтобы стандартные методы делегировались вложенному списку / множеству //этим займется ForwardingSet()
 
 
 public class Group extends ForwardingSet<GroupData> {  
 
-  private Set<GroupData> delegateO; //объект, которому все будет делегироваться
+  private Set<GroupData> delegate; //объект (атрибут) множество, которому все будет делегироваться
 
   @Override
   protected Set<GroupData> delegate() {
-    return delegateO;
+    return delegate; //возвращает этот объект 
   }
   
   public Groups withAdded(GroupData group) { //добавили свой метод
@@ -3825,8 +3826,149 @@ public class Group extends ForwardingSet<GroupData> {
   
 }
 
-Чтобы можно было вытягивать методы в цепочки и строить из них каскады, необходимо чтобы возвращался объект типа groups   
+Чтобы можно было вытягивать методы в цепочки и строить из них каскады, необходимо чтобы возвращался объект типа Groups.   
  
+1 способ 
+Поэтому нужно в уже существующее множество delegateO добавить объект, который передан в качестве параметра group и вернуть this. То есть тот объект, в котором вызывается метод withAdded().
+
+2 способ
+Сделать копию. Так что старый объект остается неизменным. А метод withAdded() возвращает новый объект c добавленной новой группой.
+Копировани объектов дает возможность работать со старым множеством без добавленной группы и с новым множеством с добавленной группой. 
+
+public class Groups extends ForwardingSet<GroupData> {
+
+  private Set<GroupData> delegate;
+
+  public Groups(Groups groups) { //конструктор, будет строить копию существующего объекта
+    this.delegate = new HashSet<>(groups.delegate); //берем множество из существующего объекта, который передан в качестве параментра. Строим новое множество, которое содержит теже самые элементы, и присваиваем новое множество в качестве атрибута в новый создаваемый этим конструктором объект
+  }
+
+  @Override
+  protected Set<GroupData> delegate() {
+    return delegate;
+  }
+
+  public Groups withAdded(GroupData group) { //добавили свой метод
+    Groups groups = new Groups(this); //создали копию
+    groups.add(group); //в копию добавлили объект, который передан в качестве параментра
+    return groups; //вернули построенную копию с добавленной группой
+  }
+  
+//сделаем копию, из которой удалена какая то группа 
+
+  public Groups without(GroupData group) {
+    Groups groups = new Groups(this);
+    groups.remove(group);
+    return groups;
+
+  }	
+}
+
+Возвращаемся обратно в тест
+
+Меняем тип Set<GroupData> на Groups
+
+Менаем all(), чтобы он возвращал объект типа Groups 
+
+  public Groups all() {
+    Groups groups = new Groups(); //создадим конструктор без параметров
+	
+	//дальше копии строится не будут, заполнится только тот объект который мы создали
+	//Никакой необходимости в клонировании нет, потому что нет старого списка, который мы хотели бы сохранить
+	
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));
+    for (WebElement element: elements) {
+      String name = element.getText();
+      int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
+      groups.add(new GroupData().withId(id).withName(name));
+    }
+    return groups; //и в конце он вернется
+  }
+	
+  public Groups() {
+    this.delegate = new HashSet<>();
+  }	
+
+А в тестах очень плезно делать копии. Потому что старый список, может еще пригодится для каких то других проверок. 
+
+public class GroupCreationTests extends TestBase {
+
+  @Test
+  public void testGroupCreation() {
+    app.goTo().groupPage();
+    Groups before = app.group().all();
+    GroupData group = new GroupData().withName("test2");
+    app.group().create(group);
+    Groups after = app.group().all();
+    assertThat(after.size(),equalTo(before.size() + 1)); 
+    assertThat(after, equalTo(before.withAdded(group.withId(after.stream().
+            mapToInt((g) -> g.getId()).max().getAsInt()))));
+
+  }
+}
+
+Проверку assertThat(after.size(),equalTo(before.size() + 1)) можно поставить как перед, так и после; потому что объект before() остается неизменным, в сравнении участвует его копия. А before сохраняет старый размер. Удобно когда можно не заботится о порядке проверок.  
+
+Переходим к тесту удаления
+
+public class GroupDeletionTests extends TestBase {
+
+  @BeforeMethod
+  public void ensurePreconditions() {
+    app.goTo().groupPage();
+    if (app.group().all().size() == 0) {
+      app.group().create(new GroupData().withName("test1"));
+    }
+  }
+
+  @Test
+  public void testGroupDeletion(){
+    Groups before = app.group().all();
+    GroupData deletedGroup = before.iterator().next();
+    app.group().delete(deletedGroup);
+    Groups after = app.group().all();
+    assertEquals(after.size(),before.size() -1);
+    assertThat(after, equalTo(before.without(deletedGroup)));
+  }
+
+}
+
+
+К тесту мофидификации
+
+
+public class GroupModificationTests extends TestBase {
+
+  @BeforeMethod
+  public void ensurePreconditions() {
+    app.goTo().groupPage();
+    if (app.group().all().size() == 0) {
+      app.group().create(new GroupData().withName("test1"));
+    }
+  }
+
+  @Test
+  public void testGroupModification() {
+    Groups before = app.group().all();
+    GroupData modifiedGroup = before.iterator().next();
+    GroupData group = new GroupData()
+            .withId(modifiedGroup.getId()).withName("new1").withHeader("new2").withFooter("new3");
+    app.group().modify(group);
+    Groups after = app.group().all();
+    assertEquals(after.size(), before.size());
+    assertThat(after, equalTo(before.without(modifiedGroup).withAdded(group)));
+  }
+
+}
+
+
+
+	
+}
+Урок 54. Кеширование результатов длительных операций {
+	
+	
+
 
 
 
@@ -3849,8 +3991,6 @@ public class Group extends ForwardingSet<GroupData> {
 
 	
 }
-Урок 54. Кеширование результатов длительных операций 00:06:21
-
 Урок 55. Хеширование и предварительные проверки 00:07:29
 
 Урок 56. Способы построения сложных локаторов 00:10:59
