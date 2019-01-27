@@ -1,7 +1,6 @@
 package ru.testjava.addressbook.modul;
 
 import com.google.common.collect.ForwardingSet;
-
 import java.util.HashSet;
 import java.util.Set;
 

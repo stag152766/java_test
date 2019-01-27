@@ -2,8 +2,6 @@ package ru.testjava.addressbook.modul;
 
 //вспомогательный класс, который описывает объект типа группа
 
-import java.util.Objects;
-
 public class GroupData {
   private int id = Integer.MAX_VALUE;
   private String name;
