@@ -3,12 +3,10 @@ package ru.testjava.addressbook.appmanager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import ru.testjava.addressbook.modul.GroupData;
-import ru.testjava.addressbook.modul.Groups;
+import ru.testjava.addressbook.model.GroupData;
+import ru.testjava.addressbook.model.Groups;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class GroupHelper extends HelperBase {
 

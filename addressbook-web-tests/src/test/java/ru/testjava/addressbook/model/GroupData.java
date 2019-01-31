@@ -1,4 +1,4 @@
-package ru.testjava.addressbook.modul;
+package ru.testjava.addressbook.model;
 
 //вспомогательный класс, который описывает объект типа группа
 
@@ -36,12 +36,13 @@ public class GroupData {
 
   public GroupData withId(int id) {
     this.id = id;
-    return this;
+    return this; //это ссылка на самого себя внутри экземпляра класса
+                 //метод вернет экземляр класса GroupData, вызвавший его
   }
 
   public GroupData withName(String name) {
     this.name = name;
-    return this;
+    return this; //
   }
 
   public GroupData withHeader(String header) {

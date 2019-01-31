@@ -2,8 +2,8 @@ package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import ru.testjava.addressbook.modul.GroupData;
-import ru.testjava.addressbook.modul.Groups;
+import ru.testjava.addressbook.model.GroupData;
+import ru.testjava.addressbook.model.Groups;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;

@@ -1,4 +1,4 @@
-package ru.testjava.addressbook.modul;
+package ru.testjava.addressbook.model;
 
 import com.google.common.collect.ForwardingSet;
 import java.util.HashSet;

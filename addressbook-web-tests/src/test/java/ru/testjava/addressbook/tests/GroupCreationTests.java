@@ -1,8 +1,8 @@
 package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.Test;
-import ru.testjava.addressbook.modul.GroupData;
-import ru.testjava.addressbook.modul.Groups;
+import ru.testjava.addressbook.model.GroupData;
+import ru.testjava.addressbook.model.Groups;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,7 +13,7 @@ public class GroupCreationTests extends TestBase {
   public void testGroupCreation() {
     app.goTo().groupPage();
     Groups before = app.group().all();
-    GroupData group = new GroupData().withName("test2");
+    GroupData group = new GroupData().withName("test2"); //
     app.group().create(group);
     Groups after = app.group().all();
     assertThat(after.size(),equalTo(before.size() + 1));

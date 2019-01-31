@@ -2,7 +2,7 @@ package ru.testjava.addressbook.tests;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import ru.testjava.addressbook.modul.ContactData;
+import ru.testjava.addressbook.model.ContactData;
 import java.util.Comparator;
 import java.util.List;
 
