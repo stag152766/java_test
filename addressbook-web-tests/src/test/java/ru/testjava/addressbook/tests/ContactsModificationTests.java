@@ -7,12 +7,12 @@ import ru.testjava.addressbook.model.ContactData;
 import java.util.Comparator;
 import java.util.List;
 
-public class ContactModificationTests extends TestBase {
+public class ContactsModificationTests extends TestBase {
 
   @BeforeMethod
   public void ensurePreconditions() {
     app.goTo().HomePage();
-    if (app.contact().list().size() == 0) {
+    if (app.contact().all().size() == 0) {
       app.contact().create(new ContactData()
               .withFirstname("Alex").withLastname("Jackson").withAddress("My street")
               .withMobile("+79135467841").withGroup("test1"), true);
@@ -21,12 +21,12 @@ public class ContactModificationTests extends TestBase {
 
   @Test
   public void testContactModification() {
-    List<ContactData> before = app.contact().list();
+    List<ContactData> before = app.contact().all();
     int index = before.size() - 1;
     ContactData contact = new ContactData().withId(before.get(index).getId()).withFirstname("test1")
             .withLastname("test2").withAddress("test3").withGroup(null);
     app.contact().modify(index, contact);
-    List<ContactData> after = app.contact().list();
+    List<ContactData> after = app.contact().all();
     Assert.assertEquals(after.size(), before.size());
 
     before.remove(index);

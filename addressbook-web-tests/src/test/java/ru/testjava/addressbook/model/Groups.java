@@ -4,6 +4,8 @@ import com.google.common.collect.ForwardingSet;
 import java.util.HashSet;
 import java.util.Set;
 
+//контейнер для хранения множества групп, который добавляет методы withAdded и without
+
 public class Groups extends ForwardingSet<GroupData> {
   private Set<GroupData> delegate;
 
