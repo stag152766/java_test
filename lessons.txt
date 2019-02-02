@@ -4013,58 +4013,80 @@ public class GroupModificationTests extends TestBase {
 }
 Урок 54. Кеширование результатов длительных операций {
 	
-	
+public class GroupDeletionTests extends TestBase {
+  @BeforeMethod
+  public void ensurePreconditions() {
+    app.goTo().groupPage();
+    if (app.group().all().size() == 0) { //загружаем группы 1 раз
+      app.group().create(new GroupData().withName("test1"));
+    }
+  }
+
+  @Test
+  public void testGroupDeletion(){
+    Groups before = app.group().all();//загружаем группы 2 раз
+    GroupData deletedGroup = before.iterator().next();
+    app.group().delete(deletedGroup);
+    Groups after = app.group().all(); //загружаем группы 3 раз
+    assertEquals(after.size(),before.size() -1);
+    assertThat(after, equalTo(before.without(deletedGroup)));
+  }
+}
+
+Ускорим работу теста со списком, состоящим из сотни групп
+
+Ускорить чтение списка не можем. Но может сократить количество раз, которые мы делаем эту сложную операцию. 
+
+Реализовать кеширование означает запомнить результат выполнения какой то операции. И потом вместо после повторного выполнения этой операции использовать ранее запомненный ранее результат. 
+
+Реализуем кеш в GroupHelder
+
+public Groups groupCache = null; //создадим пустое поле
+
+public Groups all() {
+	if (groupCache != null) { //добавим проверку, если кеш не пустой 
+	  return new Groups(groupCache); //возвращаем копию кеша. Именно копию, чтобы кеш никто не испортил
+	}
+	//иначе если кеш не заполнен, придется прочитать список со страницы веб приложения 
+
+    groupCache = new Groups(); //инициализируем кеш
+    List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));
+    for (WebElement element: elements) {
+      String name = element.getText();
+      int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
+      groupCache.add(new GroupData().withId(id).withName(name));
+    }
+    return new Groups(groupCache); //в конце возвращаем копию кеша
+  } 
 
 
+Но в какие то моменты кеш надо сбрасывать. Например, когда точно знаем список групп поменялся. 
+
+app.group().delete(deletedGroup);
+groupCache = null;
 
 
+submitGroupModification();
+groupCache = null;
 
+submitGroupCreation();
+groupCache = null;
 
+После всех этих действий кеш будет очищен, и при следующем обращении к методу all() будет создан заново. 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Таким образом, эта тяжеловесная операция будет выполняться минимальное количество раз, именно тогда,когда чтото поменялось.
 
 	
 }
-Урок 55. Хеширование и предварительные проверки 00:07:29
+
+Урок 55. Хеширование и предварительные проверки {
+	
+	
+	
+
+
+
+}	
 
 Урок 56. Способы построения сложных локаторов 00:10:59
 

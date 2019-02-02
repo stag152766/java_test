@@ -1,5 +1,8 @@
 package ru.testjava.addressbook.model;
 
+//контейнер для хранения множества контактов, который добавляет методы withAdded и without
+
+
 import com.google.common.collect.ForwardingSet;
 import java.util.HashSet;
 import java.util.Set;
