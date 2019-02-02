@@ -1,11 +1,19 @@
 package ru.testjava.addressbook.tests;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.testjava.addressbook.model.ContactData;
+import ru.testjava.addressbook.model.Contacts;
+
 import java.util.Comparator;
 import java.util.List;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
+import static org.testng.Assert.assertEquals;
 
 public class ContactsModificationTests extends TestBase {
 
@@ -21,21 +29,18 @@ public class ContactsModificationTests extends TestBase {
 
   @Test
   public void testContactModification() {
-    List<ContactData> before = app.contact().all();
-    int index = before.size() - 1;
-    ContactData contact = new ContactData().withId(before.get(index).getId()).withFirstname("test1")
+    Contacts before = app.contact().all();
+    ContactData modifiedContact = before.iterator().next();
+    ContactData contact = new ContactData().withId(modifiedContact.getId()).withFirstname("test1")
             .withLastname("test2").withAddress("test3").withGroup(null);
-    app.contact().modify(index, contact);
-    List<ContactData> after = app.contact().all();
-    Assert.assertEquals(after.size(), before.size());
+    app.contact().modify(contact);
+    Contacts after = app.contact().all();
+    assertEquals(after.size(), before.size());
 
-    before.remove(index);
-    before.add(contact);
+    assertThat(after, equalTo(before.without(contact).withAdded(contact.
+                    withId(after.stream().mapToInt((c) -> c.getId()).max().getAsInt()))));
 
-    Comparator<? super ContactData> byId = (c1, c2) -> Integer.compare(c1.getId(), c2.getId());
-    before.sort(byId);
-    after.sort(byId);
-    Assert.assertEquals(before, after);
+
   }
 
 }

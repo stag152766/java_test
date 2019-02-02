@@ -5,8 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
-import ru.testjava.addressbook.model.Contacts;
 import ru.testjava.addressbook.model.ContactData;
+import ru.testjava.addressbook.model.Contacts;
 
 import java.util.List;
 
@@ -31,8 +31,7 @@ public class ContactHelper extends HelperBase {
 
     if (creation) {
       new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
-    }
-    else {
+    } else {
       Assert.assertFalse(isElementPresent(By.name("new_group")));
     }
   }
@@ -41,7 +40,7 @@ public class ContactHelper extends HelperBase {
     driver.findElements(By.name("selected[]")).get(index).click();
   }
 
-  public void deleteContact() {
+  public void deleteSelectedContact() {
     click(By.xpath("//input[@value='Delete']"));
     driver.switchTo().alert().accept();
   }
@@ -58,11 +57,16 @@ public class ContactHelper extends HelperBase {
   }
 
 
-  public void modify(int index, ContactData contact) {
-    initContactModification(index);
+  public void modify(ContactData contact) {
+    selectedEditedContactById(contact.getId());
     fillContactForm(contact, false);
     submitContactModification();
     returnToHomePage();
+  }
+
+  private void selectedEditedContactById(int id) {
+    driver.findElements(By.xpath("//img[@title='Edit']")).get(id).click();
+
   }
 
   public void returnToHomePage() {
@@ -90,8 +94,18 @@ public class ContactHelper extends HelperBase {
       String lastname = element.findElement(By.cssSelector("td:nth-child(2)")).getText();
       int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
       contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname));
-      return contacts;
     }
+    return contacts;
+  }
+
+  public void delete(ContactData deletedContact) {
+    selectContactById(deletedContact.getId());
+    deleteSelectedContact();
+    returnToHomePage();
+  }
+
+  private void selectContactById(int id) {
+    driver.findElement(By.cssSelector("input[value='" + id + "']")).click();
   }
 
 }
