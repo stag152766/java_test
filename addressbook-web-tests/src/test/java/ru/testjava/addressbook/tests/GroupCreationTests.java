@@ -21,4 +21,16 @@ public class GroupCreationTests extends TestBase {
             mapToInt((g) -> g.getId()).max().getAsInt()))));
   }
 
+
+  @Test
+  public void testBadGroupCreation() {
+    app.goTo().groupPage();
+    Groups before = app.group().all();
+    GroupData group = new GroupData().withName("test2'");
+    app.group().create(group);
+    assertThat(app.group().сount(), equalTo(before.size()));
+    Groups after = app.group().all();
+    assertThat(after, equalTo(before));
+  }
+
 }

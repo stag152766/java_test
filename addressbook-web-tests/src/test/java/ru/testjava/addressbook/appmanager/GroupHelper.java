@@ -75,7 +75,6 @@ public class GroupHelper extends HelperBase {
     if (groupCache != null) {
       return new Groups(groupCache); //возвращаем копию кеша
     }
-
     groupCache = new Groups(); //инициализируем кеш
     List<WebElement> elements = driver.findElements(By.cssSelector("span.group"));
     for (WebElement element: elements) {
@@ -83,14 +82,19 @@ public class GroupHelper extends HelperBase {
       int id = Integer.parseInt(element.findElement(By.tagName("input")).getAttribute("value"));
       groupCache.add(new GroupData().withId(id).withName(name));
     }
-    return new Groups(groupCache); //в конце возвращаем копию кеша
+    return new Groups(groupCache);
   }
 
   public void delete(GroupData deletedGroup) {
-    selectGroupById(deletedGroup.getId()); //выбор по идентификатору номеру
+    selectGroupById(deletedGroup.getId());
     deleteSelectedGroups();
     groupCache = null;
     returnToGroupPage();
   }
+
+  public int сount() {
+    return driver.findElements(By.name("selected[]")).size();
+  }
+
 }
 

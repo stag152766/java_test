@@ -116,4 +116,7 @@ public class ContactHelper extends HelperBase {
     driver.findElement(By.cssSelector("input[value='" + id + "']")).click();
   }
 
+  public int count() {
+    return driver.findElements(By.name("selected[]")).size();
+  }
 }
