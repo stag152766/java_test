@@ -65,7 +65,7 @@ public class ContactHelper extends HelperBase {
   }
 
   private void selectedEditedContactById(int id) {
-    driver.findElements(By.xpath("//img[@title='Edit']")).get(id).click();
+    driver.findElement(By.xpath("//a[@href='edit.php?id=" + id + "']")).click();
 
   }
 
