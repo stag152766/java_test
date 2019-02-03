@@ -12,11 +12,9 @@ import java.util.List;
 
 public class ContactHelper extends HelperBase {
 
-
   public ContactHelper(WebDriver driver) {
     super(driver);
   }
-
 
   public void submitContactCreation() {
     click(By.name("submit"));
@@ -27,7 +25,7 @@ public class ContactHelper extends HelperBase {
     type(By.name("middlename"), contactData.getMiddlename());
     type(By.name("lastname"), contactData.getLastname());
     type(By.name("address"), contactData.getAddress());
-    type(By.name("mobile"), contactData.getMobile());
+    type(By.name("mobile"), contactData.getMobileNum());
 
     if (creation) {
       new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
@@ -57,16 +55,15 @@ public class ContactHelper extends HelperBase {
     click(By.linkText("home"));
   }
 
-
   public void modify(ContactData contact) {
-    selectedEditedContactById(contact.getId());
+    selectEditedContactById(contact.getId());
     fillContactForm(contact, false);
     submitContactModification();
     contactCache = null;
     returnToHomePage();
   }
 
-  private void selectedEditedContactById(int id) {
+  private void selectEditedContactById(int id) {
     driver.findElement(By.xpath("//a[@href='edit.php?id=" + id + "']")).click();
 
   }

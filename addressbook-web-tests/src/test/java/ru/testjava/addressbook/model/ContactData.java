@@ -8,10 +8,16 @@ public class ContactData {
   private String middlename;
   private String lastname;
   private String address;
-  private String mobile;
+  private String homeNum;
+  private String mobileNum;
+  private String workNum;
   private String group;
 
 
+
+  public int getId() {
+    return id;
+  }
 
   public String getFirstname() {
     return firstname;
@@ -29,22 +35,23 @@ public class ContactData {
     return address;
   }
 
-  public String getMobile() {
-    return mobile;
+  public String getMobileNum() {
+    return mobileNum;
   }
 
   public String getGroup() {
     return group;
   }
 
-  public int getId() {
-    return id;
+  public String getWorkNum() {
+    return workNum;
   }
 
-  public ContactData withGroup(String group) {
-    this.group = group;
-    return this;
+  public String getHomeNum() {
+    return homeNum;
   }
+
+
 
   public ContactData withId(int id) {
     this.id = id;
@@ -71,10 +78,27 @@ public class ContactData {
     return this;
   }
 
-  public ContactData withMobile(String mobile) {
-    this.mobile = mobile;
+  public ContactData withHomeNum(String homeNum) {
+    this.homeNum = homeNum;
     return this;
   }
+
+  public ContactData withMobileNum(String mobileNum) {
+    this.mobileNum = mobileNum;
+    return this;
+  }
+
+  public ContactData withWorkNum(String workNum) {
+    this.workNum = workNum;
+    return this;
+  }
+
+  public ContactData withGroup(String group) {
+    this.group = group;
+    return this;
+  }
+
+
 
   @Override
   public String toString() {
@@ -83,7 +107,6 @@ public class ContactData {
             ", lastname='" + lastname + '\'' +
             '}';
   }
-
 
   @Override
   public boolean equals(Object o) {
