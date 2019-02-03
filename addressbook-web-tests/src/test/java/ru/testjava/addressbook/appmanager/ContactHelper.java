@@ -25,7 +25,7 @@ public class ContactHelper extends HelperBase {
     type(By.name("middlename"), contactData.getMiddlename());
     type(By.name("lastname"), contactData.getLastname());
     type(By.name("address"), contactData.getAddress());
-    type(By.name("mobile"), contactData.getMobileNum());
+    type(By.name("mobile"), contactData.getMobile());
 
     if (creation) {
       new Select(driver.findElement(By.name("new_group"))).selectByVisibleText(contactData.getGroup());
@@ -116,4 +116,21 @@ public class ContactHelper extends HelperBase {
   public int count() {
     return driver.findElements(By.name("selected[]")).size();
   }
+
+//вспомогательный метод который загружает информацию из формы редактирования
+  public ContactData infoFromEditForm(ContactData contact) {
+    initContactModificationById(contact.getId()); //выбор контакта по идентификатору
+    String firstname = driver.findElement(By.name("firstname")).getAttribute("value");
+    String lastname = driver.findElement(By.name("lastname")).getAttribute("value");
+    String home = driver.findElement(By.name("home")).getAttribute("value");
+    String work = driver.findElement(By.name("work")).getAttribute("value");
+    String mobile = driver.findElement(By.name("mobile")).getAttribute("value");
+    return new ContactData().withId(contact.getId()).withFirstname(firstname).
+            withLastname(lastname).withHome(home).withWork(work).withMobile(mobile);
+  }
+
+  private void initContactModificationById(int id) {
+    driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click();
+  }
+
 }

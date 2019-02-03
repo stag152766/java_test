@@ -12,7 +12,7 @@ public class ContactPhoneTests extends TestBase {
     if (app.contact().all().size() == 0) {
       app.contact().create(new ContactData().withFirstname("Alex").
               withLastname("Jackson").withAddress("My street").
-              withMobileNum("111").withHomeNum("222").withWorkNum("333").withGroup("test1"), true);
+              withMobile("111").withHome("222").withWork("333").withGroup("test1"), true);
     }
   }
 
@@ -24,6 +24,7 @@ public class ContactPhoneTests extends TestBase {
     //будем сравнивать информацию на главной странице с данными в форме редактирования контакта
     //сделаем вспомогательный метод
     ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);
+
 
 
 

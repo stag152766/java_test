@@ -8,9 +8,9 @@ public class ContactData {
   private String middlename;
   private String lastname;
   private String address;
-  private String homeNum;
-  private String mobileNum;
-  private String workNum;
+  private String home;
+  private String mobile;
+  private String work;
   private String group;
 
 
@@ -35,20 +35,20 @@ public class ContactData {
     return address;
   }
 
-  public String getMobileNum() {
-    return mobileNum;
+  public String getMobile() {
+    return mobile;
   }
 
   public String getGroup() {
     return group;
   }
 
-  public String getWorkNum() {
-    return workNum;
+  public String getWork() {
+    return work;
   }
 
-  public String getHomeNum() {
-    return homeNum;
+  public String getHome() {
+    return home;
   }
 
 
@@ -78,18 +78,18 @@ public class ContactData {
     return this;
   }
 
-  public ContactData withHomeNum(String homeNum) {
-    this.homeNum = homeNum;
+  public ContactData withHome(String homeNum) {
+    this.home = homeNum;
     return this;
   }
 
-  public ContactData withMobileNum(String mobileNum) {
-    this.mobileNum = mobileNum;
+  public ContactData withMobile(String mobileNum) {
+    this.mobile = mobileNum;
     return this;
   }
 
-  public ContactData withWorkNum(String workNum) {
-    this.workNum = workNum;
+  public ContactData withWork(String workNum) {
+    this.work = workNum;
     return this;
   }
 
