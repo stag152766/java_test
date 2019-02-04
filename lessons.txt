@@ -4177,8 +4177,8 @@ public class ContactPhoneTests extends TestBase {
     app.goTo().HomePage();
     //загружаем множество контактов, выбираем случайным образом какой то контакт
     ContactData contact = app.contact().all().iterator().next();
-    //будем сравнивать информацию на главной странице с данными в форме редактирования контакта
-	//для отладки оставим один контакт 
+    //далее будем сравнивать информацию на главной странице с данными в форме редактирования контакта
+	//для отладки оставим в таблице один контакт 
     //сделаем вспомогательный метод
     ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);	
 	
@@ -4187,16 +4187,45 @@ public class ContactPhoneTests extends TestBase {
 	
 	
 	
+//вспомогательный метод который загружает информацию из формы редактирования
+  public ContactData infoFromEditForm(ContactData contact) {
+    initContactModificationById(contact.getId()); //выбор контакта по идентификатору
+    String firstname = driver.findElement(By.name("firstname")).getAttribute("value");
+    String lastname = driver.findElement(By.name("lastname")).getAttribute("value");
+    String home = driver.findElement(By.name("home")).getAttribute("value");
+    String work = driver.findElement(By.name("work")).getAttribute("value");
+    String mobile = driver.findElement(By.name("mobile")).getAttribute("value");
+    return new ContactData().withId(contact.getId()).withFirstname(firstname).
+            withLastname(lastname).withHome(home).withWork(work).withMobile(mobile);
+  }
 	
 	
+//вспомогательный метод, который выбирает контакт по идентификатору	
+  private void initContactModificationById(int id) {
+    driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click(); //способ 1, с помощью ChroPath
+  }	
 	
+//способ последовательный приближений
+  public ContactData infoFromEditForm2(ContactData id) {
+	//находим чек-бокс
+	//ищем элемент, который имеет тег интуп и атрибут value равное заданному значению  
+    WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value='%s']",id)));
 	
+	//ищем строку
+	//выполняем поиск относительно элемента checkbox 
+	//нам нужно от этого чек бокса перейти к ячейке, а от ячейке к строчке
+	WebElement row = checkbox.findElement(By.xpath("./../../")); 
+	//xpath позволяет перейти к родительскому элементу, то есть к тому в котором находятся данные 
+	// By.xpath("./ точка означает поиск с текущего элемента
+	// .. переход вверх
 	
+	//надо попасть в ту ячейку, в которой находится кнопка Edit
+	//берем полный список ячеек
+	//ищем внутри строки все элементы которые имеют имя td
+	List<WebElement> cells = row.findElements(By.name("td"));
 	
-	
-	
-	
-	
+	//среди этих ячеек берем по номеру нужную, внутри ячейки находим ссылку по имени тега а
+	cells.get(7).findElement(By.tagName("a")).click();	
 	
 	
 

@@ -133,4 +133,17 @@ public class ContactHelper extends HelperBase {
     driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click();
   }
 
+  //способ последовательный приближений
+  public ContactData infoFromEditForm2(ContactData id) {
+    WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value=%s]",id)));
+    WebElement row = checkbox.findElement(By.xpath("./../../"));
+    List<WebElement> cells = row.findElements(By.name("td"));
+    cells.get(7).findElement(By.tagName("a")).click();
+
+
+
+  }
+
+
+
 }
