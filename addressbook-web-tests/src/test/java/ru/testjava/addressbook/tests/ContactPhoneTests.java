@@ -1,8 +1,13 @@
 package ru.testjava.addressbook.tests;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.testjava.addressbook.model.ContactData;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.*;
 
 public class ContactPhoneTests extends TestBase {
 
@@ -19,22 +24,14 @@ public class ContactPhoneTests extends TestBase {
   @Test
   public void testContactPhones(){
     app.goTo().HomePage();
-    //загружаем список множества контактов, выбираем случайным образом какой то контакт
     ContactData contact = app.contact().all().iterator().next();
-    //будем сравнивать информацию на главной странице с данными в форме редактирования контакта
-    //сделаем вспомогательный метод
     ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);
-
-
-
-
-
+    assertThat(contact.getHome(), equalTo(contactInfoFromEditForm.getHome()));
+    assertThat(contact.getMobile(), equalTo(contactInfoFromEditForm.getMobile()));
+    assertThat(contact.getWork(), equalTo(contactInfoFromEditForm.getWork()));
 
 
   }
-
-
-
 
 
 }

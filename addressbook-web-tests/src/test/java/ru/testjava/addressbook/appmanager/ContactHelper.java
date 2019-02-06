@@ -8,7 +8,9 @@ import org.testng.Assert;
 import ru.testjava.addressbook.model.ContactData;
 import ru.testjava.addressbook.model.Contacts;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ContactHelper extends HelperBase {
 
@@ -85,7 +87,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public Contacts contactCache = null;
-
+/*
   public Contacts all() {
     if (contactCache != null) {
       return new Contacts(contactCache);
@@ -100,6 +102,21 @@ public class ContactHelper extends HelperBase {
       contactCache.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname));
     }
     return new Contacts(contactCache);
+  }
+*/
+  public Set<ContactData> all() {
+    Set<ContactData> contacts = new HashSet<>();
+    List<WebElement> rows = driver.findElements(By.name("entry"));
+    for (WebElement row : rows) {
+      List<WebElement> cells = row.findElements(By.tagName("td"));
+      int id = Integer.parseInt(cells.get(0).findElement(By.tagName("input")).getAttribute("value"));
+      String lastname = cells.get(1).getText();
+      String firstname = cells.get(2).getText();
+      String[] phones = cells.get(5).getText().split("\n");
+      contacts.add(new ContactData().withId(id).withFirstname(firstname).
+              withLastname(lastname).withHome(phones[0]).withMobile(phones[1]).withWork(phones[2]));
+    }
+    return contacts;
   }
 
   public void delete(ContactData deletedContact) {
@@ -117,7 +134,7 @@ public class ContactHelper extends HelperBase {
     return driver.findElements(By.name("selected[]")).size();
   }
 
-//вспомогательный метод который загружает информацию из формы редактирования
+  //вспомогательный метод который загружает информацию из формы редактирования
   public ContactData infoFromEditForm(ContactData contact) {
     initContactModificationById(contact.getId()); //выбор контакта по идентификатору
     String firstname = driver.findElement(By.name("firstname")).getAttribute("value");
@@ -136,19 +153,13 @@ public class ContactHelper extends HelperBase {
     //driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))).click();
   }
 
-
-
   //способ последовательный приближений
   private void initContactModificationById2(int id) {
-    WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value=%s]",id)));
+    WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value=%s]", id)));
     WebElement row = checkbox.findElement(By.xpath("./../../"));
     List<WebElement> cells = row.findElements(By.tagName("td"));
     cells.get(7).findElement(By.tagName("a")).click();
-
-
-
   }
-
 
 
 }

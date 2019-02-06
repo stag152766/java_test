@@ -4204,9 +4204,12 @@ public class ContactPhoneTests extends TestBase {
   private void initContactModificationById(int id) {
     driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click(); //способ 1, с помощью ChroPath
   }	
+ 
+  
 	
-//способ последовательный приближений
+//способ 2 последовательный приближений
   private void initContactModificationById2(int id) {
+	  
 	//находим чек-бокс
 	//ищем элемент, который имеет тег input и атрибут value равное заданному значению  
     WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value='%s']",id)));
@@ -4229,27 +4232,106 @@ public class ContactPhoneTests extends TestBase {
 	
 
 
+//способ 3 (в языке запросов xpath нумерация начинается с 1)
+driver.findElement(By.xpath(String.format("input[]value=%s/../../..td[8]/a", id))).click(); 
 
 
+//способ 4 xpath с подразпросами
+driver.findElement(By.xpath(String.format("//tr[.//input[@value='%s']]/td[8]/a", id))).click();
+//хочу найти строку внутри которой есть чек-бокс с заданным идентификатором
+//tr - поиск строки //tr[ограничения (c подзапросом]
+//.//input[@value='%s'] подзапрос (означает, что внутри этой строки находится input с заданным атрибутом value)
+//когда найдется такая строка, относительно этой строки ищем восьмую ячейку и в ней ссылку   
 
+//способ 5 "хитрый" ссылка тоже содержит идентификатор <a href="edit.php?id=38"></a>
+//можно сразу поискать по этому признаку 
 
-
-
-
-
-
-
-	
-
-
-
-
-
+driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))).clicl(); //строим css селектор, в котором ищется элемент а, имеющий атрибут href такого вида. 
 
 
 
 }	
-Урок 57. Режем строки (и немного про регулярные выражения) 00:10:12
+}
+Урок 57. Режем строки (и немного про регулярные выражения) {
+	
+Загрузим с главной страницы приложения информацию о телефонах и реализуем проверки того, что эта информация действительно представлена корректно. 
+	
+Как получить телефоны с формы редактирования мы разобрались в прошлом уроке.
+Теперь разберемся с главной страницей, то есть обратимся к методу all()	
+
+//было
+  public Set<ContactData> all2() {
+    Set<ContactData> contacts = new HashSet<>();
+    List<WebElement> rows = driver.findElements(By.name("entry"));
+    for (WebElement row : rows) {
+      List<WebElement> cells = row.findElements(By.tagName("td")); //<tr class name="entry"></tr>
+      int id = Integer.parseInt(cells.get(0).findElement(By.tagName("input")).getAttribute("value"));
+      String lastname = cells.get(1).getText(); //это текст второй ячейки
+      String firstname = cells.get(2).getText(); //это текст третьей ячейки
+      //дальше можем получит строчку, которая содержит все телефоны одновременно
+	  String allPhones = cells.get(5).getText();
+	  //для того, чтобы заполнить атрибуты объекта типа ContactData нужно три отдельных телефона, поэтому строчку нужно разрезать на части
+	  allPhones.split("\n"); //в качестве параметра в этот метод передается регилярное выражение - то есть шаблон поиска (перевод строки)
+	  //результатом будет массив, который состоит из трех элементов. Его нужно поместить в переменную Alt+Enter > Introduce local var
+      contacts.add(new ContactData().withId(id).withFirstname(firstname)).withLastname(lastname);
+
+    }
+    return contacts;
+  }
+	
+//стало 
+    	
+  public Set<ContactData> all2() {
+    Set<ContactData> contacts = new HashSet<>();
+    List<WebElement> rows = driver.findElements(By.name("entry"));
+    for (WebElement row : rows) {
+      List<WebElement> cells = row.findElements(By.tagName("td"));
+      int id = Integer.parseInt(cells.get(0).findElement(By.tagName("input")).getAttribute("value"));
+      String lastname = cells.get(1).getText();
+      String firstname = cells.get(2).getText();
+      String[] phones = cells.get(5).getText().split("\n");
+      contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname));
+    }
+    return contacts;
+  }
+	
+Теперь полученные данные используем для того, чтобы заполнить атрибуты нашего модельного объекта	
+    contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname).withHome(phones[0]).withMobile(phones[1]).withWork(phones[2]));	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}
 Урок 58. Клеим строки - метод обратных проверок 00:11:05
 
 Занятие 6. Работы с файлами
