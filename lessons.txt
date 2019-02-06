@@ -4206,9 +4206,9 @@ public class ContactPhoneTests extends TestBase {
   }	
 	
 //способ последовательный приближений
-  public ContactData infoFromEditForm2(ContactData id) {
+  private void initContactModificationById2(int id) {
 	//находим чек-бокс
-	//ищем элемент, который имеет тег интуп и атрибут value равное заданному значению  
+	//ищем элемент, который имеет тег input и атрибут value равное заданному значению  
     WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value='%s']",id)));
 	
 	//ищем строку
@@ -4222,11 +4222,23 @@ public class ContactPhoneTests extends TestBase {
 	//надо попасть в ту ячейку, в которой находится кнопка Edit
 	//берем полный список ячеек
 	//ищем внутри строки все элементы которые имеют имя td
-	List<WebElement> cells = row.findElements(By.name("td"));
+	List<WebElement> cells = row.findElements(By.tagName("td"));
 	
 	//среди этих ячеек берем по номеру нужную, внутри ячейки находим ссылку по имени тега а
 	cells.get(7).findElement(By.tagName("a")).click();	
 	
+
+
+
+
+
+
+
+
+
+
+
+
 	
 
 
