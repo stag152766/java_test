@@ -87,7 +87,7 @@ public class ContactHelper extends HelperBase {
   }
 
   public Contacts contactCache = null;
-/*
+
   public Contacts all() {
     if (contactCache != null) {
       return new Contacts(contactCache);
@@ -103,8 +103,8 @@ public class ContactHelper extends HelperBase {
     }
     return new Contacts(contactCache);
   }
-*/
-  public Set<ContactData> all() {
+
+  public Set<ContactData> all2() {
     Set<ContactData> contacts = new HashSet<>();
     List<WebElement> rows = driver.findElements(By.name("entry"));
     for (WebElement row : rows) {
@@ -136,7 +136,7 @@ public class ContactHelper extends HelperBase {
 
   //вспомогательный метод который загружает информацию из формы редактирования
   public ContactData infoFromEditForm(ContactData contact) {
-    initContactModificationById(contact.getId()); //выбор контакта по идентификатору
+    initContactModificationById(contact.getId());
     String firstname = driver.findElement(By.name("firstname")).getAttribute("value");
     String lastname = driver.findElement(By.name("lastname")).getAttribute("value");
     String home = driver.findElement(By.name("home")).getAttribute("value");
@@ -146,11 +146,12 @@ public class ContactHelper extends HelperBase {
             withLastname(lastname).withHome(home).withWork(work).withMobile(mobile);
   }
 
+  //выбор контакта по идентификатору
   private void initContactModificationById(int id) {
-    driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click();
+    //driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click();
     //driver.findElement(By.xpath(String.format("input[]value=%s/../../..td[8]/a", id))).click();
     //driver.findElement(By.xpath(String.format("//tr[.//input[@value='%s']]/td[8]/a", id))).click();
-    //driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))).click();
+    driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))).click();
   }
 
   //способ последовательный приближений
