@@ -4272,7 +4272,7 @@ driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))
 	  String allPhones = cells.get(5).getText();
 	  //для того, чтобы заполнить атрибуты объекта типа ContactData нужно три отдельных телефона, поэтому строчку нужно разрезать на части
 	  allPhones.split("\n"); //в качестве параметра в этот метод передается регилярное выражение - то есть шаблон поиска (перевод строки)
-	  //результатом будет массив, который состоит из трех элементов. Его нужно поместить в переменную Alt+Enter > Introduce local var
+	  //результатом будет массив String[], который состоит из трех элементов. Его нужно поместить в переменную Alt+Enter > Introduce local var
       contacts.add(new ContactData().withId(id).withFirstname(firstname)).withLastname(lastname);
 
     }
@@ -4290,35 +4290,80 @@ driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))
       String lastname = cells.get(1).getText();
       String firstname = cells.get(2).getText();
       String[] phones = cells.get(5).getText().split("\n");
-      contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname));
+      contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname));//* сюда добавим атрибуты с номера телефонов
     }
     return contacts;
   }
 	
 Теперь полученные данные используем для того, чтобы заполнить атрибуты нашего модельного объекта	
-    contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname).withHome(phones[0]).withMobile(phones[1]).withWork(phones[2]));	
+
+public ContactData infoFromEditForm(ContactData contact)
+    contacts.add(new ContactData().withId(id).withFirstname(firstname).withLastname(lastname).withHome(phones[0]).withMobile(phones[1]).withWork(phones[2])); //передали элемент массива в качестве параметра 	
+	
+Возвращаемся к методу testContactPhones() и добавляем проверки 
+
+  @Test
+  public void testContactPhones(){
+    app.goTo().HomePage();
+    ContactData contact = app.contact().all2().iterator().next();
+    ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);
+    assertThat(contact.getHome(), equalTo(contactInfoFromEditForm.getHome()));
+    assertThat(contact.getMobile(), equalTo(contactInfoFromEditForm.getMobile()));
+    assertThat(contact.getWork(), equalTo(contactInfoFromEditForm.getWork()));
+  }
+
+Но если изменить текст в ячейке с номерами телефонов на 
+Home + 7 (111)
+Mobile 22-22	
+Work 33 33 33
+	
+То на главной будет отображаться
++7111
+2222
+333333	
+	
+Тест упадет, потому что номера телефонов выглядят по разному 
+Expected :+ 7 (111)
+Actual   :+7111
+
+В классе ContactPhoneTests напишем вспомогательную функцию, которая будет приводить телефон к правильному очищенному виду	
 	
 	
+//метод, который удаляет лишнии символы
+public String cleaned(String phone) {
+  return phone.replaceAll("\\s",""); //заменить все вхождения чего-то на что-то
+}
 	
+Первый параметр - регулярное выражение. 
+Внутри строки ищем фрагмент, который подходит под некоторый шаблон и заменяем его на то значение, которое передано в качестве второго параметра (в нашем случае это будет пустая строка)  	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+Регулярные выражения - мощный язык
+
+
+Плагин IDEA для тестировани регулярных выражений
+https://plugins.jetbrains.com/plugin/2917-regexptester
+
+
+ќнлайн-редактор регул¤рных выражений 
+(можно также в гугле поискать по запросу regex tester java)
+http://myregexp.com
+
+
+\\s означает любой пробельный символ (пробел, табуляция, перевод строки)
+
+
+public String cleaned(String phone) {
+  return phone.replaceAll("\\s","").replaceAll("[-()]",""); //добавим еще один сеанс
+}
+
+
+
+
+
+
+
+
+
 	
 	
 	
