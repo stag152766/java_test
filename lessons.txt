@@ -738,6 +738,7 @@ public class Rectangle {
 
 }
 
+
 Занятие 2.
 Урок 16. Что такое автотесты? {
 
@@ -1648,6 +1649,7 @@ public class GroupModificationTests extends TestBase{
 
 }
 
+
 Занятие 3 Управление потоком выполнения кода, ветвление
 Урок 28. Блок if / else {
 Решение квадратного уравнения
@@ -2296,6 +2298,7 @@ public class GroupHelper extends HelperBase {
 Теперь тест testGroupDeletion выполняется правильно, вне зависимости от того есть ли группа в начале выполнения теста или нет. 
 
 }
+
 
 Занятие 4. Коллекции и циклы  
 Урок 38. Циклы. Многократные повторения похожих действий {
@@ -3399,6 +3402,7 @@ Comparator<? super GroupData> byId = (g1, g2) -> Integer.compare(g1.getId(),g2.g
 
 }
 
+
 Занятие 5. Улучшение кода тестов. Работа со строками
 Урок 48. Как правильно запускать браузер {
 
@@ -4317,7 +4321,7 @@ Home + 7 (111)
 Mobile 22-22	
 Work 33 33 33
 	
-То на главной будет отображаться
+То на главной отобразится
 +7111
 2222
 333333	
@@ -4326,8 +4330,9 @@ Work 33 33 33
 Expected :+ 7 (111)
 Actual   :+7111
 
-В классе ContactPhoneTests напишем вспомогательную функцию, которая будет приводить телефон к правильному очищенному виду	
-	
+Сначала сравниваемые объекты приводятся к общему каноническому виду, оба упрощаются а затем сравниваются. 
+ 
+В классе ContactPhoneTests напишем вспомогательную функцию, которая будет приводить телефон к правильному очищенному виду.	
 	
 //метод, который удаляет лишнии символы
 public String cleaned(String phone) {
@@ -4344,7 +4349,7 @@ public String cleaned(String phone) {
 https://plugins.jetbrains.com/plugin/2917-regexptester
 
 
-ќнлайн-редактор регул¤рных выражений 
+Онлайн-редактор регулярных выражений 
 (можно также в гугле поискать по запросу regex tester java)
 http://myregexp.com
 
@@ -4356,28 +4361,183 @@ public String cleaned(String phone) {
   return phone.replaceAll("\\s","").replaceAll("[-()]",""); //добавим еще один сеанс
 }
 
+Остается применить функцию к тем данным, которые получены с формы редактирования. Чтобы привести их к тому виду, который представлен на главной странице. Обратное преобразование невозможно. Потому что неизвестно какие символы надо добавить, легче удалить лишнии символы. 
 
 
 
-
-
-
-
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
-Урок 58. Клеим строки - метод обратных проверок 00:11:05
+Урок 58. Клеим строки - метод обратных проверок {
+Испортим свойства того контакта, телефоны которого проверяются в тесте. 
+В форме редактирования очистим поле Mobile.
+
+Теперь на главной странице представлены 2 телефона, но не понятно какие именно телефоны. //в коде приложения тоже не указано
+
+Тест падает, потому что третьего телефона нет.  
+
+Воспользуемся методом обратных проверок
+Если нельзя разрезать что то на кусочки и потом эти кусочки сравнить с чем то, значит нужно пойти с противоположного конца. Из известных кусочков склеить большую строку и сравнивать ее целиком.    
+
+Мы не знаем как разрезать телефоны на главной странице, зато мы можем взять атрибуты того объекта, который загружен на главной странице с формы редактирования склеить из них строчку, которая должна выглядеть точно также как на главной странице. И сравнивать ее целиком.
+
+
+
+было
+  public Set<ContactData> all2() {
+    Set<ContactData> contacts = new HashSet<>();
+    List<WebElement> rows = driver.findElements(By.name("entry"));
+    for (WebElement row : rows) {
+      List<WebElement> cells = row.findElements(By.tagName("td"));
+      int id = Integer.parseInt(cells.get(0).findElement(By.tagName("input")).getAttribute("value"));
+      String lastname = cells.get(1).getText();
+      String firstname = cells.get(2).getText();
+      String[] phones = cells.get(5).getText().split("\n"); //исправим то место которое падает
+      contacts.add(new ContactData().withId(id).withFirstname(firstname).
+              withLastname(lastname).withHome(phones[0]).withMobile(phones[1]).withWork(phones[2]));
+    }
+    return contacts;
+  }
+
+стало
+
+  public Set<ContactData> all2() {
+    Set<ContactData> contacts = new HashSet<>();
+    List<WebElement> rows = driver.findElements(By.name("entry"));
+    for (WebElement row : rows) {
+      List<WebElement> cells = row.findElements(By.tagName("td"));
+      int id = Integer.parseInt(cells.get(0).findElement(By.tagName("input")).getAttribute("value"));
+      String lastname = cells.get(1).getText();
+      String firstname = cells.get(2).getText();
+      String allPhones = cells.get(5).getText(); //один большой кусок текста
+      contacts.add(new ContactData().withId(id).withFirstname(firstname).
+              withAllPhones(allPhones)); //ввели специальный служебный атрибут 
+    }
+    return contacts;
+  }
+
+В GroupData 
+
+добавили атрибут 
+
+private String allPhones;
+
+добавили Getter и Setter
+
+
+  public String getAllPhones() {
+    return allPhones;
+  }
+
+  public ContactData withAllPhones(String allPhones) {
+    this.allPhones = allPhones;
+    return this; //для вытягивания в цепочку
+  }
+
+Теперь ContactHelper не будет падать. Он вместо заполнения трех отдельных атрибутов, будет заполнять четвертый атрибут, который содержит эти телефоны вместе.   
+
+Возвращаемся в тест 
+
+  @Test
+  public void testContactPhones() {
+    app.goTo().HomePage();
+    ContactData contact = app.contact().all2().iterator().next(); //контакт, который загружен с главной страницы содержит только правильное значение атрибута allPhones, а отдельные телефоны у него не заполнены
+    ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact); //контакт который загружен с формы редактирования, содержат отдельные атрибуты для телефонов, но пустой allPhones
+	
+	//поэтому сравнивать нужно будет allPhones того контакта, который загружен с главной страницы и строчку которую будем клеить  
+    assertThat(contact.getHome(), equalTo(mergePhones); //делаем вспомогательный метод 
+   
+  }
+  
+  //метод, который удаляет лишнии символы
+  public String cleaned(String phone) {
+    return phone.replaceAll("\\s","").replaceAll("[-()]",""); //заменить все вхождения чего-то на что-то
+  }
+  
+  private String mergePhones(ContactData contact) {
+    return null;
+  }
+
+Старый способ до появления элементов функционального программирования в java 8 
+
+  private String mergePhones(ContactData contact) {
+	String result = ""; //делаем пустую строчку
+	if (contact.getHomePhone() != null) {//добавляем в нее что-нибудь
+		result = result + contact.getHomePhone(); //и так далее для всех 3 телефонов 
+		} //кроме того между ними нужно в качестве разделителя вставить перевод строки 
+    return result; 
+  }
+
+
+Как склеить номера телефонов при помощи элементов функционального программирования 
+ 	
+Функциональное программирование используется для того, чтобы последовательно обрабатывать элементы коллекции. 
+Поэтому с начала из наших телефонов нужно сформировать коллекцию, которую потом будем склеивать. 
+
+private String mergePhones(ContactData contact) {
+ Arrays.asList(contact.getHome(), contact.getMobile(), contact.getWork()); //получили список, который состоит из трех элементов
+//из этого списка нужно отсеить те элементы, которые равны 0 а остальные будем склеивать
+//для этого сначала превращаем список в поток stream()
+//фильтруем поток 
+
+Выбрасываем из него те элементы, которые равны пустой строке, иначе они будут мешать при склеивании 
+Для этого используется функция filter(), в качестве параметра нужно передать аннонимную функцию
+Которая на вход принимает строку, поскольку это поток, построенный из списка строк. И возвращать эта функция должна true или false (оставить элемент или выбросить его).
+Оставит нам надо те элементы, которые не равны пустой строке. 
+
+
+  private String mergePhones(ContactData contact) {
+     Arrays.asList(contact.getHome(), contact.getMobile(), contact.getWork()).
+            stream().filter((s) -> ! s.equals("")); 
+			//теперь получаем новый поток, в котором выбрашены пусты строчки
+			//остались только непустые строчки, которые нужно склеить вместе. 
+			
+			
+    return null;
+  }
+
+Для склеивания используется функция collect() //собрать, в качестве параметра нужно передать Collector 
+В стандартной библиотеки java уже есть набор коллекторов классе Collectors, например Collectors.joinings()
+Коллектро, который склеивает все элементы потока в одну большую строку, в качеств е параметра передается разделитель "\n"
+Эта та строчка, которая будет вставлятся между склеиваемыми фрагментами.  
+Результатом метода collect() является строка. 
+
+
+  private String mergePhones(ContactData contact) {
+    return Arrays.asList(contact.getHome(), contact.getMobile(), contact.getWork())
+            .stream().filter((s) -> ! s.equals("")) //нужно ко всем элементам потока применить функцию очистки 
+			.map(ContactPhoneTest::cleaned) //для очистки используем map - ее назначение "применить ко всем элементам потока какую то функцию и вернуть поток, состоящий из результатов жтой функции
+			//в java 8 в качестве параметра можно передать не только аннонимную, но и уже существующую глобальную функцию (static)
+            .collect(Collectors.joining("\n"));
+  } 
+
+
+В итоге получаем, 
+
+
+  @Test
+  public void testContactPhones() {
+    app.goTo().HomePage();
+    ContactData contact = app.contact().all2().iterator().next();
+    ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);
+    assertThat(contact.getAllPhones(), equalTo(mergePhones(contactInfoFromEditForm)));
+  }
+
+  private String mergePhones(ContactData contact) {
+    return Arrays.asList(contact.getHome(), contact.getMobile(), contact.getWork())
+            .stream().filter((s) -> ! s.equals(""))
+            .map(ContactPhoneTests::cleaned)
+            .collect(Collectors.joining("\n"));
+  }
+
+  //метод, который удаляет лишнии символы
+  public static String cleaned(String phone) {
+    return phone.replaceAll("\\s","").replaceAll("[-()]",""); //заменить все вхождения чего-то на что-то
+  }
+
+
+
+  
+}
+
 
 Занятие 6. Работы с файлами
 Урок 59. Пути к файлам и директориям 00:13:47
