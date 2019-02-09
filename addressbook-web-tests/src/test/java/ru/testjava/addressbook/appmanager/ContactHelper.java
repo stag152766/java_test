@@ -174,4 +174,14 @@ public class ContactHelper extends HelperBase {
     return phone.replaceAll("\\s", "").replaceAll("[-()]", ""); //заменить все вхождения чего-то на что-то
   }
 
+  public ContactData infoFromDetailsForm(ContactData contact) {
+    initContactDetailsById(contact.getId());
+    String Firstname = driver.findElement();
+
+  }
+
+  private void initContactDetailsById(int id) {
+    driver.findElement(By.cssSelector(String.format("a[href='view.php?id=%s']", id)));
+  }
+
 }
