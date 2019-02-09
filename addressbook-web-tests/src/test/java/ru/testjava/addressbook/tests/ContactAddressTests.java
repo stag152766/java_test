@@ -17,6 +17,5 @@ public class ContactAddressTests extends TestBase{
     ContactData contactInfoEditForm = app.contact().infoFromEditForm(contact);
     assertThat(ContactHelper.cleaned(contact.getAddress()),
             equalTo(ContactHelper.cleaned(contactInfoEditForm.getAddress())));
-
   }
 }
