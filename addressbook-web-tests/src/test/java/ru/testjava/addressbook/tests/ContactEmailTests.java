@@ -22,11 +22,9 @@ public class ContactEmailTests extends TestBase {
   }
 
   private String mergeEmails(ContactData contact) {
-    String result = "";
-    Arrays.asList(contact.getEmail(),contact.getEmail2(), contact.getEmail3())
-            .stream().filter((s) -> ! s.equals(""))
+    return Arrays.asList(contact.getEmail(), contact.getEmail2(), contact.getEmail3())
+            .stream().filter((s) -> !s.equals(""))
             .map(ContactHelper::cleaned)
             .collect(Collectors.joining("\n"));
-    return result;
   }
 }

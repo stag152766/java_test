@@ -55,7 +55,6 @@ public class ContactData {
   }
 
 
-
   public String getAllPhones() {
     return allPhones;
   }
@@ -64,9 +63,6 @@ public class ContactData {
     this.allPhones = allPhones;
     return this; //для вытягивания в цепочку
   }
-
-
-
 
 
   public int getId() {
@@ -104,7 +100,6 @@ public class ContactData {
   public String getHome() {
     return home;
   }
-
 
 
   public ContactData withId(int id) {
@@ -151,7 +146,6 @@ public class ContactData {
     this.group = group;
     return this;
   }
-
 
 
   @Override

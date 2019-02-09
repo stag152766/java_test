@@ -151,7 +151,7 @@ public class ContactHelper extends HelperBase {
 
     return new ContactData().withId(contact.getId()).withFirstname(firstname)
             .withLastname(lastname).withHome(home).withWork(work).withMobile(mobile)
-            .withAddress(address).withEmail(email).withEmail2(email2).withEmail(email3);
+            .withAddress(address).withEmail(email).withEmail2(email2).withEmail3(email3);
   }
 
   //выбор контакта по идентификатору
@@ -169,8 +169,9 @@ public class ContactHelper extends HelperBase {
     List<WebElement> cells = row.findElements(By.tagName("td"));
     cells.get(7).findElement(By.tagName("a")).click();
   }
+
   public static String cleaned(String phone) {
-    return phone.replaceAll("\\s","").replaceAll("[-()]",""); //заменить все вхождения чего-то на что-то
+    return phone.replaceAll("\\s", "").replaceAll("[-()]", ""); //заменить все вхождения чего-то на что-то
   }
 
 }
