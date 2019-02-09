@@ -18,6 +18,17 @@ public class ContactData {
   private String email2;
   private String email3;
 
+  public String getAllNames() {
+    return allNames;
+  }
+
+  public ContactData withAllNames(String allNames) {
+    this.allNames = allNames;
+    return this;
+  }
+
+  private String allNames;
+
   public String getEmail() {
     return email;
   }

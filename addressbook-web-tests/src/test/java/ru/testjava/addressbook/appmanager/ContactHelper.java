@@ -176,12 +176,13 @@ public class ContactHelper extends HelperBase {
 
   public ContactData infoFromDetailsForm(ContactData contact) {
     initContactDetailsById(contact.getId());
-    String Firstname = driver.findElement();
-
+    String allNames = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[4]/b[1]")).getText();
+    String[] names = allNames.split("\\s");
+    return new ContactData().withFirstname(names[0]).withLastname(names[1]);
   }
 
   private void initContactDetailsById(int id) {
-    driver.findElement(By.cssSelector(String.format("a[href='view.php?id=%s']", id)));
+    driver.findElement(By.cssSelector(String.format("a[href='view.php?id=%s']", id))).click();
   }
 
 }
