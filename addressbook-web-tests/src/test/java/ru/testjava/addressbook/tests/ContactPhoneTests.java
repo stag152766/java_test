@@ -2,6 +2,7 @@ package ru.testjava.addressbook.tests;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import ru.testjava.addressbook.appmanager.ContactHelper;
 import ru.testjava.addressbook.model.ContactData;
 
 import java.util.ArrayList;
@@ -34,14 +35,12 @@ public class ContactPhoneTests extends TestBase {
   private String mergePhones(ContactData contact) {
     return Arrays.asList(contact.getHome(), contact.getMobile(), contact.getWork())
             .stream().filter((s) -> ! s.equals(""))
-            .map(ContactPhoneTests::cleaned)
+            .map(ContactHelper::cleaned)
             .collect(Collectors.joining("\n"));
   }
 
-  //метод, который удаляет лишнии символы
-  public static String cleaned(String phone) {
-    return phone.replaceAll("\\s","").replaceAll("[-()]",""); //заменить все вхождения чего-то на что-то
-  }
+
+
 
 
 }
