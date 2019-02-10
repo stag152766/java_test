@@ -8,9 +8,11 @@ import org.testng.Assert;
 import ru.testjava.addressbook.model.ContactData;
 import ru.testjava.addressbook.model.Contacts;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ContactHelper extends HelperBase {
 
@@ -154,7 +156,7 @@ public class ContactHelper extends HelperBase {
             .withAddress(address).withEmail(email).withEmail2(email2).withEmail3(email3);
   }
 
-  //выбор контакта по идентификатору
+
   private void initContactModificationById(int id) {
     //driver.findElement(By.xpath(String.format("a[href='edit.php?id=%s']", id))).click();
     //driver.findElement(By.xpath(String.format("input[]value=%s/../../..td[8]/a", id))).click();
@@ -162,7 +164,7 @@ public class ContactHelper extends HelperBase {
     driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))).click();
   }
 
-  //способ последовательный приближений
+  //способ последовательных приближений
   private void initContactModificationById2(int id) {
     WebElement checkbox = driver.findElement(By.cssSelector(String.format("input[value=%s]", id)));
     WebElement row = checkbox.findElement(By.xpath("./../../"));
@@ -176,9 +178,9 @@ public class ContactHelper extends HelperBase {
 
   public ContactData infoFromDetailsForm(ContactData contact) {
     initContactDetailsById(contact.getId());
-    String allNames = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[4]/b[1]")).getText();
-    String[] names = allNames.split("\\s");
-    return new ContactData().withFirstname(names[0]).withLastname(names[1]);
+    String details = driver.findElement(By.xpath("//body//div//div[4]")).getText();
+
+    return new ContactData().withAllNames(details);
   }
 
   private void initContactDetailsById(int id) {
