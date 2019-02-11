@@ -17,17 +17,16 @@ public class ContactData {
   private String email;
   private String email2;
   private String email3;
+  private String all;
 
-  public String getAllNames() {
-    return allNames;
+  public String getAll() {
+    return all;
   }
 
-  public ContactData withAllNames(String allNames) {
-    this.allNames = allNames;
+  public ContactData withAll(String all) {
+    this.all = all;
     return this;
   }
-
-  private String allNames;
 
   public String getEmail() {
     return email;
@@ -138,18 +137,18 @@ public class ContactData {
     return this;
   }
 
-  public ContactData withHome(String homeNum) {
-    this.home = homeNum;
+  public ContactData withHome(String home) {
+    this.home = home;
     return this;
   }
 
-  public ContactData withMobile(String mobileNum) {
-    this.mobile = mobileNum;
+  public ContactData withMobile(String mobile) {
+    this.mobile = mobile;
     return this;
   }
 
-  public ContactData withWork(String workNum) {
-    this.work = workNum;
+  public ContactData withWork(String work) {
+    this.work = work;
     return this;
   }
 
