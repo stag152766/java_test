@@ -55,7 +55,11 @@ public class ContactDetailsTests extends TestBase {
   }
 
   private String mergePhones(ContactData contact) {
-    return Arrays.asList("H:" + contact.getHome(), "M:" + contact.getMobile(), "W:" + contact.getWork()).stream().filter((s) -> !s.equals(""))
+    return Arrays.asList(
+            isHomePresent(contact),
+            isMobilePresent(contact),
+            isWorkPresent(contact))
+            .stream().filter((s) -> !s.equals(""))
             .collect(Collectors.joining());
   }
 
@@ -72,6 +76,28 @@ public class ContactDetailsTests extends TestBase {
             mergeEmails(contact)).stream().filter((s) -> !s.equals(""))
             .collect(Collectors.joining());
   }
+
+  private String isHomePresent(ContactData contact) {
+    if (contact.getHome().equals("")) {
+      return contact.getHome();
+    }
+    return "H:" + contact.getHome();
+  }
+
+  private String isMobilePresent(ContactData contact) {
+    if (contact.getMobile().equals("")) {
+      return contact.getMobile();
+    }
+    return "M:" + contact.getMobile();
+  }
+
+  private String isWorkPresent(ContactData contact) {
+    if (contact.getWork().equals("")) {
+      return contact.getWork();
+    }
+    return "W:" + contact.getWork();
+  }
+
 
 
 }
