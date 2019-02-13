@@ -1,5 +1,6 @@
 package ru.testjava.addressbook.model;
 
+import java.io.File;
 import java.util.Objects;
 
 public class ContactData {
@@ -11,13 +12,23 @@ public class ContactData {
   private String home;
   private String mobile;
   private String work;
-  private String group;
+  private String group = "[none]";
   private String allPhones;
   private String allEmails;
   private String email;
   private String email2;
   private String email3;
   private String all;
+  private File photo;
+
+  public File getPhoto() {
+    return photo;
+  }
+
+  public ContactData withPhoto(File photo) {
+    this.photo = photo;
+    return this;
+  }
 
   public String getAll() {
     return all;

@@ -4537,13 +4537,188 @@ private String mergePhones(ContactData contact) {
 
   
 }
-
+}
 
 Занятие 6. Работы с файлами
-Урок 59. Пути к файлам и директориям 00:13:47
+Урок 59. Пути к файлам и директориям {
+	
+Научимся работать с объектами, которые хранят описание файлов, хранящихся где то на диске. 	
+Научимся определять	путь к файлу, установим различия между относительными и абсолютными путями.
+    
+Например, если при создании контакта хотим прикрепить фото, нужно в поле ввести полный абсолютный путь к файлу, содержащий рисунок.    	
+	
+Для хранения ссылки на файл с рисунком добавим атрибут типа File в класс GroupData.  	//File находится в пакете java.io (input / output)
+	
+Делаем для него геттер и сеттер	
+	
+Сеттер меняем на другой, который позволяет вытягивать методы в цепочку, делать каскад и использовать флуент интерфейс. 
+  
+  public ContactData withPhoto(File photo) {
+    this.photo = photo;
+    return this;
+  }	
 
-Урок 60. Генератор тестовых данных, запись данных в файл 00:11:50
+Теперь при создании объекта можно вызвать метод withPhoto(), и передать в него в качестве параметра локальную переменную. 
+  @Test
+  public void testContactCreation() {
+    app.goTo().HomePage();
+    Contacts before = app.contact().all();
+    File photo = new File().; //инициализируем переменную типа File, после точки нужно указать путь к этому файлу
+    ContactData contact = new ContactData().withFirstname("Alex").withLastname("Jackson")
+            .withAddress("My street").withMobile("111").withHome("222").withWork("333").withPhoto(photo); //добавили метод с параметром
+  
+  } 
 
+У каждого файла есть абсолютный путь, относительно корня диска. 
+Например, c:\Users\kobzev\Documents\GitHub\java_test\addressbook-web-tests\src\test\resources\  
+
+Но на другом пк путь к файлу будет уже другим. Поэтому удобнее указать относительный путь, относительно рабочей директории. 
+У каждой программы есть рабочая директория. У теста тоже она есть. 
+
+Создадим вспомогательный тест, в котором будет определять какая	директория является текущей во время выполнения тестов. 
+
+  @Test
+  public void testCurrentDir() {
+    File currentDir = new File("."); //точка означает текущую директорию
+  }
+
+Чтобы посмотреть как будет выглядеть объект, какой путь внутри него будет указан, ставим точку останова и запускаем тест. 	
+	
+В объекте так и написано "." //то есть нет информаци где эта директория расположена 
+По косвенным признакам можно догадаться что это не корневая директория проекта, а корневая директория модуля. 
+
+Опредленим абсолютный путь к этой директории. 
+
+  @Test
+  public void testCurrentDir() {
+    File currentDir = new File(".");
+    System.out.println(currentDir.getAbsolutePath());
+  }	 
+	
+	C:\Users\kobzev\Documents\GitHub\java_test\addressbook-web-tests\. //это корневая директория модуля
+	
+Если мы хотим указать относительный путь к какому-то файлу, надо указывать путь относительно этой директории, то есть 
+	
+File photo = new File("src/test/resources/stru.png");
+    ContactData contact = new ContactData().withFirstname("Alex").withLastname("Jackson")
+            .withAddress("My street").withMobile("111").withHome("222").withWork("333").withPhoto(photo);
+	
+Перед тем как создавать контакт с рисунком, нужно убедится, что рисунок действительно существует. 
+	
+  @Test
+  public void testCurrentDir() {
+    File currentDir = new File(".");
+    System.out.println(currentDir.getAbsolutePath());
+    File photo = new File("src/test/resources/stru.png"); //созданим объект типа файл, который соответствует уже существующему файлу, находящимуся на диске 
+    System.out.println(photo.getAbsolutePath()); //выведем на консоль полный путь к этому файлу
+    System.out.println(photo.exists()); //проверим, что файл существует 
+  }
+
+В результате получим:
+C:\Users\kobzev\Documents\GitHub\java_test\addressbook-web-tests\src\test\resources\stru.png
+true
+
+Доработаем метод fillContactForm()
+
+
+  public void fillContactForm(ContactData contactData, boolean creation) {
+ ...
+    type(By.name("photo"), contactData.getPhoto().getAbsolutePath());
+    //нужно передать в качестве параметра не просто результат выполнения метода getPhoto()
+    // а нужно преобразовать его в строку, которая содержит абсолютный путь к файлу
+    //ведь у браузера, который рапускается как отдельный самостоятельный процесс, другая рабочая директория
+	//и поэтому он не сможет преобразовать путь относительно проекта в полный путь 
+	//поэтому надо сделать это явно	
+}
+Во время выполнения теста создания группы в приложении видно, что файл прикрепился, но вместе с ним открылось диалоговое окно для выбора файла. Оказывается, что файловые поля ввода действительно заполняется при помщи метода sentKeys. Но кликать по ним не надо. //chrome сам закрывает окно и идет продолжает работу 
+
+protected void type(By locator, String text) {
+click(locator);
+    if (text != null) {
+      String existingText = driver.findElement(locator).getAttribute("value");
+      if (! text.equals(existingText)) { 
+        driver.findElement(locator).clear();
+        driver.findElement(locator).sendKeys(text);}
+}
+}
+
+Поэтому для ввода файлов, нужно сделать отдельный метод sendKeys без клика. 
+
+Копируем метод type()
+
+было 
+  protected void attach(By locator, String text) {
+    click(locator);
+    if (text != null) {
+      //оптимизация, которая проверяет совпадение уже существующее значения, с тем которое мы пытаемся ввести //убираем
+      String existingText = driver.findElement(locator).getAttribute("value");
+      if (! text.equals(existingText)) {
+        driver.findElement(locator).clear(); 
+		//убираем очистку поля ввода, потому что в отличии от текстового поля ввода, где новое значение просто допишется в конец для файлового поля ввода, очистка выполняется автоматически
+        driver.findElement(locator).sendKeys(text);}
+      }
+    }
+
+стало
+  protected void attach(By locator, File file) { //так как метод предназначен для заполнения файлового поля ввода, передаем в качестве параметра объект типа файл
+    if (file != null) {
+        driver.findElement(locator).sendKeys(file.getAbsolutePath()); //здесь можно определять абсолютный пусть к файлу, который должен в качестве значения передаваться в метод sendKeys()
+    }
+  }
+
+Возвращаемся в fillContactForm() и дописываем
+attach(By.name("photo"), contactData.getPhoto());
+
+Запускаем тест. Тест зеленый. Диалоговое окно не открывается.
+
+
+
+}
+Урок 60. Генератор тестовых данных, запись данных в файл {
+	
+	
+	
+	
+	
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}	
 Урок 61. Анализ опций командой строки при запуске генератора данных 00:07:29
 
 Урок 62. Параметризация тестовых методов 00:09:52

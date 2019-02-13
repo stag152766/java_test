@@ -25,10 +25,8 @@ public class ContactDetailsTests extends TestBase {
               .withHome("11-11-11")
               .withMobile("+7 (398)")
               .withWork("33 33 33")
-              .withEmail("test@test.com")
-              .withEmail2("@222")
-              .withEmail3("333")
-              .withGroup("[none]"), true);
+              .withEmail("test_.test@t.com")
+              .withEmail3("@33"), true);
 
     }
 
