@@ -4275,7 +4275,8 @@ driver.findElement(By.cssSelector(String.format("a[href='edit.php?id=%s']", id))
       //дальше можем получит строчку, которая содержит все телефоны одновременно
 	  String allPhones = cells.get(5).getText();
 	  //для того, чтобы заполнить атрибуты объекта типа ContactData нужно три отдельных телефона, поэтому строчку нужно разрезать на части
-	  allPhones.split("\n"); //в качестве параметра в этот метод передается регилярное выражение - то есть шаблон поиска (перевод строки)
+	  allPhones.split("\n"); //в качестве параметра в этот метод передается регилярное выражение - то есть шаблон поиска (перевод строки) 
+	  // "\n" - перевод на следующую строку
 	  //результатом будет массив String[], который состоит из трех элементов. Его нужно поместить в переменную Alt+Enter > Introduce local var
       contacts.add(new ContactData().withId(id).withFirstname(firstname)).withLastname(lastname);
 
@@ -4676,34 +4677,98 @@ attach(By.name("photo"), contactData.getPhoto());
 }
 Урок 60. Генератор тестовых данных, запись данных в файл {
 	
-	
-	
-	
-	
-	
-	
-	
+Постепенно движемся в сторону создания тестов, которые будут загружать тестовые данные из внешнего файла 
+ 	
+package ru.testjava.addressbook.generators;
 
+//метод генерирует инфо о группах
+public class GroupDataGenerator { 
+
+
+  public static void main(String[] args){ //запускаемый файл
+    //при запуске программы передадим параметры через массив строк
+    int count = Integer.parseInt(args[0]); //количество групп
+    File file = new File(args[1]);//путь к файлу
+
+	//1 часть генерация данных
+    List<GroupData> groups = generatorGroups(count);
+	//2 часть сохраненние данных в файл
+    save(groups, file);
+
+  }
+
+  private static List<GroupData> generatorGroups(int count) {
+    List<GroupData> groups = new ArrayList<GroupData>();
+    for (int i = 0; i < count; i++) {
+      groups.add(new GroupData().withName(String.format("test %s", i))
+              .withHeader(String.format("header %s", i))
+              .withFooter(String.format("footer %s", i)));
+    }
+    return groups;
+    }
+
+  private static void save(List<GroupData> groups, File file) { //выбирем формат coma Separeted Values
+    //открываем файл на запись
+    Writer writer = new FileWriter(file); //IDE предупреждает об ошибке Unhandled exception
+  }
+
+
+}	
+	
+Причины исключения могут быть разными: 
+- файл уже существует и у нас нет прав на запись, 
+- файла нет и нет директории в которой он должен быть создан (java автоматически создавать директории не будет), 
+- указано недопустимое имя файла, ОС не может создать и открыть файл
+
+
+Есть два пути : //Alt+Enter
+- перехват исключения и принять какие то меры, например вывести сообщение об ошибке
+- дать возможность исключению пролететь дальше
+
+
+В декларацию этого метода добавляется информация о том, что во время работы этого метода может возникнуть исключение типа IOException.
+И тогда save() перекладывает эту проблему на main(), который тоже может декларировать, что он выбрасывает исключение типа IOException. Но конечно, перехватывать его уже некому и поэтому программа упадет. Нас такой вариант устроит.
+
+
+  
+  private static void save(List<GroupData> groups, File file) throws IOException { //выбирем формат coma Separeted Values
+    //открываем файл на запись
+    Writer writer = new FileWriter(file);
+    for (GroupData group : groups) {
+      writer.write(String.format("%s;%s;$s\n", group.getName(),group.getHeader(),group.getFooter()));
+    }
+    //закрываем файл
+    writer.close();
+  }	
+	
+Те данные, которые пишутся в объект типа writer не сохраняются мнгнованно на диск, они кешируются. Точно также, как мы пытались кешировать выполнение тяжеловесных операций. Запись данных на диск это медленно. 
+Поэтому нужно сначала накопить большой кусок данных в памяти и потом одновременно сбросить их на диск.
+Но если программа завершается в тот момент, когда данные еще не полностью сохранены на диск, а находятся в кеше, они могут быть потерены. 
+Поэтому нужно явно вызвать writer.closed(). В этот момент содержимое записывается на диск, файл закрывается. Это гарантия того, что все данные благополучно сохранились. 
+
+Запускаем тест - получаем ислючение IndexOutOfBoundsException 
+Надо передавать параметры сount, file
+	
+Открываем настройку конфигурации запуска Run / Debug Configurations	
+	
+Вводим в поле Arguments	
+10 src/test/resources/groups.csv	
 	
 	
 	
+В начале метода save посмотрим какая у нас текущая директория 
+
+System.out.println(new File(".").getAbsolutePath());	
+
+На этот раз рабочая директория проекта, а не модуля		
+C:\Users\kobzev\Documents\GitHub\java_test\.
 	
+Когда запускаются тесты, то рабочей является директория модуля, а когда программы - директория проекта. 
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+Поменемся текущую директорию 
+//рабочая директория и путь должны сойтись
+//укажем что программа должна запускаться здесь 
+C:\Users\kobzev\Documents\GitHub\java_test\addressbook-web-tests 	
 	
 	
 	
