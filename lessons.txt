@@ -1652,6 +1652,7 @@ public class GroupModificationTests extends TestBase{
 
 Занятие 3 Управление потоком выполнения кода, ветвление
 Урок 28. Блок if / else {
+
 Решение квадратного уравнения
 D = b^2 - 4ac
 
@@ -1661,10 +1662,14 @@ D > 0 - два решения
 
 
 double d = b*b - 4*a*c; 
+	
+Используя условный оператор if, можно выборочно выполнять отдельные части программы.
+Ниже представлена простейшая форма оператора if:
+if (условие) оператор;
+Условие обозначает логическое выражение.
 
 Будем анализировать дескреминант, чтобы присвоить значение в атрибут n
 
- 
 
 if (d > 0) { //если условие в скобках справедливо, то выполняется блок в фигурных скобках
   n = 2;
@@ -2323,8 +2328,13 @@ public class GroupHelper extends HelperBase {
 
 Для описания таких циклов используется конструкция for ()
 Цикл for () обычно использует переменную счетчик, которая описывается внутри круглых скобок. Она не только декларируется, но и описывает все что с этим счетчиком происходит.
+Ниже приведена простейшая форма цикла for:
 
-for (инициализация; место остановки; то что происходит с переменной счетчика на кажной итерации цикла) {действия которые должны происходить на каждой итерации}
+for (инициализация; условие; итерация) оператор;
+
+for (инициализация; место остановки; то что происходит с переменной счетчика на кажной итерации цикла) {действия которые должны происходить на каждой итерации; }
+
+
 
   
 i = i + 1
@@ -4731,7 +4741,7 @@ public class GroupDataGenerator {
 
 
   
-  private static void save(List<GroupData> groups, File file) throws IOException { //выбирем формат coma Separeted Values
+  private static void save(List<GroupData> groups, File file) throws IOException { //выбирем формат comma separated values (CSV)
     //открываем файл на запись
     Writer writer = new FileWriter(file);
     for (GroupData group : groups) {
@@ -4793,38 +4803,130 @@ JC определяет список атрибутов в текущем кла
 Класс 
 список атрибутов 
 @Parameter (параметры аннотации ) //аннотация 
-атрибут1; 
+атрибут1; //числа, строки, списки но не файлы
 @Parameter (параметры аннотации ) //аннотация 
 атрибут2; 
 
+Нам нужны опции коммандной строки count и file, которые сделаем атрибутами
+
+
+@Parameter(names = "-c", description = "Group count") //дадим этим опциям имена и описание
+public int coutn;
+
+@Parameter(names = "-f", description = "Target file")
+public String file; //тип String потому что библиотека jc напрямую работу с файлами не поддерживает
+
+А теперь делаем так как написано в документации jc
+
+Сначала создаем объект теущего класа, затем создаем объект типа 
+JCommander (параметр1, параметр2)
+где 
+параметр1 - объект, в котором должны быть заполнены соответствующие атрибуты 
+параметр2 - те опции, которые переданы коммандной строке 
+
+
+Теперь запускаем generator.run()
+
+Создадим run() и переместим туда 
+
+  private void run() throws IOException {
+	//1 часть генерация данных
+    List<GroupData> groups = generatorGroups(count);
+    //2 часть сохраненние данных в файл
+    save(groups, new File(file)); //преобразуем
+
+  }
+
+А save() и generateGroups() можно убрать static, потому что все методы вызываются внутри объекта generator
+
+Запускаем тест получаем исключение
+Was passed main parameter '10' but no main parameter was defined in your arg class
+
+Нужно добавить сообщение о том, как программу запускать правильно. 
 
 
 
+  public static void main(String[] args) throws IOException {
+    GroupDataGenerator generator = new GroupDataGenerator();
+    JCommander jCommander = new JCommander(generator); //создаем объект и помещаем его в какую-то локальную переменную
+    jCommander.parse(args); //помещаем в качестве параметра наши аргументы , но так как при этом может возникнуть исключение ParameterException перехватим его, завернем parse() в метод try() - catch ()
+	
 
 
+  public static void main(String[] args) throws IOException { //запускаемый файл
+    GroupDataGenerator generator = new GroupDataGenerator();
+    JCommander jCommander = new JCommander(generator);
+    try {
+      jCommander.parse(args);
+    } catch (ParameterException ex) {//перехватываем исключение
+      jCommander.usage(); //если исключение возникло, то выводим на консоль инфо о доступных опциях при помощи метода usage()
+      return; //метод генератор запускать не надо
+    }
 
+Снова запускаем тест, получаем сообщение 
 
+Usage: <main class> [options]
+  Options:
+    -c
+      Group count
+      Default: 0
+    -f
+      Target file
 
+Переходим в конфигурацию теста и исправляем значение аргументов
 
+-c 20 -f src/test/resources/groups.csv
 
-
-
-
-
-
-
-
-
-
-
-
-
+Благодаря тому, что мы реализовали возможность указывать параметры строки с именами, значение аргументов можно указывать в другом порядке. 
 
 
 	
 }
 
-Урок 62. Параметризация тестовых методов 00:09:52
+Урок 62. Параметризация тестовых методов {
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}	
 
 Урок 63. Загрузка тестовых данных из файла 00:07:52
 
