@@ -4721,6 +4721,7 @@ public class GroupDataGenerator {
 
   private static void save(List<GroupData> groups, File file) { //выбирем формат coma Separeted Values
     //открываем файл на запись
+	//создаем объект типа Writer, через него будет выполняться запись 
     Writer writer = new FileWriter(file); //IDE предупреждает об ошибке Unhandled exception
   }
 
@@ -5004,40 +5005,73 @@ GroudData >
 
 Урок 63. Загрузка тестовых данных из файла {
 	
+Общая идея - разделение зон ответственности: тестовый сценарий отдельно от тестовых данных. 
+
+Переделаем провайдер таким образом, чтобы он загружал тестовые данные из внешнего файла.
+
+
+  @DataProvider
+  public Iterator<Object[]> validGroups() throws FileNotFoundException { //добавим это исключение в декларацию метода 
+  //если не найден, то пусть тесты падают  
+    List<Object[]> list = new ArrayList<Object[]>();
+    Reader reader = new FileReader(new File("src/test/resources.groups.csv")); //здесь может возникать исключение
+	//java понимает \/ к путям к файлам
+    return list.iterator();
+  }
+
+
+	
+reader. (возвращается int) 
+read() int читает из файла один символ, возвращает его код
+read(char[] cbuf) int возвращает набор символов. Для этого сначала нужно создать массив символов, элементов типа char. И какая длина у  массива, столько символов будет прочитано. 
+	
+Нужно прочитать строчку целиком, такого метода в классе Reader нет. Но в классе BufferedReader есть readLine(), который читает и возвращает целую строчку. 
+Поэтому сделаем обертку: меняем тип на BufferedReader, и обычный reader заворачиваем в new BufferedReader. Получим
+
+
+BufferedReader reader = new BufferedReader(new FileReader(new File("src/test/resources.groups.csv")));
+String line = reader.readLine(); //здесь тоже может возникнуть исключение, которое мы тоже добавляем в декларацию     
+//FileNotFoundException заменяется на IOException, которое является более общим видом исключения
+
+	//таким образом можно прочитать только первую строчку
+  @DataProvider
+  public Iterator<Object[]> validGroups() throws IOException {
+    List<Object[]> list = new ArrayList<Object[]>();
+    BufferedReader reader = new BufferedReader(new FileReader(new File("src/test/resources.groups.csv")));
+    String line = reader.readLine();
+    return list.iterator();
+  }	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+  @DataProvider
+  ...
+    String line = reader.readLine();
+    //неизвестно сколько строк в файле, поэтому используем цикл while
+    while (line != null) {
+      line = reader.readLine(); //продолжаем выполнение этого цикла, на каждой следующей итерации выполняется выражение - читать следующую строчку из тогоже самого файла
+    }//когда все строки кончатся, вместо очередной строки вернется значение null и выполнение цикла прекратится
 
 	
 	
+В итоге получаем,	
 	
+  @DataProvider
+  public Iterator<Object[]> validGroups() throws IOException {
+    List<Object[]> list = new ArrayList<Object[]>();
+    BufferedReader reader = new BufferedReader(new FileReader(new File("src/test/resources.groups.csv")));
+    String line = reader.readLine();
+    //неизвестно сколько строк в файле, поэтому используем цикл while
+    while (line != null) {
+      String[] split = line.split(";");//выполнение обработки прочитанных строк
+      //строим из полученных кусочков объект, который помещаем в массив
+      //массив состоит из одного этого объекта(элемента). Добавляем массив в список
+      list.add(new Object[]{new GroupData().withName(split[0]).withHeader(split[1]).withFooter(split[2])});
+      line = reader.readLine(); //выполнение этого цикла, на каждой следующей итерации выполняется выражение - читать следующую строчку из тогоже самого файла
+    }//когда все строки кончатся, вместо очередной строки вернется значение null и выполнение цикла прекратится
+    return list.iterator();
+  }	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	

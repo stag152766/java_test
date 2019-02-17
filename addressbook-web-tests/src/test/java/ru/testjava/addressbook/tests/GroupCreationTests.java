@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import ru.testjava.addressbook.model.GroupData;
 import ru.testjava.addressbook.model.Groups;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,12 +16,19 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class GroupCreationTests extends TestBase {
 
   @DataProvider
-  public Iterator<Object[]> validGroups() {//итератор массива объектов
-    List<Object[]> list = new ArrayList<Object[]>(); //список массивов объектов
-    list.add(new Object[]{new GroupData().withName("test1'").withHeader("header 1").withFooter("footer 1")});
-    list.add(new Object[]{new GroupData().withName("test2").withHeader("header 2").withFooter("footer 2")});
-    list.add(new Object[]{new GroupData().withName("test3").withHeader("header 3").withFooter("footer 3")});
-    return list.iterator(); //возвращается итератор этого списка
+  public Iterator<Object[]> validGroups() throws IOException {
+    List<Object[]> list = new ArrayList<Object[]>();
+    BufferedReader reader = new BufferedReader(new FileReader(new File("src\\test\\resources\\groups.csv")));
+    String line = reader.readLine(); //чтение одной первой строки
+    //неизвестно сколько строк в файле, поэтому используем цикл while
+    while (line != null) {
+      String[] split = line.split(";");//выполнение обработки прочитанных строк
+      //строим из полученных кусочков объект, который помещаем в массив
+      //массив состоит из одного этого объекта(элемента). Добавляем массив в список
+      list.add(new Object[]{new GroupData().withName(split[0]).withHeader(split[1]).withFooter(split[2])});
+      line = reader.readLine(); //выполнение этого цикла, на каждой следующей итерации выполняется выражение - читать следующую строчку из тогоже самого файла
+    }//когда все строки кончатся, вместо очередной строки вернется значение null и выполнение цикла прекратится
+    return list.iterator();
   }
 
 
