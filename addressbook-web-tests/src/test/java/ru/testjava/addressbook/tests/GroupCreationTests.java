@@ -19,15 +19,12 @@ public class GroupCreationTests extends TestBase {
   public Iterator<Object[]> validGroups() throws IOException {
     List<Object[]> list = new ArrayList<Object[]>();
     BufferedReader reader = new BufferedReader(new FileReader(new File("src\\test\\resources\\groups.csv")));
-    String line = reader.readLine(); //чтение одной первой строки
-    //неизвестно сколько строк в файле, поэтому используем цикл while
+    String line = reader.readLine();
     while (line != null) {
-      String[] split = line.split(";");//выполнение обработки прочитанных строк
-      //строим из полученных кусочков объект, который помещаем в массив
-      //массив состоит из одного этого объекта(элемента). Добавляем массив в список
+      String[] split = line.split(";");
       list.add(new Object[]{new GroupData().withName(split[0]).withHeader(split[1]).withFooter(split[2])});
-      line = reader.readLine(); //выполнение этого цикла, на каждой следующей итерации выполняется выражение - читать следующую строчку из тогоже самого файла
-    }//когда все строки кончатся, вместо очередной строки вернется значение null и выполнение цикла прекратится
+      line = reader.readLine();
+    }
     return list.iterator();
   }
 
@@ -41,18 +38,6 @@ public class GroupCreationTests extends TestBase {
     assertThat(after.size(), equalTo(before.size() + 1));
     assertThat(after, equalTo(before.withAdded(group.withId(after.stream().
             mapToInt((g) -> g.getId()).max().getAsInt()))));
-  }
-
-
-  @Test(enabled = false)
-  public void testBadGroupCreation() {
-    app.goTo().groupPage();
-    Groups before = app.group().all();
-    GroupData group = new GroupData().withName("test2'");
-    app.group().create(group);
-    assertThat(app.group().сount(), equalTo(before.size()));
-    Groups after = app.group().all();
-    assertThat(after, equalTo(before));
   }
 
 }

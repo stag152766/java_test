@@ -53,7 +53,7 @@ public class GroupDataGenerator { //генерирует инфо о групп�
     return groups;
   }
 
-  private void save(List<GroupData> groups, File file) throws IOException { //выбирем формат coma Separeted Values
+  private void save(List<GroupData> groups, File file) throws IOException {
     //открываем файл на запись
     System.out.println(new File(".").getAbsolutePath());
     Writer writer = new FileWriter(file);
