@@ -3,6 +3,7 @@ package ru.testjava.addressbook.generators;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.thoughtworks.xstream.XStream;
 import ru.testjava.addressbook.model.GroupData;
 
 import java.io.File;
@@ -19,27 +20,41 @@ public class GroupDataGenerator { //генерирует инфо о групп�
   public int count;
 
   @Parameter(names = "-f", description = "Target file")
-  public String file; //тип String потому что библиотека jc напрямую работу с файлами не поддерживает
+  public String file;
+
+  @Parameter(names = "-d", description = "Data format")
+  public String format;
 
 
-  public static void main(String[] args) throws IOException { //запускаемый файл
+  public static void main(String[] args) throws IOException {
     GroupDataGenerator generator = new GroupDataGenerator();
     JCommander jCommander = new JCommander(generator);
-    try {//заворачиваем в метод try
+    try {
       jCommander.parse(args);
-    } catch (ParameterException ex) {//перехватываем исключение
-      jCommander.usage(); //если исключение возникло, то выводим на консоль инфо о доступных опциях при помощи метода usage()
-      return; //метод генератор запускать не надо
+    } catch (ParameterException ex) {
+      jCommander.usage();
+      return;
     }
     generator.run();
   }
 
   private void run() throws IOException {
-//1 часть генерация данных
     List<GroupData> groups = generatorGroups(count);
-    //2 часть сохраненние данных в файл
-    save(groups, new File(file)); //преобразуем
+    if (format.equals("csv")) { //свернутая конструкция if где идет серия однотипных проверок
+      saveAsCsv(groups, new File(file));
+    } else if (format.equals("xml")) {
+      saveAsXml(groups, new File(file));
+    } else { //в конце нужно сообщить пользователю если он указан нераспознаваемый формат
+      System.out.println("Unrecognized" + format);
+    }
+  }
 
+  private void saveAsXml(List<GroupData> groups, File file) throws IOException {
+    XStream xstream = new XStream();
+    String xml = xstream.toXML(groups);
+    Writer writer = new FileWriter(file);
+    writer.write(xml);
+    writer.close();
   }
 
 
@@ -53,16 +68,13 @@ public class GroupDataGenerator { //генерирует инфо о групп�
     return groups;
   }
 
-  private void save(List<GroupData> groups, File file) throws IOException {
-    //открываем файл на запись
+  private void saveAsCsv(List<GroupData> groups, File file) throws IOException {
     System.out.println(new File(".").getAbsolutePath());
     Writer writer = new FileWriter(file);
     for (GroupData group : groups) {
       writer.write(String.format("%s;%s;%s\n", group.getName(), group.getHeader(), group.getFooter()));
     }
-    //закрываем файл
     writer.close();
   }
-
 
 }

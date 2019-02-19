@@ -5074,7 +5074,143 @@ String line = reader.readLine(); //здесь тоже может возникн
 	
 	
 }	
-Урок 64. Формат XML 00:14:22
+Урок 64. Формат XML {
+	
+Задача: необходимо набор объектов тестовых данных сохранить в формате xml. Для этого будем использовать особую разновидность библиотек  для работы с форматом xml, которые называются сериализатор данных. 
+Они предназначены, для того чтобы автоматически преобразовать какие то объекты языка программирования в формат xml и наоборот, анализировать данные в формате xml и автоматически строить объекты нужного типа.
+
+Подключим библиотеку Xstream
+
+https://search.maven.org/artifact/com.thoughtworks.xstream/xstream/1.4.11.1/jar
+	
+
+Недостатки формата csv:
+- структура нарушается формата если поля состоят из нескольких строк
+- структура формата нарушается если поле содержит ;
+- большое количество полей
+
+Переделаем гененатор
+
+public class GroupDataGenerator { //генерирует инфо о группах
+
+
+  @Parameter(names = "-c", description = "Group count")
+  public int count;
+
+  @Parameter(names = "-f", description = "Target file")
+  public String file; //тип String потому что библиотека jc напрямую работу с файлами не поддерживает
+
+
+  public static void main(String[] args) throws IOException { //запускаемый файл
+    GroupDataGenerator generator = new GroupDataGenerator();
+    JCommander jCommander = new JCommander(generator);
+    try {//заворачиваем в метод try
+      jCommander.parse(args);
+    } catch (ParameterException ex) {//перехватываем исключение
+      jCommander.usage(); //если исключение возникло, то выводим на консоль инфо о доступных опциях при помощи метода usage()
+      return; //метод генератор запускать не надо
+    }
+    generator.run();
+  }
+
+  private void run() throws IOException {
+//1 часть генерация данных
+    List<GroupData> groups = generatorGroups(count);
+    //2 часть сохраненние данных в файл
+    save(groups, new File(file)); //преобразуем
+
+  }
+
+
+  private List<GroupData> generatorGroups(int count) {
+    List<GroupData> groups = new ArrayList<GroupData>();
+    for (int i = 0; i < count; i++) {
+      groups.add(new GroupData().withName(String.format("test %s", i))
+              .withHeader(String.format("header %s", i))
+              .withFooter(String.format("footer %s", i)));
+    }
+    return groups;
+  }
+
+  private void save(List<GroupData> groups, File file) throws IOException {
+    //открываем файл на запись
+    System.out.println(new File(".").getAbsolutePath());
+    Writer writer = new FileWriter(file);
+    for (GroupData group : groups) {
+      writer.write(String.format("%s;%s;%s\n", group.getName(), group.getHeader(), group.getFooter()));
+    }
+    //закрываем файл
+    writer.close();
+  }
+
+
+}
+
+Сделаем дополнительный параметр - опцию командной строки
+  @Parameter(names = "-d", description = "Data format")
+  public String format;
+
+Теперь при запуске нужно указывать третий параметр Edit Configuration
+-f src/test/resouces/groups.xml -c 3 -d xml
+
+
+Нужно добавить проверку в run()
+
+
+   private void run() throws IOException {
+    List<GroupData> groups = generatorGroups(count);
+    if (format.equals("csv")) { //свернутая конструкция if где идет серия однотипных проверок
+      saveCsv(groups, new File(file));
+    } else if (format.equals("xml")) {
+      saveXml(groups, new File(file));
+    } else { //в конце нужно сообщить пользователю если он указан нераспознаваемый формат
+      System.out.println("Unrecognized" + format);
+    }
+  }
+
+Создаем saveXml()
+
+  private void saveXml(List<GroupData> groups, File file) { //(список групп, который нужно сохранить, файл, в который нужно сохранить)
+  
+  }
+
+Смотрим как надо работать с библиотекой http://x-stream.github.io/tutorial.html
+
+
+Создаем объект типа xstream
+
+XStream xstream = new XStream();
+
+Now, to convert it to XML, all you have to do is make a simple call to XStream:
+
+String xml = xstream.toXML(groups); //в качестве параметра передаем тот объект, который нужно сериализовать 
+//то есть превратить их объектного представления в строчку в формате xml
+
+Делаем writer, который может выбрасывать исключение. Поэтому добавляем эту инфо в декларацию метода.
+
+  private void saveXml(List<GroupData> groups, File file) throws IOException {
+    XStream xstream = new XStream();
+    String xml = xstream.toXML(groups);
+    Writer writer = new FileWriter(file);
+    writer.write(xml);
+    writer.close();
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}	
 Урок 65. Формат JSON 00:10:17
 Урок 66. Автоматическое закрытие файлов после использования 00:03:13
 Урок 67. Конфигурационные файлы для описания тестовых наборов 00:08:14
