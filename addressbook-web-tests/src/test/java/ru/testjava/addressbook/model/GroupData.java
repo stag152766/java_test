@@ -41,8 +41,8 @@ public class GroupData {
 
   public GroupData withId(int id) {
     this.id = id;
-    return this; //это ссылка на самого себя внутри экземпляра класса
-                 //метод вернет экземляр класса GroupData, вызвавший его
+    return this;
+
   }
 
   public GroupData withName(String name) {

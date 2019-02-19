@@ -13,7 +13,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupDataGenerator { //генерирует инфо о группах
+//генерация инфо о группах
+public class GroupDataGenerator {
 
 
   @Parameter(names = "-c", description = "Group count")
@@ -49,15 +50,6 @@ public class GroupDataGenerator { //генерирует инфо о групп�
     }
   }
 
-  private void saveAsXml(List<GroupData> groups, File file) throws IOException {
-    XStream xstream = new XStream();
-    xstream.processAnnotations(GroupData.class); //для класса GroupData нужно прочитать подсказки, которые в нем самом написаны
-    String xml = xstream.toXML(groups);
-    Writer writer = new FileWriter(file);
-    writer.write(xml);
-    writer.close();
-  }
-
 
   private List<GroupData> generatorGroups(int count) {
     List<GroupData> groups = new ArrayList<GroupData>();
@@ -75,6 +67,15 @@ public class GroupDataGenerator { //генерирует инфо о групп�
     for (GroupData group : groups) {
       writer.write(String.format("%s;%s;%s\n", group.getName(), group.getHeader(), group.getFooter()));
     }
+    writer.close();
+  }
+
+  private void saveAsXml(List<GroupData> groups, File file) throws IOException {
+    XStream xstream = new XStream();
+    xstream.processAnnotations(GroupData.class); //для класса GroupData нужно прочитать подсказки, которые в нем самом написаны
+    String xml = xstream.toXML(groups);
+    Writer writer = new FileWriter(file);
+    writer.write(xml);
     writer.close();
   }
 
