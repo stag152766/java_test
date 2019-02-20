@@ -31,8 +31,8 @@ public class ContactDataGenerator {
   }
 
   private void run() throws IOException {
-    List<ContactData> groups = generatorContacts(count);
-    saveAsXml(groups, new File(file));
+    List<ContactData> contacts = generatorContacts(count);
+    saveAsXml(contacts, new File(file));
 
   }
 
