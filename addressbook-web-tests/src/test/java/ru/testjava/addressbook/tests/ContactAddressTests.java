@@ -12,7 +12,7 @@ public class ContactAddressTests extends TestBase{
 
   @Test
   public void testContactAddress() {
-    app.goTo().HomePage();
+    app.goTo().homePage();
     ContactData contact = app.contact().all2().iterator().next();
     ContactData contactInfoEditForm = app.contact().infoFromEditForm(contact);
     assertThat(ContactHelper.cleaned(contact.getAddress()),

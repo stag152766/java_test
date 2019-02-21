@@ -5,7 +5,6 @@ import org.testng.annotations.Test;
 import ru.testjava.addressbook.appmanager.ContactHelper;
 import ru.testjava.addressbook.model.ContactData;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,7 @@ public class ContactPhoneTests extends TestBase {
 
   @BeforeMethod
   public void ensurePreconditions() {
-    app.goTo().HomePage();
+    app.goTo().homePage();
     if (app.contact().all().size() == 0) {
       app.contact().create(new ContactData().withFirstname("Alex").
               withLastname("Jackson").withAddress("My street").
@@ -26,7 +25,7 @@ public class ContactPhoneTests extends TestBase {
 
   @Test
   public void testContactPhones() {
-    app.goTo().HomePage();
+    app.goTo().homePage();
     ContactData contact = app.contact().all2().iterator().next();
     ContactData contactInfoFromEditForm = app.contact().infoFromEditForm(contact);
     assertThat(contact.getAllPhones(), equalTo(mergePhones(contactInfoFromEditForm)));
