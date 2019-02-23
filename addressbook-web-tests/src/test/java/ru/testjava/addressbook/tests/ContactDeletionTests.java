@@ -9,7 +9,7 @@ import ru.testjava.addressbook.model.Contacts;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ContactsDeletionTests extends TestBase {
+public class ContactDeletionTests extends TestBase {
 
 
   @BeforeMethod
