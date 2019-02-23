@@ -8,13 +8,4 @@
             <class name="ru.testjava.addressbook.tests.GroupDeletionTests" />
         </classes>
     </test>
-
-    <test name="Contacts">
-        <classes>
-            <class name="ru.testjava.addressbook.tests.ContactCreationTests" />
-            <class name="ru.testjava.addressbook.tests.ContactModificationTests" />
-            <class name="ru.testjava.addressbook.tests.ContactDetailsTests" />
-            <class name="ru.testjava.addressbook.tests.ContactDeletionTests" />
-        </classes>
-    </test>
 </suite>
