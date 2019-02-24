@@ -5719,8 +5719,80 @@ web.adminPassword=secret
 Note: Some input files use unchecked or unsafe operations.
 Note: Recompile with -Xlint:unchecked for details.
 
+
+
 }
-Урок 69. Протоколирование (лог-файлы) 00:13:38
+Урок 69. Протоколирование (лог-файлы) {
+
+
+Вместо того, чтобы выводить на консоль нужно использовать специальные бибилиотеки, которые предназначены для протоколирования.
+Они позволят перенаправить сообщения не только на консоль, но и в файл или вложить в бд.
+
+Смотрим докуменатнацию
+https://logback.qos.ch/manual/configuration.html
+
+Подключаем библиотеку
+https://search.maven.org/artifact/ch.qos.logback/logback-classic/1.3.0-alpha4/jar
+
+Задача: в тесте для создания групп, в начале теста нужно выводить сообщение о запуске тест с некоторыми параметрами.
+
+
+Для этого сначала создадим специальную переменную типа Logger
+Классов с таким названием великое множество, потому что каждая библиотека так или иначе реализует протоколирование. 
+Нужно взять тот класс, который находится в пакете org.slf4j (simple logging fasad for java)
+Создавать объект будем при помощи LoggerFactory, который тоже находится в том же самом пакете.
+При создании логгера указывается класс с которым этот логгер будет ассоциирован. Смысл ассоциации в том, в сообщениях будет видно название этого класса.
+
+
+public void testGroupCreation(GroupData group) {
+    Logger logger = LoggerFactory.getLogger(GroupCreationTests.class);   
+	logger.info("Start testGroupCreation"); //используем его 
+
+	//в конец добавляем
+	logger.info("Stop testGroupCreation");
+
+
+Запускаем тест, получаем
+
+21:04:09.326 [main] INFO ru.testjava.addressbook.tests.GroupCreationTests - Start testGroupCreation
+21:04:12.475 [main] INFO ru.testjava.addressbook.tests.GroupCreationTests - Stop testGroupCreation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
 
 Занятие 7. Работа с базами данных
