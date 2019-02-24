@@ -6,10 +6,16 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.fail;
 
 public class ApplicationManager {
+  private final Properties properties;
   private WebDriver driver;
 
   private ContactHelper contactHelper;
@@ -21,12 +27,14 @@ public class ApplicationManager {
   private StringBuffer verificationErrors = new StringBuffer();
   private String browser;
 
-  public ApplicationManager(String browser) {
-
+  public ApplicationManager(String browser)  {
     this.browser = browser;
+    properties = new Properties();  //создаем объект типа properties и сохраняем его в поле этого класса, потому что он пригодится в будущем
   }
 
-  public void init() {
+  public void init() throws IOException {
+    String target = System.getProperty("target", "local"); //часть имени конфигурационного файла
+    properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
     if (browser.equals(BrowserType.CHROME)) {
       driver = new ChromeDriver();
     } else if (browser.equals(BrowserType.FIREFOX)) {
@@ -37,12 +45,12 @@ public class ApplicationManager {
 
     baseUrl = "https://www.katalon.com/";
     driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
-    driver.get("http://localhost/addressbook");
+    driver.get(properties.getProperty("web.baseUrl"));
     sessionHelper = new SessionHelper(driver);
     groupHelper = new GroupHelper(driver);
     navigationHelper = new NavigationHelper(driver);
     contactHelper = new ContactHelper(driver);
-    sessionHelper.login("admin", "secret");
+    sessionHelper.login(properties.getProperty("web.adminLogin"), properties.getProperty("web.adminPassword"));
   }
 
 
