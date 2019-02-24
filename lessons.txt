@@ -5644,33 +5644,80 @@ task testContacts(type: Test) {
     
 }
 
-Точно также передадим другое свойство -Ptarget будет указываеться имя, название конфигурационного файла в котором хранится информация о тестируемой системе.
+Передадим другое свойство -Ptarget будет указываеть имя, название конфигурационного файла в котором хранится информация о тестируемой системе.
 
 gradlew -Ptarget=local testContacts // если указано такое свойство, то инфо о ТС должна быть загружена из файла resources/local.properties
 
 Пробрасываем это системное свойство через сборщик в запускаемую VA  
 
 
+task testContacts(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources.testng-contacts.xml'
+    }
+    if (project.hasProperty('browser')) {
+        systemProperty 'browser', "${browser}"        
+    }
+
+    if (project.hasProperty('target')) {
+        systemProperty 'target', "${target}"
+    }
+}
 
 
+Теперь нужно это свойство где то использовать, очевидно в  АМ. Добавим инициализацию свойства в конструктор.
+
+public ApplicationManager(String browser) {
+
+    this.browser = browser;
+    properties = new Properties();//создаем объект типа properties и сохраняем его в поле этого класса, потому что он пригодится в будущем
+  }
+
+Добавим 
+
+в метод инит 
+
+public void init() throws IOException {
+    String target = System.getProperty("target", "local"); //часть имени конфигурационного файла
+    properties.load(new FileReader(new File(String.format("src/test/java/resources.%s.properties"), target)));//в load в качестве параметра передаем Reader
+
+    //после того , как свойства загружены - можно их использовать
+    if (browser.equals(BrowserType.CHROME)) {
+      driver = new ChromeDriver();
+    } else if (browser.equals(BrowserType.FIREFOX)) {
+      driver = new FirefoxDriver();
+    } else if (browser == BrowserType.IE) {
+      driver = new InternetExplorerDriver();
+    }
+  String target = System.getProperty("target", "local"); //часть имени конфигурационного файла
+   
+	
+добавляем оба исключения в декларацию метода 
+
+После того , как свойства загружены - можно их использовать
+
+Убираем конкретные значения, вместо этого будут использоваться свойства загруженные из конфигурационного файла 
+вместо 
+driver.get("http://localhost/addressbook");
+sessionHelper.login("admin", "secret");
+
+напишем 
+driver.get(properties.getProperty("web.baseUrl"));
+sessionHelper.login(properties.getProperty("web.adminLogin"), properties.getProperty("web.adminPassword"));
+  
+Создадим конфигурационный файл local.properties
+
+web.baseUrl=http://localhost/addressbook
+web.adminLogin=admin
+web.adminPassword=secret
+
+Тем самым мы получаем возможность создавать разные конфигурационные файлы и при запуске указывать какой именно из них хотим использовать. 
+
+Теперь при запуске тестов мы можем указывать где они должны работать, в каком бразуре, какой тестовый набор использовать. И все это является независимыми настройками, запуск тестов становится гибким.  
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
 
 }
 Урок 69. Протоколирование (лог-файлы) 00:13:38
