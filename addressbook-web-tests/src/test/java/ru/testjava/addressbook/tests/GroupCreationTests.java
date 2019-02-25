@@ -61,8 +61,6 @@ public class GroupCreationTests extends TestBase {
 
   @Test(dataProvider = "validGroupsFromJson")
   public void testGroupCreation(GroupData group) {
-    Logger logger = LoggerFactory.getLogger(GroupCreationTests.class);
-    logger.info("Start testGroupCreation");
     app.goTo().groupPage();
     Groups before = app.group().all();
     app.group().create(group);
@@ -70,7 +68,6 @@ public class GroupCreationTests extends TestBase {
     assertThat(after.size(), equalTo(before.size() + 1));
     assertThat(after, equalTo(before.withAdded(group.withId(after.stream().
             mapToInt((g) -> g.getId()).max().getAsInt()))));
-    logger.info("Stop testGroupCreation");
   }
 
 }
