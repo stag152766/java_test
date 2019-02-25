@@ -5757,32 +5757,136 @@ public void testGroupCreation(GroupData group) {
 21:04:09.326 [main] INFO ru.testjava.addressbook.tests.GroupCreationTests - Start testGroupCreation
 21:04:12.475 [main] INFO ru.testjava.addressbook.tests.GroupCreationTests - Stop testGroupCreation
 
+Точное время сообщения /поток, из которого сообщение отправлено / уровень сообщения / название класса, с которым ассоциирован логгер
+
+Уровни: ingo, debug, error, warn, trace
+
+Через конфигурационный файл можно управлять какие сообщения выводятся какие нет. Кроме того, в нем можно настроить куда эти сообщения должны идти. Удобно сохранять результаты теста в файле. 
+
+Настроим систему протоколлирования, чтобы она сохраняла в файл.
+
+Создаем файл logback.xml в каталоге resources. Он должен называться именно так, потому что файл с таким названием будет искать библиотека logback чтобы прочитать конфигурацию.
+
+//настройки по умолчанию 
+//если нет никакого конфиг файла, будет использоваться этот 
+
+
+  <configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    //добавляем блок о сохранении файла 
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>testFile.log</file>
+        <append>true</append> //настройка означает, что новые данные при следующем запуске тестов будут дописываться в конец файла 
+        //если настройку убрать то тогда, при каждом следующем запуске, файл будет создаваться заново и потерется информация о предыдущих запусках 
+
+        <!-- set immediateFlush to false for much higher logging throughput -->
+        <immediateFlush>true</immediateFlush>
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+
+  <root level="debug">
+    <appender-ref ref="FILE" /> //добавляем информацию о необходимости сохранять в файл
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>
+
+Хотелось бы чтобы при каждом запуске создавался отдельный файл с новым именем. 
+
+Сначала надо создать timestamp, то есть переменную которая будет содержать текущее время 
+
+ <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
+Теперь в имени файла можно использовать эту переменную
+
+
+было 
+
+ <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>testFile.log</file>
+
+стало
+
+
+ <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+ <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>test-${bySecond}.log</file>
+
+Запускаем тест, получаем новый файл, который содержит информацию о запуску тестов
+
+В файле время выполнения представлено от начала, так как абсолютное время запуска теста указано в названии.
+
+%-4relative //относительное время
+%d{HH:mm:ss.SSS} //абсолютное время 
 
 
 
+Но засорять тестами, строчками logger.info() идея так себе. 
+Лучше сделать в классе TestBase сделать отдельные методы и выводить сообщения там 
+
+@BeforeMethod //метод будет выполняться перед каждым тестовым методом
+public void logTestStart () {
+
+}
 
 
+@AfterMethod (alwaysRun = true) //указать опцию, чтобы метод всегда выполнялся, даже если тест завершился неуспешно
+public void logTestStop() {
+
+}
+
+Перенесем туда протоколирования, но для этого нужно узнать название метода который запускается.
+
+В метод, который помечен аннотацией Before / AfterMethod можно передать параметр тип Method (из пакета java.lang.reflect). Он будет содержать информацию, о методе который сейчас запускается
+
+Переносим logger в базовый класс, привязываем к классу TestBace чтобы было видно откуда сообщение выводится 
+
+public class TestBase {
+  Logger logger = LoggerFactory.getLogger(TestBase.class);
+
+Переносим строчки log.info в методы 
 
 
+  @BeforeMethod(alwaysRun = true)
+  public void logTestStart(Method m) {
+    logger.info("Start test" + m.getName());
 
 
+  }
+
+  @AfterMethod(alwaysRun = true)
+  public void logTestStop (Method m) {
+    logger.info("Stop test" + m.getName());
+
+  }
+
+Запускаем тест, получаем
+
+5429 [main] INFO  r.t.addressbook.tests.TestBase - Start testtestGroupCreation 
+10841 [main] INFO  r.t.addressbook.tests.TestBase - Stop testtestGroupCreation 
+
+Можно дополнить лог информацией о параметрах тестовых методов 
+
+Для этого нужно объявить еще один параметр типа Object[], который будет содержать параметры тестового метода. И добавить эту информацию в протокол.  
+
+  @BeforeMethod(alwaysRun = true, Object[] p)
+  public void logTestStart(Method m) {
+    logger.info("Start test" + m.getName() + "with parameters " + p); //но выводить в таком виде не удобно, потому что у массива объектов нет метода toString()
+    //нужно преобразовать в список Arrays.asList(p)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  }
 
 
 
