@@ -16,8 +16,15 @@ public class ContactModificationTests extends TestBase {
     app.goTo().homePage();
     if (app.contact().all().size() == 0) {
       app.contact().create(new ContactData()
-              .withFirstname("Alex").withLastname("Jackson").withAddress("My street")
-              .withMobile("+79135467841").withGroup("test2"), true);
+              .withFirstname(app.properties.getProperty("web.firstname"))
+              .withLastname(app.properties.getProperty("web.lastname"))
+              .withAddress(app.properties.getProperty("web.address"))
+              .withHome(app.properties.getProperty("web.home"))
+              .withMobile(app.properties.getProperty("web.mobile"))
+              .withWork(app.properties.getProperty("web.work"))
+              .withEmail(app.properties.getProperty("web.email"))
+              .withEmail3(app.properties.getProperty("web.email3")), true);
+
     }
   }
 

@@ -4,7 +4,6 @@
     <test name="Groups" >
         <classes>
             <class name="ru.testjava.addressbook.tests.GroupCreationTests" />
-            <class name="ru.testjava.addressbook.tests.GroupModificationTests" />
             <class name="ru.testjava.addressbook.tests.GroupDeletionTests" />
         </classes>
     </test>

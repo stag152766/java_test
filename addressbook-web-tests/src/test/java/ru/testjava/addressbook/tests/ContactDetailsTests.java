@@ -19,14 +19,14 @@ public class ContactDetailsTests extends TestBase {
     app.goTo().homePage();
     if (app.contact().all2().size() == 0) {
       app.contact().create(new ContactData()
-              .withFirstname("test1")
-              .withLastname("test2")
-              .withAddress("111,\n" + "test\n" + "123456")
-              .withHome("11-11-11")
-              .withMobile("+7 (398)")
-              .withWork("33 33 33")
-              .withEmail("test_.test@t.com")
-              .withEmail3("@33"), true);
+              .withFirstname(app.properties.getProperty("web.firstname"))
+              .withLastname(app.properties.getProperty("web.lastname"))
+              .withAddress(app.properties.getProperty("web.address"))
+              .withHome(app.properties.getProperty("web.home"))
+              .withMobile(app.properties.getProperty("web.mobile"))
+              .withWork(app.properties.getProperty("web.work"))
+              .withEmail(app.properties.getProperty("web.email"))
+              .withEmail3(app.properties.getProperty("web.email3")), true);
 
     }
 

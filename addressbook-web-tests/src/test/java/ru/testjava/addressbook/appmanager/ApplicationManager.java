@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.fail;
 
 public class ApplicationManager {
-  private final Properties properties;
+  public final Properties properties;
   private WebDriver driver;
 
   private ContactHelper contactHelper;
@@ -29,11 +29,11 @@ public class ApplicationManager {
 
   public ApplicationManager(String browser)  {
     this.browser = browser;
-    properties = new Properties();  //создаем объект типа properties и сохраняем его в поле этого класса, потому что он пригодится в будущем
+    properties = new Properties();
   }
 
   public void init() throws IOException {
-    String target = System.getProperty("target", "local"); //часть имени конфигурационного файла
+    String target = System.getProperty("target", "local");
     properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
     if (browser.equals(BrowserType.CHROME)) {
       driver = new ChromeDriver();

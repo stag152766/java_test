@@ -51,8 +51,8 @@ public class ContactCreationTests extends TestBase {
     File currentDir = new File(".");
     System.out.println(currentDir.getAbsolutePath());
     File photo = new File("src/test/resources/stru.png");
-    System.out.println(photo.getAbsolutePath()); //выведем его абсолютный путь
-    System.out.println(photo.exists()); //проверим что он существует
+    System.out.println(photo.getAbsolutePath());
+    System.out.println(photo.exists());
   }
 
 }

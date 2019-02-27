@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="ru.testjava.addressbook.tests.ContactCreationTests" tests="3" skipped="0" failures="0" errors="0" timestamp="2019-02-27T12:02:23" hostname="kobzev" time="7.028">
+  <properties/>
+  <testcase name="testContactCreation[0](ContactData{firstname='firstname0', lastname='lastname0'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="2.895"/>
+  <testcase name="testContactCreation[1](ContactData{firstname='firstname1', lastname='lastname1'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="2.089"/>
+  <testcase name="testContactCreation[2](ContactData{firstname='firstname2', lastname='lastname2'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="2.024"/>
+  <system-out><![CDATA[6794 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestContactCreationwith parameter [ContactData{firstname='firstname0', lastname='lastname0'}] 
+]]></system-out>
+  <system-err><![CDATA[Security framework of XStream not initialized, XStream is probably vulnerable.
+]]></system-err>
+</testsuite>
