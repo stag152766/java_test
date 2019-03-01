@@ -5928,36 +5928,183 @@ public class TestBase {
 Занятие 7. Работа с базами данных
 Урок 70. Драйвер базы данных. Получение данных из БД {
 
+Как работать с базами данных. Начнем с технологии Java Database Connectivity (JDBC)
+
+Получать информацию о группах и контактах можно не только через веб интерфейс , но и напрямую обращаясь к бд. 
+
+Для веб интерфейся мы использовали специальную библиотеку - драйвер, которая позволяет управлять браузером. 
+Для взаимодействия с бд нам тоже понадобится драйвер, но другого типа. Для каждого сервера управления бд существует свой драйвер. В нашем случае используется сервер MySQL, драйвер используется MySQL Connector/j
+
+Подлючаем библиотеку (драйвер) mysql:mysql-connector-java:8.0.15
+
+Чтобы убедится что мы может взаимодействовать с бд, создадим вспомогательный тест
+
+//тест, который проверяет что можно установить соединие и извлечь информацию из бд
+
+package ru.testjava.addressbook.tests;
+public class DbConnectionTest {
+  @Test
+  public void testDbConnection() {
+
+    
+  }
+}
 
 
+ 
+Как установить соединие с бд
+https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-usagenotes-connect-drivermanager.html
 
 
+com.mysql.cj.jdbc.Driver //информация о классе, который содержит драйвер 
+
+ 
+Для установки соединения используется DriverManager, который находится в пакете java.sql.DriverManager и входит в стандартную библиотеку java. DriverManager по адресу базы данных, который передается в метод getConnection, догадывается какой именно драйвер должен использоваться для установления соединения с бд автоматически. Главное чтобы был правильно указан адрес бд.
+
+Копирум весь врагмент, вставляем внутрь теста 
+ 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+Connection conn = null;
+...
+try {
+    conn = DriverManager.getConnection("jdbc:mysql://localhost/test?user=minty&password=greatsqldb"); 
+  
+
+    // Do something with the Connection
+
+   ...
+} catch (SQLException ex) {
+    // handle any errors
+    System.out.println("SQLException: " + ex.getMessage());
+    System.out.println("SQLState: " + ex.getSQLState());
+    System.out.println("VendorError: " + ex.getErrorCode());
+}
+
+Теперь нужно указать правильный адрес бд
 
 
+"jdbc:mysql://localhost:3306/addressbook?user=root&password="  
 
 
+"jdbc" протокол 
+
+"mysql" тип базы даных 
+
+"//localhost" адресс
+
+"3306" порт указывать необязательно, если используется стандартный порт, драйвер сам догадается  
+
+"/addressbook" название базы данных 
+
+"root" имя пользователя 
+
+" пароль пустой
+
+Пробуем запустить код, если не упадет значит соединение успешно установилось
+
+ 
+Следующий шаг, пытаемся извлечь из бд какую то информацию  
+
+public class DbConnectionTest {
 
 
+@Test
+public void testDbConnection() { 
+	//копируем и вставляем блок кода из документации 
+  Connection conn = null;
+  try {
+	conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/addressbook?user=root&password=");
+	//создадим объект
+	Statement st = conn.createStatement();
+
+	//c помощью этого объекта, вызовим метод, в который в качестве параметра передадим SQL запрос к бд
+	st.executeQuery("select group_id, group_name, group_header, group_footer  from group_list ");
 
 
+Чтобы узнать названия полей и таблиц, нужно заглянуть в структуру бд с помощью инструмента phpmyadmin
+
+http://localhost/phpmyadmin/db_structure.php?server=1&db=addressbook
+
+Поместим результат запроса в переменную с помощью среды разработки. Тип переменной будет ResultSet это некий аналог коллекции, по сути является наобором строк, которые извлекаются из таблицы. 
+
+ResultSet rs = st.executeQuery("select group_id, group_name, group_header, group_footer  from group_list ");
+        
+
+Но это не обычный список / коллекция, поэтому напрямую использовать цикл for, который пробегается по элементам коллекции, здесь не удается.    
+
+Вместо этого нужно сделать цикл while
+ 
+	//пока есть еще какие то элементы, в этом множестве результатов, можно с ними выполнять какие то действия
+	//когда функция next вернет false, т.е все множество результатов исчерпалось - цикл заканчивается
+	while (rs.next()) {
+	  //создадим объект и заполним его атрибуты теми данными, которые извлечены из бд
+	  //в качестве параметра getInt указываем название столбца
+	new GroupData().withId(rs.getInt("group_id"));
+
+Мы обращаемся напряму к объекту rs типа ResultSet и извлекаем int вместо того, чтобы извлечь отдельную строчку и работать с этой строкой.  
+Но так сложилось, что это древний интерфейс. 
+Считается что, в каждый момент времени переменная rs указывает на некую строку (как бы курсор, который движется по строчкам таблицы). 
+И вызов метода next() сдвигает курсор на следующую строку. То есть ResultSet это как бы с одной стороны вся таблица,а с другой в каждый момент времени этот объект указывает на одну единственную строчку в этой таблицы.
+И когда мы извлекаем данные, то мы их извлекаем из текущей строки который указывает этот курсор             
+Поэтому метод getInt() берет из текущей строки значение, которое хранится в столбце group_id и возвращает его как целое число.  
+
+package ru.testjava.addressbook.tests;
+
+import org.testng.annotations.Test;
+import ru.testjava.addressbook.model.GroupData;
+import ru.testjava.addressbook.model.Groups;
+import java.sql.*;
+
+public class DbConnectionTest {
 
 
+  @Test
+  public void testDbConnection() { 
+      Connection conn = null;
+      try {
+        conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/addressbook?user=root&password=");
+        //создадим объект
+        Statement st = conn.createStatement();
 
+        //вызовим метод, в который в качестве параметра передадим SQL запрос к бд
+        ResultSet rs = st.executeQuery("select group_id, group_name, group_header, group_footer  from group_list ");
 
+        Groups groups = new Groups(); //добавим в него созданные объекты, чтобы после завершения цикла получить полную коллекцию объетов
 
+        //пока есть еще какие то элементы, в этом множестве результатов, можно с ними выполнять какие то действия
+        //когда функция next вернет false, т.е все множество результатов исчерпалось - цикл заканчивается
+        while (rs.next()) {
+          //создадим объект и заполним его атрибуты теми данными, которые извлечены из бд
+          //в качестве параметра getInt указываем название !столбца!
+        groups.add(new GroupData().withId(rs.getInt("group_id"))
+                .withName(rs.getString("group_name"))
+                .withFooter(rs.getString("group_footer"))
+                .withHeader(rs.getString("group_footer")));
+        }
+        //чтобы не было потери ресурсов, нужно соединение с бд закрывать
+        //ресурсы после использования надо освобождать
+        rs.close(); //означает, что мы больше не собираемся из него читать никакие данные и можно освободить память
+        st.close(); //означает, что мы больше не собираеимся выполнять никакие запросы
+        conn.close(); //закрываем соединение с бд
+        //теперь можно вывести на консоль ту инфо, которую мы извлекли
+        System.out.println(groups);
 
+      } catch (SQLException ex) {
+        // handle any errors
+        System.out.println("SQLException: " + ex.getMessage());
+        System.out.println("SQLState: " + ex.getSQLState());
+        System.out.println("VendorError: " + ex.getErrorCode());
+      }
 
+    }
+}
 
-
-
-
-
-
-
-
-
-
-
+  
+Запускаем тест, получаем результат 
+[GroupData{id='1', name='test 0'}, GroupData{id='2', name='test 1'}, GroupData{id='3', name='test 2'}]
 
 
 
