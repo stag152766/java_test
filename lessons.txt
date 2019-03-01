@@ -6070,6 +6070,7 @@ public class DbConnectionTest {
         Statement st = conn.createStatement();
 
         //вызовим метод, в который в качестве параметра передадим SQL запрос к бд
+		//получаем данные в виде своеобразной таблицы 
         ResultSet rs = st.executeQuery("select group_id, group_name, group_header, group_footer  from group_list ");
 
         Groups groups = new Groups(); //добавим в него созданные объекты, чтобы после завершения цикла получить полную коллекцию объетов
@@ -6077,6 +6078,7 @@ public class DbConnectionTest {
         //пока есть еще какие то элементы, в этом множестве результатов, можно с ними выполнять какие то действия
         //когда функция next вернет false, т.е все множество результатов исчерпалось - цикл заканчивается
         while (rs.next()) {
+		  //преобразуем полученные данные из таблицы в объект GroupData 			
           //создадим объект и заполним его атрибуты теми данными, которые извлечены из бд
           //в качестве параметра getInt указываем название !столбца!
         groups.add(new GroupData().withId(rs.getInt("group_id"))
@@ -6110,9 +6112,92 @@ public class DbConnectionTest {
 
 	
 }
+Урок 71. Object Relational Mapping (ORM) {
+	
+Объекто-реляционные преобразователи - инструменты, которые позволяют с помощью специальный библиотек автоматически (при помощи небольших подсказок) преобразовывать объекты в какой то формат и обратно.
 
-Урок 71. Object Relational Mapping (ORM) 00:17:30
+Подключим библиотеку hibernate     	
+	
+http://hibernate.org/ 	
+http://hibernate.org/orm/releases/5.1/	
+https://search.maven.org/artifact/org.hibernate/hibernate-core/5.1.17.Final/jar	
+	
+Для работы с mysql нужно подключить оба 
 
+implementation 'mysql:mysql-connector-java:8.0.15' //для работы hebernate нужен драйвер 
+implementation 'org.hibernate:hibernate-core:5.1.17.Final'
+ 
+	
+Делаем вспомогательный тест, в котором будет учится устанавливат соединение с бд при помощи hebernate	
+
+package ru.testjava.addressbook.tests;
+import org.testng.annotations.Test;
+public class HdConnectionTest {
+  @Test
+  public void testHdConnection() {
+    
+  }
+}
+	
+Обращаемся к документации
+http://docs.jboss.org/hibernate/orm/5.1/quickstart/html_single/#tutorial-native
+
+Сначала нужно сделать конфигурационный файл hibernate.cfg.xml 	
+
+Содержимое можно взять из http://docs.jboss.org/hibernate/orm/5.1/quickstart/html_single/hibernate-tutorials.zip	
+	
+Копируем полностью из ~\hibernate-tutorials\annotations\src\test\resources\	и вставляем в наш проект 
+	
+Теперь нужно его доработать:
+-поменяем драйвер базы данных		
+ <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+
+- поменяем адрес бд 
+<property name="connection.url">jdbc:mysql://localhost:3306/addressbook</property> //указываем отдельно юзера и пароль
+<property name="connection.username">root</property>
+<property name="connection.password"></property>
+ 
+ - диалект 
+<property name="dialect">org.hibernate.dialect.MySQLDialect</property> 
+
+Будем смотреть какие запросы генерирует hebernate, для контроля 
+<property name="show_sql">true</property>
+
+
+!Важно
+<!-- Drop and re-create the database schema on startup --> //Удалить или пересоздать схему бд во время запуска 
+<property name="hbm2ddl.auto">create</property>
+
+Значение create опасноt, если сделать неправильную привязку объектов к базе данных , внезапно могут создаться новые таблицы или новые столбцы в уже существующих таблицах.
+
+Укажем значение на validate. Это означает, что hebernate должен только проверить правильность привязки. Он проверит, что нужные таблицы, столбцы в бд существуют. Если не существуют, то он об этом сообщит но создавать ничего не будет. Базу данных менять нельзя.  
+
+Привязки или mapping 
+<!-- Names the annotated entity class -->
+<mapping class="org.hibernate.tutorial.annotations.Event"/>
+
+Для каждого класса, который привязывается к базе данных, то есть ему соответствует какая та таблица в бд, нужно описать привязку.     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+}
 Урок 72. Условия отбора данных 00:09:05
 
 Урок 73. Сравнение данных, загруженных из БД 00:13:09
