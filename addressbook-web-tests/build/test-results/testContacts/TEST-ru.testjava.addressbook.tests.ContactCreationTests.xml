@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ru.testjava.addressbook.tests.ContactCreationTests" tests="3" skipped="0" failures="0" errors="0" timestamp="2019-02-28T10:57:27" hostname="kobzev" time="8.005">
+<testsuite name="ru.testjava.addressbook.tests.ContactCreationTests" tests="3" skipped="0" failures="0" errors="0" timestamp="2019-03-02T00:03:40" hostname="DESKTOP-BRBDFUN" time="13.993">
   <properties/>
-  <testcase name="testContactCreation[0](ContactData{firstname='firstname0', lastname='lastname0'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="3.327"/>
-  <testcase name="testContactCreation[1](ContactData{firstname='firstname1', lastname='lastname1'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="2.421"/>
-  <testcase name="testContactCreation[2](ContactData{firstname='firstname2', lastname='lastname2'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="2.244"/>
-  <system-out><![CDATA[7243 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestContactCreationwith parameter [ContactData{firstname='firstname0', lastname='lastname0'}] 
+  <testcase name="testContactCreation[0](ContactData{firstname='firstname0', lastname='lastname0'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="5.676"/>
+  <testcase name="testContactCreation[1](ContactData{firstname='firstname1', lastname='lastname1'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="3.947"/>
+  <testcase name="testContactCreation[2](ContactData{firstname='firstname2', lastname='lastname2'})" classname="ru.testjava.addressbook.tests.ContactCreationTests" time="4.364"/>
+  <system-out><![CDATA[4913 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestContactCreationwith parameter [ContactData{firstname='firstname0', lastname='lastname0'}] 
 ]]></system-out>
   <system-err><![CDATA[Security framework of XStream not initialized, XStream is probably vulnerable.
 ]]></system-err>

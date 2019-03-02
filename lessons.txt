@@ -5953,10 +5953,9 @@ public class DbConnectionTest {
 
  
 Как установить соединие с бд
-https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-usagenotes-connect-drivermanager.html
+https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-usagenotes-connect-drivermanager.html
 
-
-com.mysql.cj.jdbc.Driver //информация о классе, который содержит драйвер 
+com.mysql.jdbc.Driver //информация о классе, который содержит драйвер
 
  
 Для установки соединения используется DriverManager, который находится в пакете java.sql.DriverManager и входит в стандартную библиотеку java. DriverManager по адресу базы данных, который передается в метод getConnection, догадывается какой именно драйвер должен использоваться для установления соединения с бд автоматически. Главное чтобы был правильно указан адрес бд.
@@ -6122,13 +6121,13 @@ http://hibernate.org/
 http://hibernate.org/orm/releases/5.1/	
 https://search.maven.org/artifact/org.hibernate/hibernate-core/5.1.17.Final/jar	
 	
-Для работы с mysql нужно подключить оба 
+Для работы с mysql нужно подключить обе звыисимости
 
 implementation 'mysql:mysql-connector-java:8.0.15' //для работы hebernate нужен драйвер 
 implementation 'org.hibernate:hibernate-core:5.1.17.Final'
  
 	
-Делаем вспомогательный тест, в котором будет учится устанавливат соединение с бд при помощи hebernate	
+Делаем вспомогательный тест, в котором будем учиться устанавливать соединение с бд при помощи hebernate	
 
 package ru.testjava.addressbook.tests;
 import org.testng.annotations.Test;
@@ -6160,7 +6159,7 @@ http://docs.jboss.org/hibernate/orm/5.1/quickstart/html_single/#tutorial-native
  - диалект 
 <property name="dialect">org.hibernate.dialect.MySQLDialect</property> 
 
-Будем смотреть какие запросы генерирует hebernate, для контроля 
+- Будем смотреть какие запросы генерирует hebernate, для контроля 
 <property name="show_sql">true</property>
 
 
@@ -6168,18 +6167,160 @@ http://docs.jboss.org/hibernate/orm/5.1/quickstart/html_single/#tutorial-native
 <!-- Drop and re-create the database schema on startup --> //Удалить или пересоздать схему бд во время запуска 
 <property name="hbm2ddl.auto">create</property>
 
-Значение create опасноt, если сделать неправильную привязку объектов к базе данных , внезапно могут создаться новые таблицы или новые столбцы в уже существующих таблицах.
+Значение create опасно, если сделать неправильную привязку объектов к базе данных, внезапно могут создаться новые таблицы или новые столбцы в уже существующих таблицах.
 
-Укажем значение на validate. Это означает, что hebernate должен только проверить правильность привязки. Он проверит, что нужные таблицы, столбцы в бд существуют. Если не существуют, то он об этом сообщит но создавать ничего не будет. Базу данных менять нельзя.  
+Укажем значение validate. Это означает, что hebernate должен только проверить правильность привязки. Он проверит, что нужные таблицы, столбцы в бд существуют. Если не существуют, то он об этом сообщит, но создавать ничего не будет. Базу данных менять нельзя.  
 
 Привязки или mapping 
 <!-- Names the annotated entity class -->
-<mapping class="org.hibernate.tutorial.annotations.Event"/>
+<mapping class="ru.testjava.addressbook.model.GroupData"/>
 
-Для каждого класса, который привязывается к базе данных, то есть ему соответствует какая та таблица в бд, нужно описать привязку.     
+Нужно описать привязку для каждого класса, который привязывается к базе данных, то есть ему соответствует какая та таблица в бд, .     
+В конфигурационном файле нужно только объявить, что привязка существует.
+
+Возвращаемся в тест
+Как установить соединение с бд
+Обращаемся к док http://docs.jboss.org/hibernate/orm/5.1/quickstart/html_single/#hibernate-gsg-tutorial-basic-test
+
+Добавляем блок кода и помечаем аннотацией 
+
+//функция которая устанавливает соединение с бд
+
+@BeforeClass
+protected void setUp() throws Exception {
+	// A SessionFactory is set up once for an application!
+	final StandardServiceRegistry registry = new StandardServiceRegistryBuilder() //добавляем импорты
+			.configure() // configures settings from hibernate.cfg.xml
+			.build();
+	try {
+		sessionFactory = new MetadataSources( registry ).buildMetadata().buildSessionFactory(); //добавляем поле 
+	}
+	catch (Exception e) {
+		// The registry would be destroyed by the SessionFactory, but we had trouble building the SessionFactory
+		// so destroy it manually.
+		StandardServiceRegistryBuilder.destroy( registry );
+	}
+}
+
+Эта стандартная процедура инициализации, во время которой будет прочитан конфиг файл, из него извлечена вся информация о бд, проверено что есть доступ к бд, извлечена информация о меппингах (привязках) объектов к таблицам и будет проверено что эта привязка корректная, то есть есть все необходимые таблицы и поля в них.
+
+Кроме инициализации нужно написать код теста, который извлекает информацию о группах 
+
+Обратимся к документации
+
+//Example 6. Obtaining a list of entities
+session = sessionFactory.openSession();//проще session удалить, и заново создать локальную переменную с помощью среды разработки
+session.beginTransaction();
+List result = session.createQuery( "from Event" ).list();//List импортируем, можно явно указат тип, меняем запрос
+for ( Event event : (List<Event>) result ) { //event меняем на GroupData, так как уже указали тип, то здесь приводить к типу не надо
+    System.out.println( "Event (" + event.getDate() + ") : " + event.getTitle() );
+}
+session.getTransaction().commit();
+session.close();
+
+
+стало
+
+  @Test
+  public void testHdConnection() {
+    Session session = sessionFactory.openSession();
+    session.beginTransaction();
+    List<GroupData> result = session.createQuery("from GroupData").list();
+    for (GroupData group : result) {
+      System.out.println(group);
+    }
+    session.getTransaction().commit();
+    session.close();
+  }
+
+Запрос к базе данных createQuery("from GroupData") 
+При использовании инструментов такого типа (ORB) вместо языка запросов SQL используется OQL (Object Quary Language) язык запросов к объектам.
+Вместо того, чтобы писать название таблицы, пишем название объектов а все остальное сделает инструмент: он размеберется какая таблица соответствует этим объектом, извлечет данные и сразу вернет список объектов нужного типа. 
+
+На данном этапе можно запустить тест, чтобы убедится в правильности конфиг файла , что информация от туда загружается и hebernate может установить соединение с бд. Но если попытка окажется не удачной, мы не узнаем, потому что перехватывается исключение и инфо о нем пропадает.
+Добавляем вывод сообщения об ошибке
+
+catch (Exception e) {
+	e.printStackTrace(); //вывести сообщение об ошибке на консоль
+	StandardServiceRegistryBuilder.destroy( registry );
+
+Добавим зависимость в build.gradle
+
+https://stackoverflow.com/questions/51916221/javax-xml-bind-jaxbexception-implementation-of-jaxb-api-has-not-been-found-on-mo
+compile('javax.xml.bind:jaxb-api:2.3.0')
+compile('javax.activation:activation:1.1')
+compile('org.glassfish.jaxb:jaxb-runtime:2.3.0')
+
+Запускаем тест. Наша задача убедится, что соединие с бд устанавливается, то есть во время выполнения метода инициализаци не возникает ошибок.
+Тест прошел дальше и упал при попытке выполнить запрос creatyQuery()
+Caused by: org.hibernate.hql.internal.ast.QuerySyntaxException: GroupData is not mapped
+
+Привязка к бд осуществляется при помощи аннотаций //оставляем инструменту подсказки 
+
+
+package ru.testjava.addressbook.model;
+
+@XStreamAlias("group")
+@Entity//объявляет класс GroupData привязанным к бд
+//Если бы таблица называлас также как класс GroupData, то никакие дополнительные параметры были бы не нужны. Инструмен сопоставил бы их автоматически.
+//У нас таблица называется по другому, поэтому необходимы дополнительные указания
+@Table(name="group_list")
+public class GroupData {
+  @XStreamOmitField
+  @Id //атрибут id используется как идентификатор, поэтому ему присваивается особая аннотация
+  @Column(name = "group_id")//если бы название столбца совпадало с названием атрибута, то ничего доп указывать не нужно
+  private int id = Integer.MAX_VALUE;
+  @Expose
+  @Column(name = "group_name")
+  private String name;
+  @Expose
+  @Column(name = "group_header")
+  private String header;
+  @Expose
+  @Column(name = "group_footer")
+  private String footer;
+
+Запускаем тест, он падает
+Schema-validation: wrong column type encountered in column [group_footer] in table [group_list]; found [mediumtext (Types#LONGVARCHAR)], but expecting [varchar(255) (Types#VARCHAR)]
 
 
 
+Иногда преобразование типов hebernate может сделать самостоятельно, но иногда ему нужна подсказка
+добавляем в описание типа 
+
+@Type(type="text") //эти поля многострочные, поэтому в бд они храняться по другому 	
+
+
+Запускаем тест, получаем результат 
+
+ru.testjava.addressbook.model.GroupData{footer=footer 0, name=test 0, header=header 0, id=37} 
+ru.testjava.addressbook.model.GroupData{footer=footer 1, name=test 1, header=header 1, id=38} 
+ru.testjava.addressbook.model.GroupData{footer=footer 2, name=test 2, header=header 2, id=39} 
+
+В лог файл и на консоль выводится много инфо уровня debug. Есть возможность это настроить в конфигурационном файле logback.xml
+
+Для аппендера, который пишет на консоль нужно настроить фильтр 
+<appender name="STDOUT" 
+
+Идем читать документацию, https://logback.qos.ch/manual/filters.html
+
+
+ThresholdFilter
+
+ <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+
+
+
+ <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level> //выводит на экран уровень инфо и или выше
+        </filter>
+        <encoder>
+            <pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</pattern>
+        </encoder>
+    </appender>
 
 
 

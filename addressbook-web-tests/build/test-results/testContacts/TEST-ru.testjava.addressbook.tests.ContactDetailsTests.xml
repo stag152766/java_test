@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ru.testjava.addressbook.tests.ContactDetailsTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-28T10:57:37" hostname="kobzev" time="1.721">
+<testsuite name="ru.testjava.addressbook.tests.ContactDetailsTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-03-02T00:03:57" hostname="DESKTOP-BRBDFUN" time="3.087">
   <properties/>
-  <testcase name="testContactDetails" classname="ru.testjava.addressbook.tests.ContactDetailsTests" time="1.721"/>
-  <system-out><![CDATA[17336 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestContactDetailswith parameter [] 
+  <testcase name="testContactDetails" classname="ru.testjava.addressbook.tests.ContactDetailsTests" time="3.087"/>
+  <system-out><![CDATA[22366 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestContactDetailswith parameter [] 
 ]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
