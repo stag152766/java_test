@@ -1,35 +1,80 @@
 package ru.testjava.addressbook.model;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import org.hibernate.annotations.Type;
+import org.testng.annotations.Test;
 
+import javax.persistence.*;
 import java.io.File;
 import java.util.Objects;
 
+@Entity
+@Table(name="addressbook")
 public class ContactData {
+
   @XStreamOmitField
+  @Id
+  @Column(name="id")
   private int id = Integer.MAX_VALUE;
+
+  @Column(name="firstname")
   private String firstname;
+
+  @Column(name="middlename")
   private String middlename;
+
+  @Column(name="lastname")
   private String lastname;
+
+  @Transient
   private String address;
+
+  @Column(name="home")
+  @Type(type="text")
   private String home;
+
+  @Column(name="mobile")
+  @Type(type="text")
   private String mobile;
+
+  @Column(name="work")
+  @Type(type="text")
   private String work;
+
+  @Transient
   private String group = "[none]";
+
+  @Transient
   private String allPhones;
+
+  @Transient
   private String allEmails;
+
+  @Column(name="email")
+  @Type(type="text")
   private String email;
+
+  @Column(name="email2")
+  @Type(type="text")
   private String email2;
+
+  @Column(name="email3")
+  @Type(type="text")
   private String email3;
+
+  @Transient
   private String all;
-  private File photo;
+
+  @Column(name="photo")
+  @Type(type="text")
+  private String photo;
 
   public File getPhoto() {
-    return photo;
+    return new File(photo);
   }
 
   public ContactData withPhoto(File photo) {
-    this.photo = photo;
+    this.photo = photo.getPath();
     return this;
   }
 

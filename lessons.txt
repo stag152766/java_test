@@ -6324,22 +6324,159 @@ ThresholdFilter
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	
 }
-Урок 72. Условия отбора данных 00:09:05
+Урок 72. Условия отбора данных {
+	
+Извлечем информацию о контактах
+
+Сначала изменим тест 
+
+было
+@Test
+  public void testHdConnection() {
+    Session session = sessionFactory.openSession();
+    session.beginTransaction();
+    List<GroupData> result = session.createQuery("from GroupData").list();
+    for (GroupData group : result) {
+      System.out.println(group);
+    }
+    session.getTransaction().commit();
+    session.close();
+  }
+	
+стало	
+  @Test
+  public void testHdConnection() {
+    Session session = sessionFactory.openSession();
+    session.beginTransaction();
+    List<ContactData> result = session.createQuery("from ContactData").list();
+    for (ContactData contact : result) {
+      System.out.println(contact);
+    }
+    session.getTransaction().commit();
+    session.close();
+  }	
+	
+Запускаем тест, тест падает с ожидаемым исключением. Для объектов ContactData не описаны привязка к бд.
+
+Сначала отправляемся в класс ContactData и объявляем его 
+@Entity
+	
+Дальше указываем в какой таблице хранится информация об объектак такого типа
+
+@Table(name="addressbook") // из пакета javax.persistence.	
+	
+@Entity
+@Table(name="addressbook")
+public class ContactData {
+
+@XStreamOmitField	
+@Id
+@Column(name="id")
+private int id = Integer.MAX_VALUE;
+
+@Column(name="firstname")
+private String firstname;
+
+
+Аналогично, указать аннотации для других простых атрибутов
+
+
+Для сложных атрибутов	
+	
+Привязка к группам нигде не хранится. Такого столбца в таблице нет. Информацию о том, в каких группах хранится контакт мы научимся получать позже. 
+
+А сейчас нужно пометить поле, чтобы оно было пропущено, не извлекалось из бд.
+Есть два способа: 
+
+способ 1
+@Transient
+private String group;	
+
+способ 2
+transient private String group;	
+
+Тоже надо сделать с остальными сложными атрибутами
+
+Кроме	
+	
+@Column(name="photo")
+private File photo; //атрибут типа файл, но в базе хранится строка а не сам файл 	
+//если оставим тип File, то hebernate не сможет это прочитать из бд
+
+Нужно поменять тип на String
+
+@Column(name="photo")
+private String photo;	
+
+Чтобы не исправлять getter() и setter() и другие места в коде, преобразовывать эту строчку в файл можно внутри getter() и setter()  
+
+было	
+public File getPhoto() {
+	return photo;
+}	
+  
+public ContactData withPhoto(File photo) {
+	this.photo = photo;
+return this;
+}  
+	
+	
+стало
+
+public File getPhoto() {
+	return new File(photo);
+}
+
+
+public ContactData withPhoto(File photo) {
+	this.photo = photo.getPath();
+	return this;
+}	
+
+То есть для внешнего наблюдателя, будет казаться что мы работаем с файлом, а внутри объекта хранится строка - путь к этому файлу. 
+И в таком виде, с бд связывать этот объект получается уже проще. 
+
+Указав аннотации для всех атрибутов, переходим к конфигурационному файлу hibernate.cfg.xml
+
+В нем нужно написать, что такая привязка существует
+
+<mapping class="ru.testjava.addressbook.model.ContactData"/> //привяза должна быть указана явно
+
+Запускаем тест, тест падает 
+
+Schema-validation: wrong column type encountered in column [address] in table [addressbook]; found [text (Types#LONGVARCHAR)], but expecting [varchar(255) (Types#VARCHAR)]
+
+	
+Для номеров телефонов нужно дополнительно указать аннотацию
+@Column(name="home")
+@Type(type="text")
+private String home;		
+
+Это видно из лога, в сообщении об ошибке	
+Schema-validation: wrong column type encountered in column [address] in table [addressbook]; found [text (Types#LONGVARCHAR)], but expecting [varchar(255) (Types#VARCHAR)]	
+
+Поле в бд имеет тип LONGVARCHAR, и это соответствует типу text с точки зрения hebernate. Этот тип нужно указать рядом с соответствующим полем.  
+	
+//для mediumtext можно указать text	
+	
+Запускаем тест, получаем результат
+4 объекта типа ContactData
+
+Смотрим на приложение через веб интерфейс, там указан 1 контакт. В базе данных 4 контакта. 
+Оказывается, что все предыдущие ранее были созданы, а потом удалены. И в бд они физически не удалились, вместо этого они помечены как удаленные. В поле deprecated (устаревший) стоит дата удаления. Если стоит 00-00-00, это означает что он пока не удален.
+
+Соответственно, нам нужно из бд извлекать только те контакты, у которых в поле deprecated написано 00-00-00
+
+Доработаем запрос
+
+List<ContactData> result = session.createQuery("from ContactData where deprecated = '0000-00-00'").list();
+    
+Теперь на консоль выводится 1 контакт, неудаленный.	
+	
+	
+}	
 
 Урок 73. Сравнение данных, загруженных из БД 00:13:09
 
