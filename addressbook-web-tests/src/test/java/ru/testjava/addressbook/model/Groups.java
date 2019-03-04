@@ -17,11 +17,11 @@ public class Groups extends ForwardingSet<GroupData> {
   }
 
   public Groups() {
-    this.delegate = new HashSet<>();
+    this.delegate = new HashSet<GroupData>();
   }
 
   public Groups(Collection<GroupData> groups) {
-    this.delegate = new HashSet<GroupData>(groups); //копируем / строим новое множество объектов типа GroupData из коллекции
+    this.delegate = new HashSet<GroupData>(groups);
   }
 
   @Override

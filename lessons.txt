@@ -6486,9 +6486,11 @@ List<ContactData> result = session.createQuery("from ContactData where deprecate
 
 При разработке автотестов нужно придерживаться общего правила - если вы можете какие то не основные вспомогательные действия сделать через более быстрый интерфейс, нужно это сделать. 
  
-В тесте для модификации группы мы проверяем корректность работы функции которая модифицирует группу. Значит основным действие является
-app.group().modify(group); 
-Все остальное можно считать вспомогательными действиями. В частности,получаение списка групп - самое длительная и дорогостоящая операция которая выполняется многократно, при проверки предусловия, перед и после модификации группы, может быть выполнена через более быстрый интерфейс.
+В тесте для модификации группы мы проверяем корректность работы функции, которая модифицирует группу. Значит основным действием является
+app.group().modify(group);
+ 
+Все остальное можно считать вспомогательными действиями. В частности, получаение списка групп - самое длительная и дорогостоящая операция, которая выполняется многократно: при проверки предусловия, перед и после модификации группы; может быть выполнена через более быстрый интерфейс.
+
 Например, путем прямого обращения к бд. Да, мы не контролируем список групп, который выводится на страницу приложения. Но это можно сделать отдельным тестом, он не связан на прямую с операцией модификации группы. Здесь тестируется именно операция модификации, поэтому все остальное нужно постараться сделать максимально быстрым способом. 
 
 Создадим новый класс DbHelper в ApplicationManager
@@ -6530,7 +6532,7 @@ public void init() throws IOException {
     String target = System.getProperty("target", "local");
     properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
     
-    dbHelper = new DbHelper();
+    dbHelper = new DbHelper(); //перенесли инициализацию метода для установки соединения с бд наверх
     
     if (browser.equals(BrowserType.CHROME)) {
       driver = new ChromeDriver();
@@ -6538,19 +6540,105 @@ public void init() throws IOException {
 	}
 }
 
+Сначала нужно инициализировать те помощники , которые инициализируются быстро, если их удалось инициализировать правильно, то можно переходить к инициализации более медленных помощников.   
 
 
+Создаем поле для хранения SessionFactory 
+
+Делаем 2 метода, один делаем чтобы получить список групп, другой - список контактов.
+
+public Groups groups(){
+    //копируем сюда, код из учебного теста testHdConnection()
+    }
 
 
+  public Groups groups() {
+    Session session = sessionFactory.openSession();
+    session.beginTransaction();
+    List<GroupData> result = session.createQuery("from GroupData").list(); //исправляем тип коллекции, запрос 
+    session.getTransaction().commit();
+    session.close(); //убрали цикл
+    return new Groups(result); //вернуть нужно список результатов + добавляем конструктор 
+  }
 
 
+Добавить конструктор, который по произвольной коллекции строит объект типа Groups
+
+public Groups(Collection<GroupData> groups) {
+    this.delegate = new HashSet<GroupData>(groups); //копируем / строим новое множество объектов типа GroupData из коллекции
+  }
 
 
+Возвращаемся в метод проверки предусловия
+public class GroupModificationTests extends TestBase {
 
 
+//было
+
+  @BeforeMethod
+  public void ensurePreconditions() {
+    app.goTo().groupPage();
+    if (app.group().all().size() == 0) {
+      app.group().create(new GroupData().withName("test1"));
+    }
+  }
+
+//стало
+  @BeforeMethod
+  public void ensurePreconditions() {
+    if (app.db().groups().size() == 0) {
+    app.goTo().groupPage();
+    app.group().create(new GroupData().withName("test1"));
+  }
 
 
+Теперь сам тест 
 
+assertEquals(app.group().сount(), before.size()); 
+Проверка, которая реализовывала хеширование, то есть оптимизацию - быструю проверку перед более медленной, теперь становится не очень нужной. Функцию хеширования она больше не выполняет, более того это проверка скорее всего будет выполняться медленнее, чем загрузка информации из бд. То есть наоборот она теперь не ускоряет, а замедляет выполнение тестов.      
+Но оставим ее здесь, чтобы минимально контролировать пользовательский интерфейс, убедится что там количество групп неизменилось. 
+А точное и подробное сравнение информации о группах будет происходить другим способом - эту информацию мы загружаем не из пользовательского интерфейса, а из бд.   
+
+
+  @Test
+  public void testGroupModification() {
+    Groups before = app.db().groups(); //берем список напрямую из бд
+    GroupData modifiedGroup = before.iterator().next();
+    GroupData group = new GroupData()
+            .withId(modifiedGroup.getId()).withName("new1").withHeader("new2").withFooter("new3");
+	app.goTo().groupPage();		
+    app.group().modify(group);
+    assertEquals(app.group().сount(), before.size());
+    Groups after = app.db().groups();//берем список напрямую из бд
+    assertThat(after, equalTo(before.without(modifiedGroup).withAdded(group)));
+  }
+
+Запустим тест, время выполнение 0,9 сек
+
+
+Как мы сравниваем объекты типа GroupData
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    GroupData groupData = (GroupData) o;
+
+    if (id != groupData.id) return false;
+    return name != null ? name.equals(groupData.name) : groupData.name == null;
+  }
+
+Мы сравниваем только name, потому что другая информация из веб интерфейса нам не доступна.
+И в тесте при модификации, группы мы указываем header и footer но не можем это проверить, потому что в списках это никак не учитывается.
+
+Но все меняется, когда мы загружаем данные из бд. Там содержаться полная инфо об атрибутах объектов, поэтому мы можем поменять функцию сравнения equals и сравнивать не один атрибут а все.   
+
+Перегенерируем функцию equals(), выберем все атрибуты.
+
+Запускаем тест, теперь сравниваются name, header, footer. 
+
+//но теперь необходимо передать тесты для создания группы 
 
 	
 }	
