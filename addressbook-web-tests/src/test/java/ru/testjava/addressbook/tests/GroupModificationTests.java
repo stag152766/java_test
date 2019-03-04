@@ -13,21 +13,22 @@ public class GroupModificationTests extends TestBase {
 
   @BeforeMethod
   public void ensurePreconditions() {
-    app.goTo().groupPage();
-    if (app.group().all().size() == 0) {
+    if (app.db().groups().size() == 0) {
+      app.goTo().groupPage();
       app.group().create(new GroupData().withName("test1"));
     }
   }
 
   @Test
   public void testGroupModification() {
-    Groups before = app.group().all();
+    Groups before = app.db().groups();
     GroupData modifiedGroup = before.iterator().next();
     GroupData group = new GroupData()
-            .withId(modifiedGroup.getId()).withName("new1").withHeader("new2").withFooter("new3");
-    app.group().modify(group);
-    assertEquals(app.group().сount(), before.size());
-    Groups after = app.group().all();
+            .withId(modifiedGroup.getId()).withName("modify1").withHeader("modify2").withFooter("modify3");
+    app.goTo().groupPage();
+    app.group().modify(group); //основное действие
+    assertEquals(app.group().сount(), before.size()); //доп проверка количества групп в веб интерфейса
+    Groups after = app.db().groups();
     assertThat(after, equalTo(before.without(modifiedGroup).withAdded(group)));
   }
 
