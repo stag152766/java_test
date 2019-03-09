@@ -37,7 +37,7 @@ public class ContactModificationTests extends TestBase {
             .withFirstname("mod_1")
             .withLastname("mod2")
             .withAddress("mod3")
-            .withGroup(null)
+            //.withGroup(null)
             .withEmail("mod4")
             .withEmail2("mod5")
             .withEmail3("mod6")

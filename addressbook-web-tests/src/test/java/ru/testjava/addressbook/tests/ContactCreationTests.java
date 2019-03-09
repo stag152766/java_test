@@ -5,6 +5,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.testjava.addressbook.model.ContactData;
 import ru.testjava.addressbook.model.Contacts;
+import ru.testjava.addressbook.model.Groups;
 
 import java.io.*;
 import java.util.Iterator;
@@ -35,8 +36,9 @@ public class ContactCreationTests extends TestBase {
   }
 
 
-  @Test(dataProvider = "validContacts")
+  @Test(enabled = false, dataProvider = "validContacts")
   public void testContactCreation(ContactData contact) {
+    Groups groups = app.db().groups();//все группы
     Contacts before = app.db().contacts();
     app.goTo().homePage();
     app.contact().create(contact, true);
@@ -45,6 +47,18 @@ public class ContactCreationTests extends TestBase {
     assertThat(after, equalTo(before.withAdded(contact.withId(after.stream().
             mapToInt((c) -> c.getId()).max().getAsInt()))));
   }
+
+
+  @Test
+  public void testContactCreationDb() {
+    Groups groups = app.db().groups();//все группы
+    File photo = new File ("src/test/resources/stru.png");
+    ContactData newContact = new ContactData().withFirstname("firstname0").withLastname("lastname0").withPhoto(photo)
+            .inGroup(groups.iterator().next());
+    app.goTo().homePage();
+    app.contact().create(newContact, true);
+  }
+
 
   @Test(enabled = false)
   public void testCurrentDir() {

@@ -1,10 +1,13 @@
 package ru.testjava.addressbook.model;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="addressbook")
@@ -39,8 +42,10 @@ public class ContactData {
   @Type(type="text")
   private String work;
 
-  @Transient
-  private String group = "[none]";
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "address_in_groups", joinColumns = @JoinColumn(name = "id"),
+          inverseJoinColumns = @JoinColumn(name = "group_id"))
+  private Set<GroupData> groups = new HashSet<GroupData>();
 
   @Transient
   private String allPhones;
@@ -176,9 +181,7 @@ public class ContactData {
     return mobile;
   }
 
-  public String getGroup() {
-    return group;
-  }
+
 
   public String getWork() {
     return work;
@@ -228,11 +231,9 @@ public class ContactData {
     return this;
   }
 
-  public ContactData withGroup(String group) {
-    this.group = group;
-    return this;
+  public Groups getGroups() {
+    return new Groups(groups);
   }
-
 
   @Override
   public String toString() {
@@ -242,4 +243,9 @@ public class ContactData {
             '}';
   }
 
+
+  public ContactData inGroup(GroupData group) {
+    groups.add(group);
+    return this;
+  }
 }
