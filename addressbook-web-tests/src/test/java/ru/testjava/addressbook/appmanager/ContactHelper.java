@@ -7,12 +7,11 @@ import org.openqa.selenium.support.ui.Select;
 import org.testng.Assert;
 import ru.testjava.addressbook.model.ContactData;
 import ru.testjava.addressbook.model.Contacts;
+import ru.testjava.addressbook.model.GroupData;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ContactHelper extends HelperBase {
 
@@ -197,4 +196,29 @@ public class ContactHelper extends HelperBase {
     driver.findElement(By.cssSelector(String.format("a[href='view.php?id=%s']", id))).click();
   }
 
+  public void addTo(ContactData contact, GroupData group) {
+    selectContactById(contact.getId());
+    selectToGroup(group.getId());
+
+  }
+
+  private void selectToGroup(int id) {
+    driver.findElement(By.xpath("//select[@name='to_group']//option[@value='" + id + "']")).click();
+    driver.findElement(By.name("add")).click();
+  }
+
+  public void remove(ContactData contact, GroupData group) {
+    selectGroup(group.getId());
+    selectContactById(contact.getId());
+    removeFrom();
+
+  }
+
+  private void selectGroup(int id) {
+    driver.findElement(By.xpath("//select[@name='group']//option[@value='" + id + "']")).click();
+  }
+
+  private void removeFrom() {
+    driver.findElement(By.name("remove")).click();
+  }
 }
