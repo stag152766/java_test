@@ -10,7 +10,7 @@ import ru.testjava.addressbook.model.Groups;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class ContactDeleteFromGroupTests extends TestBase {
+public class ContactRemoveFromGroupTests extends TestBase {
 
   @BeforeMethod
   public void ensurePreconditions() {
@@ -19,30 +19,28 @@ public class ContactDeleteFromGroupTests extends TestBase {
       app.contact().create(new ContactData().withFirstname("web.firstname").withLastname("web.lastname")
               .withAddress("web.address").withHome("web.home").withMobile("web.mobile").withWork("web.work")
               .withEmail("web.email").withEmail3("web.email3"), true);
-      if (app.db().groups().size() == 0) {
-        app.goTo().groupPage();
-        app.group().create(new GroupData().withName("test1"));
-      }
+    }
+    if (app.db().groups().size() == 0) {
+      app.goTo().groupPage();
+      app.group().create(new GroupData().withName("newGroup"));
     }
   }
 
 
   @Test
-  public void testContactDeleteFromGroup() {
+  public void testContactRemoveFromGroup() {
     Contacts contacts = app.db().contacts();
     ContactData contact = contacts.iterator().next();
     Groups before = contact.getGroups();
-
-
     Groups groups = app.db().groups();
     GroupData group = groups.iterator().next();
-
+    if (before.size() == 0) {
+      app.goTo().homePage();
+      app.contact().addTo(contact, group);
+    }
     app.goTo().homePage();
-
     app.contact().remove(contact, group);
-    Groups after = contact.getGroups();
+    Groups after = app.db().contacts().iterator().next().getGroups();
     assertThat(after, equalTo(before.without(group)));
-
-
   }
 }
