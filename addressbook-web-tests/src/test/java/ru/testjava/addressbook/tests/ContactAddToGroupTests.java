@@ -1,6 +1,5 @@
 package ru.testjava.addressbook.tests;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.testjava.addressbook.model.ContactData;
@@ -15,6 +14,8 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ContactAddToGroupTests extends TestBase {
+
+  public GroupData newGroup;
 
   @BeforeMethod
   public void ensurePreconditions() {
@@ -42,16 +43,28 @@ public class ContactAddToGroupTests extends TestBase {
     if (before.size() == 0) {
       app.goTo().homePage();
       app.contact().addTo(contact, group);
+      Groups after = app.db().contacts().iterator().next().getGroups();
+      assertThat(after, equalTo(before.withAdded(group)));
     }
     else {
       List<GroupData> c = new ArrayList<GroupData>(groups.size());
       c.addAll(groups);
       c.removeAll(before);
+      if (c.size() == 0) {
+        app.goTo().groupPage();
+        app.group().create(new GroupData().withName("test2"));
+      }
+      Groups groups2 = app.db().groups();
+      List<GroupData> d = new ArrayList<GroupData>(groups2.size());
+      d.addAll(groups2);
+      d.removeAll(before);
       app.goTo().homePage();
-      app.contact().addTo(contact, c.iterator().next());
+      this.newGroup = d.iterator().next();
+      app.contact().addTo(contact, newGroup);
+      Groups after = app.db().contacts().iterator().next().getGroups();
+      assertThat(after, equalTo(before.withAdded(newGroup)));
     }
-    Groups after = app.db().contacts().iterator().next().getGroups();
-    assertThat(after, equalTo(before.withAdded(group)));
+
   }
 
 }
