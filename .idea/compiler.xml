@@ -6,6 +6,8 @@
       <module name="addons.test" target="11" />
       <module name="addressbook-web-tests.main" target="11" />
       <module name="addressbook-web-tests.test" target="11" />
+      <module name="mantis-tests.main" target="11" />
+      <module name="mantis-tests.test" target="11" />
       <module name="sandBox.main" target="11" />
       <module name="sandBox.test" target="11" />
     </bytecodeTargetLevel>
