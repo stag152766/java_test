@@ -7010,7 +7010,7 @@ gradle, gradlew, gradle.bat, build.gradle
 
 File > Product Structure > Modules > + > Import modules >
 
-Выбираем файл C:\..\GitHub\java_test\mantis-tests\build.gradle
+Выбираем файл C:\..\GitHub\java_test\mantis-tests\build.gradle > Ok
 
 Включаем 
 use auto import
@@ -7018,35 +7018,100 @@ use default gradle wrapper
 create directories for empty content
 Ok
 
-
 Проверяем на вкладке Sourses режим совместимости с Java старше 11
 Ок
 
-Чистим файл build.gradle
+Чистим файл build.gradle так как он содержит лишнюю инфо
+Отключаем (удаляем) ненужные зависимости.
+Оставляем 
+
+    implementation 'org.testng:testng:7.0.0-beta3'
+   // implementation 'com.katalon:com.katalon.platform.parent:1.0.5'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    implementation 'org.hamcrest:hamcrest:2.1'
+
+Т.к. оставляем для запусков тестов одну единственную (про запас) дадим ей обычное имя test 
+
+В итоге получим 
 
 
+apply plugin: 'java'
 
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.testng:testng:7.0.0-beta3'
+    implementation 'com.katalon:com.katalon.platform.parent:1.0.5'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    implementation 'org.hamcrest:hamcrest:2.1'
+}
+
+test {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    if (project.hasProperty('browser')) {
+        systemProperty 'browser', "${browser}"
+    }
+
+    if (project.hasProperty('target')) {
+        systemProperty 'target', "${target}"
+    }
+
+    if (project.hasProperty('verifyUI')) {
+        systemProperty 'verifyUI', "${verifyUI}"
+    }
+}
  
 
+Не смотря на то, что включен автоимпорт иногда среда разработки не догадывается, что нужно перегенерировать зависимости после того как вы их удалили.
+
+Для того, чтобы это обновить вручную нужно 
+View > Tool Windows > Gradle > Refresh (справа) 
+
+При этом происходит импорт конфигурационных файлов Build.gradle и подключение / отключение зависимостей.
+
+Переносим из существующего модуля addressbook другие элементы инфраструктуры
+
+Заходим в test > resources 
+
+Переносим
+local.properties //описывает свойства тестового стенда 
+
+В нем указываем 
+
+web.baseUrl=http://localhost/mantisbt-1.2.19
+web.adminLogin=administrator
+web.adminPassword=root
+
+Создаем пакет ru.stqa.pft.mantis в папке java
+Внутри этого пакета делаем пакет tests
+Копируем в него класс TestBase
 
 
+Чистим класс TestBase, оставляем в нем только  инициализацию ApplicationManager
+
+Создаем ru.stqa.pft.mantis.appmanager
+
+Копируем в него класс ApplicationManager
+
+Чистим ApplicationManager. Удаляем всех помощников. Оставляем только инициализацию самого ApplicationManager
+
+Новый модуль готов.
+В нем будет TestBase, от которого будут наследоваться все тестовые классы чтобы получить доступ к АМ 
+В нем будет АМ, который ссылается на каких то помощников  
+Есть файл local.properties который содержит инфо о тестовом стенде. 
+И общая инфрастртура, файл конфигурационный файл build.gradle и запускатель gradlew
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
+Урок 78. Прямое взаимодействие с сервером по протоколу HTTP {
+	
+	
+	
 
 
 
@@ -7068,8 +7133,6 @@ Ok
 
 
 }	
-
-Урок 78. Прямое взаимодействие с сервером по протоколу HTTP 00:16:34
 
 Урок 79. Ленивая инициализация помощников 00:08:35
 
