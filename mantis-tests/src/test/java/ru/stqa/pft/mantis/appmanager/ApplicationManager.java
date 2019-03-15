@@ -1,13 +1,11 @@
 package ru.stqa.pft.mantis.appmanager;
 
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
+import ru.stqa.pft.mantis.tests.HttpSession;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,16 +13,10 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static org.testng.Assert.fail;
-
 public class ApplicationManager {
   public final Properties properties;
   private WebDriver driver;
-
-
   private String baseUrl;
-  private boolean acceptNextAlert = true;
-  private StringBuffer verificationErrors = new StringBuffer();
   private String browser;
 
 
@@ -54,35 +46,15 @@ public class ApplicationManager {
 
   public void stop() {
     driver.quit();
-    String verificationErrorString = verificationErrors.toString();
-    if (!"".equals(verificationErrorString)) {
-      fail(verificationErrorString);
-    }
-  }
-
-  public boolean isElementPresent(By by) {
-    try {
-      driver.findElement(by);
-      return true;
-    } catch (NoSuchElementException e) {
-      return false;
-    }
   }
 
 
-  public String closeAlertAndGetItsText() {
-    try {
-      Alert alert = driver.switchTo().alert();
-      String alertText = alert.getText();
-      if (acceptNextAlert) {
-        alert.accept();
-      } else {
-        alert.dismiss();
-      }
-      return alertText;
-    } finally {
-      acceptNextAlert = true;
-    }
+
+  public HttpSession newSession() {
+    return new HttpSession(this);
   }
 
+  public String getProperty(String key) {
+    return properties.getProperty(key);
+  }
 }
