@@ -49,7 +49,6 @@ public class ApplicationManager {
   }
 
 
-
   public HttpSession newSession() {
     return new HttpSession(this);
   }
