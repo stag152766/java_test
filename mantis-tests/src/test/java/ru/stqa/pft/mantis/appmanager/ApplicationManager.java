@@ -14,40 +14,30 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class ApplicationManager {
-  public final Properties properties;
+  private final Properties properties;
   private WebDriver driver;
-  private String baseUrl;
   private String browser;
+  private RegistrationHelper registratonHelper;
+  private FtpHelper ftp;
 
 
-  public ApplicationManager(String browser)  {
+
+  public ApplicationManager(String browser) {
     this.browser = browser;
     properties = new Properties();
   }
-
 
   public void init() throws IOException {
     String target = System.getProperty("target", "local");
     properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
 
-    if (browser.equals(BrowserType.CHROME)) {
-      driver = new ChromeDriver();
-    } else if (browser.equals(BrowserType.FIREFOX)) {
-      driver = new FirefoxDriver();
-    } else if (browser == BrowserType.IE) {
-      driver = new InternetExplorerDriver();
-    }
-
-    baseUrl = "https://www.katalon.com/";
-    driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
-    driver.get(properties.getProperty("web.baseUrl"));
   }
-
 
   public void stop() {
-    driver.quit();
+    if (driver != null) {
+      driver.quit();
+    }
   }
-
 
   public HttpSession newSession() {
     return new HttpSession(this);
@@ -56,4 +46,35 @@ public class ApplicationManager {
   public String getProperty(String key) {
     return properties.getProperty(key);
   }
+
+  public RegistrationHelper registration() {
+    if (registratonHelper == null){
+      registratonHelper = new RegistrationHelper(this);
+    }
+    return registratonHelper;
+  }
+
+  public WebDriver getDriver() {
+    if (driver == null) {
+      if (browser.equals(BrowserType.CHROME)) {
+        driver = new ChromeDriver();
+      } else if (browser.equals(BrowserType.FIREFOX)) {
+        driver = new FirefoxDriver();
+      } else if (browser == BrowserType.IE) {
+        driver = new InternetExplorerDriver();
+      }
+      driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+      driver.get(properties.getProperty("web.baseUrl"));
+    }
+    return driver;
+  }
+
+
+  public FtpHelper ftp() {
+    if (ftp == null) {
+      ftp = new FtpHelper(this);
+    }
+    return ftp;
+  }
+
 }

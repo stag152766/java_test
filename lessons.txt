@@ -7276,17 +7276,442 @@ public class LoginTests extends TestBase{
 
 Запускаем тест, но стартует браузер, который не используется . Потому что так написано в методе init() 
 
+Доп инфо:
+
+http://hc.apache.org/httpcomponents-client-ga/index.html
+
+compile 'org.apache.httpcomponents:httpclient:4.5.7'
+
+
+
+}
+Урок 79. Ленивая инициализация помощников {
+	
+В предыдущем уроке мы столкнулись с проблемой производительности. Браузер запускается даже тогда, когда он не нужен. Несмотря на то что он нигде не используется АМ его все равно инициализирует.
+Для того, чтобы избавится от этой проблемы - реализуем шаблон проектирования (ленивая инициализация)
+
+Будем делат тест для регистрации нового пользователя в системе. 
+Задача: браузер должен запускаться только тогда, когда он понадобится
+
+Сначала создадим тест 
+
+public class RegistrationTests extends TestBase{
+
+
+  @Test
+  public void testRegistration() {
+    app.registration().start("user1" , "user1@localhost.localdomain"); //ставим заглушки, создаем новый метод 
+  }
+
+}
+
+	
+Указываем возвращаемое значение RegistratonHelper
+  public RegistratonHelper registration() {
+    return null;
+  }	
+	
+Создаем такой класс	
+	
+	public class RegistratonHelper {
+
+
+
+}
+	
+	
+Возвращаемся в АМ
+  public RegistratonHelper registration() {
+    return RegistratonHelper(this); //в качестве параметра передаем this то есть ссылку на АМ 
+  //менеджер нанимает помощника и передает ссылку на самого себя
+  }		
+	
+Создаем такой конструктор	
+	
+public RegistratonHelper(ApplicationManager applicationManager) {
+    this.app = app;
+    
+  }
+	
+Создаем поле
+
+public class RegistratonHelper {
+
+  private final ApplicationManager app;
+
+  public RegistratonHelper(ApplicationManager app) {
+    this.app = app;
+  } 
+ 
+}	
+	
+Создадим метод  	
+	
+	  public void start(String username, String email) {
+  }
+	
+Этому помощнику браузер нужен
+
+Поэтому добавим поле 
+
+ private WebDriver driver;	
+	
+Заполняться это поле будет следующим образом
+
+ public RegistratonHelper(ApplicationManager app) {
+    this.app = app;
+    driver = app.driver;//просим ссылку на драйвер у менеджера
+  }
+
+После этого можно пользоваться драйвером
+
+
+  public void start(String username, String email) {
+    driver.get(app.getProperty("web.baseUrl") + "/signup_page.php");
+  }
+
+Нас интересует вопрос инициализации 
+
+Для того, чтобы ссылку присвоилась 
+
+  public RegistratonHelper(ApplicationManager app) {
+    this.app = app;
+    driver = app.driver; //сюда
+  }
+
+она должны быть уже проинициализирована в АМ. Как раз это нас не устраивает, то что инициализация драйвера происходит слищком рано. 
+
+Поменяем это на ленивую инициализацию
+
+Сделаем метод getDriver() и этот метод будет иницилизировать драйвер в момент первого обращения.
+
+
+  public RegistratonHelper(ApplicationManager app) {
+    this.app = app;
+    driver = app.getDriver(); //здесь
+  }
+  
+  
+Создаем метод 
+
+ public WebDriver getDriver() {
+    return driver;
+  }
+
+При этом созданную переменную public WebDriver getDriver; удаляем
+
+Для того, чтобы инициализация стала ленивой, нужно ее перенести в этот метод
+
+
+
+
+public WebDriver getDriver() {
+    if (driver == null) {//если драйвер не проинициализирован, то тогда нужно его проинициализировать а потом вернуть
+      if (browser.equals(BrowserType.CHROME)) { //перемещаем сюда фрагмент кода из метода init()
+        driver = new ChromeDriver();
+      } else if (browser.equals(BrowserType.FIREFOX)) {
+        driver = new FirefoxDriver();
+      } else if (browser == BrowserType.IE) {
+        driver = new InternetExplorerDriver();
+      }
+  
+      driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+      driver.get(properties.getProperty("web.baseUrl"));
+    }
+	//а если уже проинициализирован, то делать ничего не надо
+    return driver;	
+	
+}
+
+
+В результате при вызове метода init() только разгружается конфиг файл
+Реально драйвер будет иницилизироваться, когда кто то к нему обратиться (вызовет метод getDriver())
+
+Для того, чтобы никто к нему случайно не обратился напрямую, только через этот метод нужно сделать переменную 
+	
+private WebDriver driver;
+	
+Теперь переменная доступна только изнутри этого класса, и фактически только через метод getDriver().
+
+Кроме того, у нас драйвер останавливаться в самом конце и он может быть не проинициализирован
+
+  public void stop() {
+    driver.quit();
+  } 
+
+Поэтому останов тоже нужно сделать с проверкой
+
+  public void stop() {
+    if (driver != null) {
+      driver.quit();
+    }
+  }
+
+Переходим к   
+
+public RegistratonHelper registration() {
+    return new RegistratonHelper(this);
+  }
+
+Каждый раз создавать новый экземляр класса необходимости нет. 
+
+  public RegistratonHelper registration() {
+    return new RegistratonHelper(this);
+  }
+
+Вполне достаточно иметь один экземляр этого класса, потому что он будет работать с браузером. А браузер у нас будет только один.
+
+
+Возникает естественное желание перенести эту инициализацию в метод init() чтобы сделать это один раз, а не при каждом обращании к методу registration()
+
+Но если мы перенесем это в метод init то внутри контсруктора RegistrationHelper произойдет обращение к методу getDriver()
+
+  public RegistratonHelper(ApplicationManager app) {
+    this.app = app;
+    driver = app.getDriver();
+  }
+
+И браузер вновь запуститься при вызове метода init(). Это то отчего мы пытались избавиться. 
+
+Нужно в конструкторе RegistratonHelper реализовать ленивую инициализацию
+
+
+Создаем поле 
+registratonHelper = new RegistratonHelper(this);
+
+Но инициализируем его не в методе init а при первом обращении к методу registration()
+
+То есть 
+
+  public RegistratonHelper registration() {
+    if (registratonHelper == null){ 
+      registratonHelper = new RegistratonHelper(this); //выполняем инициализацию
+    }
+    return registratonHelper; //и возвращаем то что получилось в результате инициализации
+  }
+
+А если он уже не null, это означает что его уже инициализировали, и повторно иницилизировать не нужно
+
+Теперь при запуске registartion test открывается браузер, а при запуске login test браузер не открывается. 
+
+Таким образом, с помощью шаблона ленивой инициализации можно откладыват тяжеловесные действия на более поздний этап. А если они никогда не понадобятся, то никогда их не выполнять.
+
+Не обязательно все делать сразу при инициализации, можно это делать только когда какой то ресурс понадобиться.
+
+
+ 
+}	
+Урок 80. Передача файлов на удалённую машину по протоколу FTP {
+	
+В тесте регистрации нового пользователя, при заполнении полей ввода возникает проблема с capcha.
+
+Нужно отключить capcha на тестовом стенде. В мантис чтобы ее отключить нужно дописать специальную строчку в конфиг файл.
+Предположим, что сервер находится на удаленной машине, то есть просто взять и изменить файл мы не можем. Нужно сделать это удаленно, используя протокол для передачи файлов ftp.
+
+Загрузим на удаленную машину конфиг файл, который отключает эту защиту. 
+
+Добавим в проект помощник FtpHelper. Для его работы нужна дополнительная зависимость. 
+	
+compile  'commons-net:commons-net:3.4'	
+	
+https://search.maven.org/artifact/commons-net/commons-net/3.4/jar	
+	
+package ru.stqa.pft.mantis.appmanager;
+
+
+import org.apache.commons.net.ftp.FTPClient;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class FtpHelper {
+  private final ApplicationManager app;
+  private FTPClient ftp;
+
+
+  public FtpHelper(ApplicationManager app) {
+    this.app = app;
+    ftp = new FTPClient();
+  }
+
+  
+  //загружает новый и переименовывает старый
+  public void upload(File file, String target, String backup) throws IOException {
+    ftp.connect(app.getProperty("ftp.host"));
+    ftp.login(app.getProperty("ftp.login"),app.getProperty("ftp.password"));
+    ftp.deleteFile(backup);
+    ftp.rename(target,backup);
+    ftp.enterLocalPassiveMode();
+    ftp.storeFile(target, new FileInputStream(file));
+    ftp.disconnect();
+  }
+
+  //востанавливает исходный файл
+  public void restore(String target, String backup) throws IOException {
+    ftp.connect(app.getProperty("ftp.host"));
+    ftp.login(app.getProperty("ftp.login"),app.getProperty("ftp.password"));
+    ftp.deleteFile(target);
+    ftp.rename(backup, target);
+    ftp.disconnect();
+  }
+
+}
+
+	
+Помощник готов, теперь его нужно подлючить к АМ, т.е. вызвать конструктор. И сделать ленивую инициализацию
+
+
+В АМ делаем метод
+
+
+  public FtpHelper ftp() { //1 - создаем метод 
+    if (ftp == null) { //3-если помощник не ицинилизирован, то инициализируем его
+      ftp = new FtpHelper(this); //4-в качестве параметра передаем this т.е. ссылка на АМ
+    }
+    return ftp; //2-будет возвращать объект типа FtpHelper, только в том случае если объект уже инициализирован
+  }
+
+создаем поле, которое будет содержать ссылку на этого помощника 
+
+public FtpHelper ftp;	
+	
+	
+	
+Рассмотрим помощник
+
+Во первых при вызове помошника создается инициализация - клиент, который будет устанавливать соединения, передавать файлы и др действия.
+Задача исходный конфигурационный файл нужно переименовать, добавить новый (поддлельный), а в конце удалить поддельный и вернуть на его место старый исходый.
+
+  public FtpHelper(ApplicationManager app) {
+    this.app = app;
+    ftp = new FTPClient(); //создается клиент
+  }	
+	
+
+/*метод будем вызывать в самом начале при инициализации тестируемой системы
+метод принимает 3 параметра: 
+file новый локальный файл, кот должен быть загружен на удаленную машину 
+target имя удаленного файла (куда все загружается)
+backup имя резервной копии (если удаленный файл уже существует)
+*/
+public void upload(File file, String target, String backup) throws IOException {
+	//устанавливаем соединение с каким то сервером 
+    ftp.connect(app.getProperty("ftp.host"));
+	//выполняется логин
+    ftp.login(app.getProperty("ftp.login"),app.getProperty("ftp.password"));
+	//удаляем предыдущую резервную копию (на всякий случай)
+    ftp.deleteFile(backup);
+	//переименовываем удаленный файл - делаем резервную копию
+    ftp.rename(target, backup);
+	//включается пассивный режим передачи данных. Техническая манипуляция, связана с ограничениями ftp сервера 
+    ftp.enterLocalPassiveMode();
+	//самая главная строчку - здесь передается файл
+	//локальный файл file из него делается InputStrea
+	//FileInputStream предназначен для чтения бинарных даных - побайтовое чтение
+	//эти данные читаются из локального файла, передаются на удаленную машину и там сохраняются в удаленном файле который называется target
+    ftp.storeFile(target, new FileInputStream(file));
+	//после того, как передача закончилась соединения разрывается
+    ftp.disconnect();
+  }
+
+
+
+//в конце вызываем метод restore, который восстанавливает исходную конфигурацию тестируемой системы
+  public void restore(String target, String backup) throws IOException {
+    ftp.connect(app.getProperty("ftp.host"));
+    ftp.login(app.getProperty("ftp.login"),app.getProperty("ftp.password"));
+	//удаляется поддельный файл
+    ftp.deleteFile(target);
+	//востанавливается оригинальный файл из резервной копии 
+    ftp.rename(backup, target);
+    ftp.disconnect();
+  }
+	
+	
+Файл, который нужно загрузить на ftp сервер, называется config_inc.php	
+В отличии от оригинального файла, он содержит строчку которая отключает капчу.	
+	
+<?php
+$g_hostname      = 'localhost';
+$g_db_type       = 'mysql';
+$g_database_name = 'bugtracker';
+$g_db_username   = 'mantisdbuser';
+$g_db_password   = '';
+$g_signup_use_captcha = 'OFF';
+	
+	
+Для передачи файлов нужен ftp сервер. В XAMPP он называется FileZilla	
+
+Наживаем Start > Admin чтобы создать пользователя, который будет использоваться в тестах
+	
+Оставляем по умолчанию
+127.0.0.1
+14147
+	
+Нажимаем кнопку Displays the user account dialog
+Add new 
+Называем его mantis
+Указываем для него пароль mantis
+Указываем для него домашнюю директорию Shared Folders
+Выбираем пользователя mantis
+Нажимаем кнопку Add в блоке Shared Folders
+Указываем где находится наш багтреккер (корневую папку с mantis)
+Указываем права на read, write, delete, append
+Нажимаем Ок
+
+Пользователь создан, теперь нужно прописать его свойства в конфиг файле. 
+
+FtpHelper использует 3 свойства
+
+Открываем файл свойств local.properties	
+
+ftp.host = localhost 
+ftp.login = mantis
+ftp.password = mantis
+
+Свойства готовы и осталось только где то вызвать эти методы. 
+Надо сделать это в TestBase, 
+
+  public void setUp() throws IOException {
+    app.init();
+	  app.ftp().upload(new File("src/test/resources/config.php"), "config.php", "config.php.bak");
+  
+  } 
+	
+А в конце, перед тем как останавливать приложение и вызывать метод stop нужно написать вызов метода restore	
+	
+public void tearDown() throws IOException {
+    app.ftp().restore("config_inc.php.bak", "config.php");
+    app.stop();
+  }	
+
+
+Запускаем тест в отладчика, установив точки остановы в методах connection() и start	
+Смотрим на консоль ftp сервера 
+Logged on //логин выполнен успешно
+Transfer OK	//файл успешно загружен
+
+
+
+}	
+Урок 81. Получение почты на встроенный в тесты почтовый сервер {
+	
+	
+	
+
+
+
+
 
 }	
 
-Урок 79. Ленивая инициализация помощников 00:08:35
-
-Урок 80. Передача файлов на удалённую машину по протоколу FTP 00:13:56
-
-Урок 81. Получение почты на встроенный в тесты почтовый сервер 00:24:55
-
 Урок 82. unnamed 82 00:16:38
 
+
+
+
+Занятие 9.Сетевое программирование - удалённые программные интерфейсы
 Урок 83. Немного теории про Remote API 00:12:35
 
 Урок 84. SOAP - простой пример 00:11:44
