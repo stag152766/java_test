@@ -5,7 +5,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.BrowserType;
-import ru.stqa.pft.mantis.tests.HttpSession;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,7 +18,7 @@ public class ApplicationManager {
   private String browser;
   private RegistrationHelper registratonHelper;
   private FtpHelper ftp;
-
+  private MailHelper mailHelper;
 
 
   public ApplicationManager(String browser) {
@@ -75,6 +74,13 @@ public class ApplicationManager {
       ftp = new FtpHelper(this);
     }
     return ftp;
+  }
+
+  public MailHelper mail() {
+    if (mailHelper == null){
+      mailHelper = new MailHelper(this);
+    }
+    return mailHelper;
   }
 
 }

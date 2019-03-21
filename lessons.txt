@@ -7520,7 +7520,6 @@ package ru.stqa.pft.mantis.appmanager;
 
 
 import org.apache.commons.net.ftp.FTPClient;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7695,18 +7694,556 @@ Transfer OK	//файл успешно загружен
 
 
 }	
-Урок 81. Получение почты на встроенный в тесты почтовый сервер 24:55 {
+Урок 81. Получение почты на встроенный в тесты почтовый сервер {
+
+Продолжаем делать тест для регистрации нового пользователя в багтреккере Mantis
+
+Пользователь указывает имя, email нажимает кнопку Sign up после чего, ему на указаный email приходит письмо. 
+Это письмо содержит ссылку, по которой необходимо пройти для того чтобы завершить регистрацию. Указать там пароль (на странице, открытой по ссылке) и после этого пользователь сможет войти в систему. 
+
+
+Создадим класс HelperBase, который реализует все вспомогательные методы, в том числе метод для заполнения полей формы
+
+public class HelperBase {
+
+  protected ApplicationManager app; //вот эта ссылка 
+  protected WebDriver driver;
+
+  public HelperBase(ApplicationManager app) {
+    this.app = app;
+    this.driver = app.getDriver();
+  }
+
+  protected void click(By locator) {
+    driver.findElement(locator).click();
+  }
+
+
+  protected void type(By locator, String text) {
+    click(locator); //клик по полю ввода
+    if (text != null) { //не вытается ввести значение которое заменит дефолтное  
+      String existingText = driver.findElement(locator).getAttribute("value");
+      if (! text.equals(existingText)) {//не вытается ввести текст, если он совпадает с существующим
+        driver.findElement(locator).clear();
+        driver.findElement(locator).sendKeys(text);
+      }
+    }
+  }
+
+  void attach(By locator, File file) {
+    driver.findElement(locator).sendKeys(file.getAbsolutePath());
+  }
+
+}
+
+Теперь напишем, что  
+public class RegistrationHelper extends HelperBase
+
+поэтому 
+
+было 
+
+public class RegistrationHelper extends HelperBase{
+  private final ApplicationManager app;
+  private WebDriver driver;
+
+  public RegistrationHelper(ApplicationManager app) {
+    this.app = app;
+    driver = app.getDriver();
+  }
+
+
+  public void start(String username, String email) {
+    driver.get(app.getProperty("web.baseUrl") + "/signup_page.php");
+
+  }
+}
+
+
+стало
+
+public class RegistrationHelper extends HelperBase {
+  //private final ApplicationManager app; **поэтому хранить эту ссылку в классе RegistrationHelper уже необходимости нет , этим займется HelperBase ** 
+  //private WebDriver driver; **аналогично 
+	
+
+  public RegistrationHelper(ApplicationManager app) {
+    super(app); //вызов конструктора базового класса, туда передается ссылка на AM ** 
+  }
+
+
+  public void start(String username, String email) {
+    driver.get(app.getProperty("web.baseUrl") + "/signup_page.php");
+
+  }
+  
+  
+}
+
+Теперь реализуем заполнение полей имя и email
+
+
+<input type="text" name="username" size="32" maxlength="32">
+	
+<input type="text" name="email" size="32" maxlength="64" value="">	
+
+Пишем в методе start() в классе RegistrationHelper
+
+public void start(String username, String email) {
+    driver.get(app.getProperty("web.baseUrl") + "/signup_page.php");
+	type(By.name("username"), username);
+	type(By.name("email"), email);
+  }
+
+}
+
+Находим локатор кнопки Sign up по атрибуту value
+
+<input type="submit" class="button" value="Signup">
+
+  click(By.cssSelector("input[value='Signup']")); //ищим элемент input у которого атрибут value="Signup"
+
+
+Первая часть готова.
+После того как эти действия выполненены, на указанный адрес электронной почты отправляется письмо. 
+
+Куда оно придет? На каком почтовом сервере его искать?
+
+Чтобы упростить решение этой задачи, мы можем сделать собственный почтовый сервер. 
+
+В этом модуле мы запустим тестовый сервер, который встроен в тесты. 
+
+Для этих целей будет использоваться помощник MailHelper
+
+В нем будет использоваться библиотека 
+
+compile  'org.subethamail:subethasmtp:3.1.7'
+    
+эта библиотека подлючила еще одну зависимость javax.mail (отдельно указывать в конфиг файле нет необходимости)
+
+Подлючим помощник к АМ
+
+Вновь реализуем механизм ленивой инициализации в АМ
+
+  public MailHelper mail() {
+    if (mailHelper == null){
+      mailHelper = new MailHelper(this); //создаем поле в АМ ;  private MailHelper mailHelper;
+    }
+    return mailHelper;
+  }
+
+  
+Возвращаемся к MailHelper
+
+  public MailHelper(ApplicationManager app){
+    this.app = app;
+    wiser = new Wiser();//инициализация почтового сервера 
+  }
+
+Для того, чтобы запустить сервер нужно вызвать метод start() и остановить stop() 
+
+
+  public void start() {
+    wiser.start();
+  }
+
+  public void stop(){
+    wiser.stop();
+  }
+
+
+Таким образом в тест RegistrationTests необходимо добавить некоторое действие, которые будет выполняться перед началом тестов и после того, как тест отработал. 
+
+
+Для каждого тестового метода, можно запускать заного почтовый сервер. Для того, чтобы старая почта гарантировано пропадала, и не было никаких конфликтов / влияния одного теста на другой (при наличии разных тестов).
+
+
+  @BeforeMethod
+  public void startMailServer(){
+    app.mail().start();
+  }
+
+  @Test
+  public void testRegistration() {
+    app.registration().start("user1" , "user1@localhost.localdomain");
+  }
+
+
+  @AfterMethod(alwaysRun = true)//для того, чтобы метод останавливал сервер даже, если тест завершился не успешно
+  public void stopMailServer() {
+    app.mail().stop();
+  }
+}
+
+Теперь мы научились запускать поточвый сервер
+
+Как mantis узнает, что почту надо доставлять именно сюда? 
+
+Настроим тестируемую систему на наш почтовый сервер 
+В конфигурационный файл багтреккреа config_inc.php нужно добавить 2 опции 
+
+способ доставки почты по протоколу SMTP
+
+$g_phpMailer_method = PHPMAILER_METHOD_SMTP;
+
+адрес доставки почты 
+
+$g_smtp_host = 'localhost';
+
+
+Настроили, сервер запустили, теперь в него придет письмо. Но почта ходит не быстро, не мнгновенно.
+Поэтому необходимо добавить ожидание - для этого предназначен метод waitForMail()
+
+ public List<MailMessage> waitForMail(int count, long timeout) {
+ //количество писем, которое должно прийти, время ожидания   
+
+
+//если почта в течение этого времени не приходит то в конце выбрасывается исключение
+//почты нет, точнее она есть но слишком мало; писем пришло меньше чем ожидалось < count 
+ throw new Error("No mail :(");
+
+ }
+ 
+Как метод устроен внутри   
+
+public List<MailMessage> waitForMail(int count, long timeout) {
+	//запоминаем текущее время
+    long start = System.currentTimeMillis();
+	
+	//в цикле проверяется, что время ожидания еще не истекло; новое текущее время не превышает момент старта + таймаут
+	//нужно продолжать ждать почту 
+    while (System.currentTimeMillis() < start + timeout) {
+		//внутри проверяем, если почты пришло уже достаточно много
+      if (wiser.getMessages().size() >= count) {
+		  //значит ожидание множно прекращать - выполняется выход из этого метода 
+		  
+        return wiser.getMessages().stream().map((m) -> toModelMail(m)).collect(Collectors.toList());
+      }
+	  //если почты слишком мало, то проскакиваем проверку 
+      try {
+		  //попадаем сюда - ждем 1000 милисек 
+		  
+        Thread.sleep(1000);
+		//и цикл повторяется - с while - снова смотрим, не истек ли таймаут 
+		//и так до тек пор пока не придет достаточное количество писем, либо не закончится время ожидания 
+		 
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+    throw new Error("No mail :(");
+  }
+
+Предположим что почты пришло достаточно много, тогда попадаем в строчку
+eturn wiser.getMessages().stream().map((m) -> toModelMail(m)).collect(Collectors.toList());
+
+В которой происходит преобразование реальных объектов в модельные. 
+Модельными объектами легко оперировать, которые содержат нужную нам инфо и не зависят от деталей реализации
+
+Разные почтовые сервера могут использовать разный формат представления почты, поэтому мы делаем свой собственный модальный объект, который содержит два интересующих нас поля. 
+
+package ru.stqa.pft.mantis.model;
+
+public class MailMessage {
+  public String to; //кому пришло письмо
+  public String text; //текст этого письма
+  
+  public MailMessage(String to, String text) {
+    this.to = to;
+    this.text = text;
+  }
+}
+
+
+Соответственно в помощнике нужно реальные объекты , которые храняться в реальном почтовом ящике на реальном почтовом сервере преобразовать в модальные.
+
+Мы берем список, превращаем в поток, ко всем элементам потока применяем одну и туже функцию, и потом получившиеся новые модельные объекты собирираем снова в список. 
+
+Рассмотрим подробнее, как происходит преобразование реальных почтовых сообщений в наши модельные.   
+
+  private static MailMessage toModelMail(WiserMessage m) {
+    try {
+		//берем реальный объект 
+      MimeMessage mm = m.getMimeMessage();
+	  //Во-первых, берем список получателей, и оставляем только первого из них, потому что известно что он там единственный
+	  //mantis отправляет два письма первое администратору, о том что зарегистрировался новый пользователь
+	  //второе пользователю, в котором содержится ссылка для продолжения регистрации 
+	  //Во вторых, так как письмо тестовое, то объект Content представляет собой обычную строку 
+	  //поэтому мы его преобразуем в строку 
+	  //получившеся значение попадает в объект типа MailMessage
+      return new MailMessage(mm.getAllRecipients()[0].toString(), (String) mm.getContent());
+	  //оставшаяся часть метода - это перехват каких-то ошибок (создается при помощи среды разработки)
+    } catch (MessagingException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+Она очень простая, потому что в нашем примере точно известно что mantis точно присылает письма в обычном текстовом формате. 
+Но в реальной жизни в ней могут быть картинки, текст в формате HTML, attachments. Поэтому анализ письма штука достаточно сложная. 
+
+
+Возвращается в RegistrationTests
+
+
+  @Test
+  public void testRegistration() {
+    app.registration().start("user1" , "user1@localhost.localdomain");
+	//добавляем ожидание
+	//app.mail().waitForMail(2,10000);
+	//присваиваем возвращаемое значение waitForMail() в какую то переменную 
+	List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000); 
+  }
+
+Теперь среди этих писем нужно найти то которое, пришло этому пользователю user1@localhost.localdomain
+И извлечь из письма ссылку для продолжения регистрации
+
+
+Организуем рефакторинг 
+
+было 
+public class RegistrationTests extends TestBase{
+
+
+
+  @BeforeMethod
+  public void startMailServer(){
+    app.mail().start();
+  }
+
+  @Test
+  public void testRegistration() {
+    app.registration().start("user1" , "user1@localhost.localdomain"); //"user1@localhost.localdomain" ПКМ > Refactor > Extrackt > Variable 
+    List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000);
+  }
+
+  
+
+  @AfterMethod(alwaysRun = true)
+  public void stopMailServer() {
+    app.mail().stop();
+  }
+}
+
+стало
+
+ @Test
+  public void testRegistration() {
+    String email = "user1@localhost.localdomain";
+    String user1 = "user1";
+    app.registration().start(user1, email);
+    List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000);
+    findConformationLink(mailMessages, email);
+  }
+
+
+Создали метод findConformationLink(), в который будут передаваться список писем и адрес электронной почты 
+Среди всех писем нужно найти то, которое отправлено на этот адрес и извлечь из него ссылку. 
+
+private String findConformationLink(List<MailMessage> mailMessages, String email) {
+    //сначала нужно найти среди всех писем то, которое отправлено на нужный адрес
+    MailMessage mailMessage = mailMessages.stream().filter((m) -> m.to.equals(email)).findFirst().get();
+  }
+Используем функцию filter(), в которую в качестве параметра передается предикат ( т.е. функция возвращающая булевское значение) 
+На входе она будет принимать объект типа MailMessage и выполнять проверку (m) -> m.to.equals(email)
+В результате фильтрации в потоке останутся только те сообщения, которые отправлены по нужному адресу.
+Дальше среди них берем первое findFirst().get()
+Возвращаемое значение цепочки помещаем в локальную переменную
+
+	//теперь нужно из текста этого сообщения извлечь ссылку
+	
+Для этого нам пригодились бы регулярные выражения.
+Можно воспользоваться вспомогательной библиотекой verbalregex, с помощью которой можно строить регулярные выражения. 
+
+compile  'ru.lanwen.verbalregex:java-verbal-expressions:1.4'
+
+VerbalExpression regex = VerbalExpression.regex().find("http://").nonSpace().oneOrMore().build();
+
+Сначала ищим такой текст
+VerbalExpression regex = VerbalExpression.regex().find("http://")
+
+После него должно идти какое то количество непробельных символов 
+nonSpace()
+
+Сколько 
+oneOrMore()
+
+Результатом является объект типа VerbalExpression, который внутри содержит построенное регулярное выражение 
+
+Здесь мы видим использование флуент интерфейса, точнее шаблона проектирование билдер - объект строится путем последовательного применения цепочки методов.
+
+Теперь нужно это регулярное выражение применять к тексту нашего письма и получившеся значение вернуть.
+
+regex.getText() возвращает тот кусок текста, который соответствует построенному регулярному выражению 
+
+Получаем,
+
+  private String findConformationLink(List<MailMessage> mailMessages, String email) {
+    //сначала нужно найти среди всех писем то, которое отправлено на нужный адрес
+    MailMessage mailMessage = mailMessages.stream().filter((m) -> m.to.equals(email)).findFirst().get();
+    VerbalExpression regex = VerbalExpression.regex().find("http://").nonSpace().oneOrMore().build();
+    return regex.getText(mailMessage.text);
+  }
+
+Присваиваем получившуюся ссылку в какуюто локальную переменную 
+
+findConformationLink(mailMessages, email) 
+
+String conformationLink = findConformationLink(mailMessages, email);
+
+И завершаем регистрацию 
+
+app.registration().finish(conformationLink, "password"); //в качестве параметра указываем ссылку и пароль 
+
+Создадим метод finish() внтури RegistrationHelper
+
+
+ public void finish(String conformationLink, String password) {
+	 //проходим по ссылке
+    wd.get(conformationLink);
+	//вводим пароль 
+    type(By.name("password"), password);
+	//вводим подтверждение пароля
+    type(By.name("password_conform"), password);
+	click(By.cssSelector("input[value='Update User']"));
+  }
+
+Тем самым регистрация пользователя завершается 
+
+Нужно проверить, действительно ли он может войти в систему
+
+RegistrationTest должен в конце содержать какую то проверку
+
+Реализуем проверку с помощью помощника - по протоколу http
+
+app.newSession().login(user, password);
+
+
+и добавляем проверку 
+
+
+assertTrue(app.newSession().login(user, password));
+
+
+Получаем, 
+
+
+  @Test
+  public void testRegistration() throws IOException {
+    String user = "user1";
+    String password = "password";
+    String email = "user1@localhost.localdomain";
+    app.registration().start(user, email); //сюда ставим точку остановы 
+    List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000);
+    String conformationLink = findConformationLink(mailMessages, email);
+    app.registration().finish(conformationLink, password);
+    assertTrue(app.newSession().login(user, password));
+  }
+
+Тест готов, запускаем.
+
+Сначала запускается почтовый сервер
+Отправляется конфигурационный файл по протоколу ftp 
+И наконец, мы находимся в точке, в кототорой должен запустится бразузер и в нем должны выполниться какие то действия
+
+app.registration().start(user, email); //сюда ставим точку остановы 
+Шаг вперед , на запуск браузера уходит достаточно много времени
+
+Появляется бразузер, заполняются поля, нажимается кнопка signup 
+И видим сообщение, в котором сказано что на адрес электронной почты указанный при регистрации отправлено письмо 
+
+Возвращаемся в отладчик, нас интересуют пришли ли письма
+
+Нажимаем ПКМ по app
+
+List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000);
+
+Нажимаем Evaluate и смотрим что находится в переменной mailHelper
+
+В объекте wiser два письма - одно админу, другое пользователю 
+
+Нажимаем next
+
+mailMessage size = 2 
+conformationLink = "" //извлечен из письма
+
+Еще шаг вперед и в браузере завершается регистрация, произошло перенаправление на главную страницу  
+
+Выполняется проверка, что пользователь может войти в систему
+
+Тест зеленый
+
+Подлючим библиотеку logback
+
+Если запустить тест второй раз, то он упадет, потому что пользователь с таким же имененем и почтой зарегистрироваться не может  
+"That username is already being used. Please go back and select another one."
+
+Поэтому необходимо изменить тесты, так чтобы каждый раз регистрировались новые пользователи 
+
+Создадим уникальные идентификаторы для пользователей.
+
+Например, 
+
+long now = System.currentTimeMillis();
+
+Функция возвращает текущее время в милисекундах
+
+
+ public void testRegistration() throws IOException {
+    long now = System.currentTimeMillis();
+    String user = String.format("user%s",now);
+    String password = String.format("password",now);
+    String email = String.format("user%s@localhost.localdomain", now);;
+
+	
+	
+ }
+Урок 82. Telnet Выполнение команд {
 	
 	
 	
-
-
-
-
-
-}	
-
-Урок 82. Telnet Выполнение команд 00:16:38 {
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 }
