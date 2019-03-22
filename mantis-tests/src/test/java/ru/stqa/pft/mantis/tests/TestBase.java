@@ -11,7 +11,8 @@ import java.io.IOException;
 public class TestBase {
 
 
-  protected static final ApplicationManager app = new ApplicationManager(System.getProperty("browser", BrowserType.CHROME));
+  protected static final ApplicationManager app = new ApplicationManager
+          (System.getProperty("browser", BrowserType.CHROME));
 
   @BeforeSuite(alwaysRun = true)
   public void setUp() throws IOException {

@@ -2,10 +2,11 @@ package ru.stqa.pft.mantis.appmanager;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import ru.stqa.pft.mantis.tests.TestBase;
 
 import java.io.File;
 
-public class HelperBase {
+public class HelperBase extends TestBase {
 
   protected ApplicationManager app;
   protected WebDriver wd;
@@ -15,12 +16,12 @@ public class HelperBase {
     this.wd = app.getDriver();
   }
 
-  protected void click(By locator) {
+  public void click(By locator) {
     wd.findElement(locator).click();
   }
 
 
-  protected void type(By locator, String text) {
+  public void type(By locator, String text) {
     click(locator);
     if (text != null) {
       String existingText = wd.findElement(locator).getAttribute("value");

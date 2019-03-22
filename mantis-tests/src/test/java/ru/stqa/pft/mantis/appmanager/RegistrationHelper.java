@@ -16,6 +16,7 @@ public class RegistrationHelper extends HelperBase {
     click(By.cssSelector("input[value='Signup']"));
 
 
+
   }
 
   public void finish(String conformationLink, String password) {

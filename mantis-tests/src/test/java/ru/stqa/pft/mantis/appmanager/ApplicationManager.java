@@ -14,11 +14,12 @@ import java.util.concurrent.TimeUnit;
 
 public class ApplicationManager {
   private final Properties properties;
-  private WebDriver driver;
+  private WebDriver wd;
   private String browser;
   private RegistrationHelper registratonHelper;
   private FtpHelper ftp;
   private MailHelper mailHelper;
+  private AdminHelper adminHelper;
 
 
   public ApplicationManager(String browser) {
@@ -33,8 +34,8 @@ public class ApplicationManager {
   }
 
   public void stop() {
-    if (driver != null) {
-      driver.quit();
+    if (wd != null) {
+      wd.quit();
     }
   }
 
@@ -54,18 +55,18 @@ public class ApplicationManager {
   }
 
   public WebDriver getDriver() {
-    if (driver == null) {
+    if (wd == null) {
       if (browser.equals(BrowserType.CHROME)) {
-        driver = new ChromeDriver();
+        wd = new ChromeDriver();
       } else if (browser.equals(BrowserType.FIREFOX)) {
-        driver = new FirefoxDriver();
+        wd = new FirefoxDriver();
       } else if (browser == BrowserType.IE) {
-        driver = new InternetExplorerDriver();
+        wd = new InternetExplorerDriver();
       }
-      driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
-      driver.get(properties.getProperty("web.baseUrl"));
+      wd.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+      wd.get(properties.getProperty("web.baseUrl"));
     }
-    return driver;
+    return wd;
   }
 
 
@@ -83,4 +84,10 @@ public class ApplicationManager {
     return mailHelper;
   }
 
+  public AdminHelper admin() {
+    if (adminHelper == null) {
+      adminHelper = new AdminHelper(this);
+    }
+    return null;
+  }
 }

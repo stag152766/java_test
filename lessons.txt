@@ -8199,6 +8199,79 @@ long now = System.currentTimeMillis();
 
 	
 	
+	
+	ДЗ
+	
+1. Создаем нового пользователя в ручную. Указываем логин, пароль, адрес
+2. Админ выбирает указанного пользователя. 
+Например, в поле Search вводит имя пользователя и нажимает кнопку manage user
+3. Нажимает кнопку Reset Password на открывшейся странице 
+4. На адрес ушло письмо.
+5. wiser получил письма, нашел ссылку и передал ее драйверу
+
+
+Received: from localhost ([0:0:0:0:0:0:0:1])
+        by kobzev.enterra.ln
+        with SMTP (SubEthaSMTP 3.1.7) id JTIKWRCF
+        for user1@localhost.localdomain;
+        Thu, 21 Mar 2019 18:55:17 +0700 (GMT+07:00)
+Date: Thu, 21 Mar 2019 12:55:17 +0100
+Return-Path: <admin@example.com>
+To: user1@localhost.localdomain
+From: Mantis Bug Tracker <noreply@example.com>
+Subject: [MantisBT] Password Reset
+Message-ID: <77ef415a566ddb0630692ccb0c2bf581@localhost>
+X-Priority: 3
+X-Mailer: PHPMailer 5.2.6 (https://github.com/PHPMailer/PHPMailer/)
+Auto-Submitted: auto-generated
+X-Auto-Response-Suppress: All
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+
+
+Someone (presumably you) requested a password change through e-mail
+verification. If this was not you, ignore this message and nothing will happen.
+
+If you requested this verification, visit the following URL to change your
+password: 
+
+http://localhost/mantisbt-1.2.19/verify.php?id=3&confirm_hash=e5b905ff88f4cc6905f073bcb47aec46
+
+
+Username: user1 
+Remote IP address: ::1 
+
+Do not reply to this message
+
+
+6. Драйвер прошел по ссылке, 
+открылась страница с залогиненным пользователем
+
+http://localhost/mantisbt-1.2.19/verify.php?id=3&confirm_hash=e5b905ff88f4cc6905f073bcb47aec46
+
+нужно ввести новый пароль в поле
+
+<input type="password" size="32" maxlength="1024" name="password">
+
+
+и подтвердить пароль в поле
+
+<input type="password" size="32" maxlength="1024" name="password_confirm">
+
+нажать кнопку 
+
+<input type="submit" class="button" value="Update User">
+
+
+через некоторое время просиходит пререход на страницу с логином
+
+http://localhost/mantisbt-1.2.19/login_page.php?return=%2Fmantisbt-1.2.19%2Faccount_page.php
+
+6. На странице с логином вводим username и новый пароль и нажимаем кнопку логин
+
+7. Проверяем имя пользователя с помощью httpHelper
+
  }
 Урок 82. Telnet Выполнение команд {
 	
