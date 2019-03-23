@@ -21,30 +21,24 @@ public class ChangePasswordTests extends TestBase {
 
   @Test
   public void testChangePassword() throws IOException {
-    //админ инициирует смену пароля пользователю
-    String username = "user1";
-    String email = String.format("user1s@localhost.localdomain");
+    String username = "user1553302824487";
+    String newpassword = "222222";
+    String email = String.format("%s@localhost.localdomain", username);
     app.admin().login();
     app.admin().manageUsers(username);
     app.admin().resetPassword();
-
-    //пользователь устанавливает новый пароль
-
-    String newpassword = "111111";
-    List<MailMessage> mailMessages = app.mail().waitForMail(2, 10000);
+    List<MailMessage> mailMessages = app.mail().waitForMail(1, 10000);
     String conformationLink = app.admin().findConformationLink(mailMessages, email);
     app.admin().finish(conformationLink, newpassword);
-
-    //проверка логина с новым паролем
     HttpSession session = app.newSession();
     assertTrue(session.login(username, newpassword));
     assertTrue(session.isLoggedAs(username));
-
   }
 
 
-  @AfterMethod
+  @AfterMethod(alwaysRun = true)
   public void stopMailServer() {
     app.mail().stop();
   }
+
 }

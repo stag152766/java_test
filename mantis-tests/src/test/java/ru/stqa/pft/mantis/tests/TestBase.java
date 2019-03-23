@@ -10,11 +10,10 @@ import java.io.IOException;
 
 public class TestBase {
 
+ protected static final ApplicationManager app
+          = new ApplicationManager(System.getProperty("browser", BrowserType.CHROME));
 
-  protected static final ApplicationManager app = new ApplicationManager
-          (System.getProperty("browser", BrowserType.CHROME));
-
-  @BeforeSuite(alwaysRun = true)
+  @BeforeSuite
   public void setUp() throws IOException {
     app.init();
     app.ftp().upload(new File("src/test/resources/config_inc.php"),
@@ -26,4 +25,5 @@ public class TestBase {
     app.ftp().restore("config_inc.php.bak", "config_inc.php");
     app.stop();
   }
+
 }

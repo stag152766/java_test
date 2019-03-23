@@ -18,14 +18,14 @@ public class AdminHelper extends HelperBase {
     type(By.name("username"), app.getProperty("web.adminLogin"));
     type(By.name("password"), app.getProperty("web.adminPassword"));
     click(By.cssSelector("input[value='Login']"));
-
   }
 
+
   public void manageUsers(String username) {
-    wd.findElement(By.xpath(" //a[contains(text(),'Manage Users')]")).click();
-    type(By.cssSelector("input[name='username']"), username);
-
-
+    wd.get(app.getProperty("web.baseUrl") + "/manage_overview_page.php");
+    click(By.cssSelector("a[href*='manage_user_page']"));
+    type(By.name("username"), username);
+    click(By.cssSelector("input[value='Manage User']"));
   }
 
   public void resetPassword() {

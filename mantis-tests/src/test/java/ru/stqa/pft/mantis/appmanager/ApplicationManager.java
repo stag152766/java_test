@@ -88,6 +88,6 @@ public class ApplicationManager {
     if (adminHelper == null) {
       adminHelper = new AdminHelper(this);
     }
-    return null;
+    return adminHelper;
   }
 }
