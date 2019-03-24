@@ -10,6 +10,8 @@
       <module name="mantis-tests.test" target="11" />
       <module name="sandBox.main" target="11" />
       <module name="sandBox.test" target="11" />
+      <module name="soap-sample.main" target="11" />
+      <module name="soap-sample.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
