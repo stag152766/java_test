@@ -1,6 +1,7 @@
 apply plugin: 'java'
 
 
+
 repositories {
     mavenCentral()
 }
@@ -8,5 +9,25 @@ repositories {
 
 dependencies {
     implementation 'org.testng:testng:6.14.3'
-    
+
+}
+
+buildscript{
+    repositories{
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'no.nils:wsdl2java:0.10'
+    }
+}
+apply plugin: 'no.nils.wsdl2java'
+
+wsdl2java {
+    generatedWsdlDir = file("src/main/java")  // куда именно будут помещены файлы java, которые генерируются из описания 
+    wsdlDir = file("src/main/resources") // вспомогательная директория где генератор может хранить какие то файлы
+    wsdlsToGenerate = [   //  2d-array of wsdls and cxf-parameters
+                          ['src/main/resources/wsdl/geoipservice.wsdl'],
+    ]
+
 }
