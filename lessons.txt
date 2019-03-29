@@ -8892,39 +8892,607 @@ http://www.webservicex.net/geoipservice.asmx?WDSL
 
 С точки зрения сетевого протокла отправляется запрос
 
+POST /ipservice.asmx HTTP/1.1
+Host: wsgeoip.lavasoft.com
+Content-Type: text/xml; charset=utf-8
+Content-Length: length
+SOAPAction: "http://lavasoft.com/GetIpLocation"
+
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <GetIpLocation xmlns="http://lavasoft.com/">
+      <sIp>string</sIp>
+    </GetIpLocation>
+  </soap:Body>
+</soap:Envelope>
+
+
 и приходит ответ
+
+<Geo Ip>
+<ReturnCode>
+<IP>
+<ReturnCodeDetails>
+<CountryName>
+<ContryCode>
 
 
 Но мы такие запрос отправлять не будем. Наша цель научится пользоваться удаленным программным интерфейсом, а не работать на уровне сетевого протокола.
 
+Как из описания сервиса в формате wsdl автоматически сгенерировать код на java, который предоставляет удаленный програмный интерфейс к этому сервису.  
+
+Сейчас нас будет интересовать адрес
+
+
+http://www.webservice.net/geoipservice.asmx?WSDL
+
+Он содержит описани программного интерфейса в специальном формате WSDL ()
+Сохраняем файл внутрь нашего проекта resouses
+Называем файл geoservice.wsdl тип web page xml only
+
+Теперь по этому описанию можно сгенерировать код на языке java, который будет использоваться для удаленого взаимодействия с этим сервисом
+
+Для этого открываем конф файл и подключаем плагин
+
+Копируем фрагмент из 
+
+https://github.com/nilsmagnus/wsdl2java
+
+buildscript{
+    repositories{
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'no.nils:wsdl2java:0.10'
+    }
+}
+apply plugin: 'no.nils.wsdl2java'
+
+
+Копируем пример 
+
+wsdl2java {
+    generatedWsdlDir = file("my-generated-sources")  // target directory for generated source coude
+    wsdlDir = file("src/main/resources/myWsdlFiles") // define to support incremental build
+    wsdlsToGenerate = [   //  2d-array of wsdls and cxf-parameters
+                ['src/main/resources/wsdl/firstwsdl.wsdl'],
+                ['-xjc','-b','bindingfile.xml','src/main/resources/wsdl/secondwsdl.wsdl']
+        ]
+    locale = Locale.GERMANY
+}
+
+Меняем под свой собвстенный проект 
+
+
+wsdl2java {
+    generatedWsdlDir = file("src/main/java")  // куда именно будут помещены файлы java, которые генерируются из описания*** 
+    wsdlDir = file("src/main/resources") // вспомогательная директория где генератор может хранить какие то файлы
+    wsdlsToGenerate = [   //  2d-array of wsdls and cxf-parameters
+                ['src/main/resources/wsdl/geoipservice.wsdl'],
+        ]
+
+}
+ 
+***а тесты которые будут использовать этот программный интерфейс поместим в src /test/java
+
+
+теперь запускаем консоль в подкаталоге 
+c:\Users\kobzev\Documents\GitHub\java_test\soap-sample\
+
+выполняем команду
+
+gradlew wsdl2java
+
+должен сгененироваться код, состоящий из множества классов
+
+
+Теперь этим кодом можно пользоваться, делаем тест 
+
+
+package ru.stqa.pft.soap;
+
+import org.testng.annotations.Test;
+
+public class GeoIpServiceTests {
+
+  @Test
+  public void testMyIp() {
+	//создаем объект типа GeoIpService()
+	//в нем выбираем тип реализации 
+	//вызываем функцию, вместо параметра передаем свой ip 
+	//результат сохраняем в переменную типа GeoIP
+	GeoIP geoIP = new GeoIpService().getGeoIPServiceSoap12().getGeoIP("194.28.29.152"); 
+	//выполняем сравнения полученного значения и ожидаемого 
+	assertEquals(geoIP.getConuntryCode(), "RUS"); 
+  }
+}
+
+Тест зеленый, значит мы смогли вызвать функцию, обратиться через удаленный программный интерфейс к удаленного сервису и получили правильный ответ.
+
+
+}
+
+Урок 85. SOAP - взаимодействие с MantisBT {
+
+Не всегда просто сгенерировать код на java из файла wdsl
+
+Во первых, бывает генератору нужно указать какие то параметры отличных от дефолтных
+Во вторых, иногда бывает нужно использовать устаревшую версию генератора 
+
+Для того чтобы избавить пользователей от генерации разработчики системы, которая предоставляет удаленный программный интерфейс часто сами генерируют уже готовую библиотеку. Тогда нужно ее только подключить к своему проекту и использовать.  
+
+Рассмотрим на примере Mantis, который предоставляет удаленный программный интерфейс, работающий по технологии SOAP и для него уже есть такая готовая библиотека.
+
+Для того, чтобы использовать удаленный программный интерфейс багтреккера Mantis нужно обращаться по адресу  
+http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php?wsdl //файл описания, из которого с дефолтными параметрами не получается сгенерировать программный код - это описание написано в устаревшем формате, поэтому нужно использовать старую версию генератора.
+
+Чтобы не мучится с генератором, нужно найти уже готовый компонент
+
+https://search.maven.org/artifact/biz.futureware.mantis/mantis-axis-soap-client/1.2.19/jar
+
+Добавляем в список зависимостей mantis-tests
+implementation 'biz.futureware.mantis:mantis-axis-soap-client:1.2.19'
+
+Пишем новый тест
+
+
+package ru.stqa.pft.mantis.tests;
+
+import org.testng.annotations.Test;
+
+public class SoapTests {
+
+  @Test
+  public void testGetProjects() {
+    //получение списка проектов
+
+    
+
+  }
+
+}
 
 
 
+Посмотрим на подлюченные библиотеки
+
+C:\Users\kobzev\.gradle\caches\modules-2\files-2.1\biz.futureware.mantis\mantis-axis-soap-client\1.2.19\1b4a9cd7104f320c4a1d716f94975dc33e6fd2b9\mantis-axis-soap-client-1.2.19.jar!\biz\futureware\mantis\rpc\soap\client\MantisConnectLocator.class
 
 
+  @Test
+  public void testGetProjects() throws MalformedURLException, ServiceException {
+    //получение списка проектов
+	//устанавливаем соединение
+    new MantisConnectLocator().getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php?wsdl"));
 
 
+  }
+
+присваиваем получившееся значение в переменную
+
+  MantisConnectPortType mc = new MantisConnectLocator().getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php?wsdl"));
+
+//получаем массив проектов, к которым указанный пользователь имеет доступ
+    ProjectData[] projects = mc.mc_projects_get_user_accessible("administrator", "root"); //обращаемся к объекту, вызываем метод, присваиваем полученное значение в переменную. тип переменной указывается автоматически
+	
+Смотрим через веб интерфес какие есть проекты, создаем при необходимости
+
+http://localhost/mantisbt-1.2.19/manage_proj_page.php
 
 
+Попробуем вывести информацию на консоль
+
+- количество проектов
+- названия проектов 
+
+Получаем
+1
+test
 
 
+/*Если возникает ошибка 
+Error Type: SYSTEM NOTICE, Error Description: Array to string conversion
 
+то нужно исправить файл nusoap.php
 
+The problem seems to be on the debug statement when it tries to convert an array to a string around line 6139 in serializeType in nusoap.php. The debug statement is in comments in the note, because is the one causing the error problems. Most likely it should be resolved with an application of implode on the right variable type. But being that I do not need to run debug, a comment on the statement will do it for me.
 
+Code included:
 
+$rows = sizeof($value);
+$contents = '';
+foreach($value as $k => $v) {
+// PROBLEM STATEMENT
+//$this->debug("serializing array element: $k, $v of type: $typeDef[arrayType]");
+// PROBLEM STATEMENT
 
+//if (strpos($typeDef['arrayType'], ':') ) {
 
+if (!in_array($typeDef['arrayType'],$this->typemap['http://www.w3.org/2001/XMLSchema'])) {
+$contents .= $this->serializeType('item', $typeDef['arrayType'], $v, $use);
+} else {
+$contents .= $this->serialize_val($v, 'item', $typeDef['arrayType'], null, $this->XMLSchemaVersion, false, $use);
+}
 
+*/
 
+Смогли обратиться к баг трекеру через удаленный програмнный интерфейс и получить от него какую то информацию
 
+Конечно, работать с этими данными, которые предоставляет библитека не очень удобно. Нам хотелось бы иметь свои собственные модельные объекты.
 
+В частност, модельные объекты для представления проектов. 
+
+Сделаем модельные объекты
+
+Добавим новый класс Project в пакет model
+
+package ru.stqa.pft.mantis.model;
+
+public class Project {
+  private int id;
+  private String name;
+  
 
 
 
 }
 
-Урок 85. SOAP - взаимодействие с MantisBT 00:22:17
 
+Гененируем getter и setter
+
+Setter меняем на такие, какие можно использоватль путем вытягивания в цепочки т.е. делаем fluent interface
+
+public int getId() {
+    return id;
+  }
+
+  public Project withtId(int id) {
+    this.id = id;
+    return this;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Project withtName(String name) {
+    this.name = name;
+    return this;
+  }
+
+
+
+Делаем помощник SoapHelper
+
+Инициализируем помощник в АМ
+
+  public SoapHelper soap() {
+    if (soapHelper == null) {
+      soapHelper = new SoapHelper(this);
+    }
+    return soapHelper;
+  }
+
+
+
+Делаем конструктор
+
+public class SoapHelper {
+  private ApplicationManager app;
+
+public SoapHelper(ApplicationManager app) //принимает в качестве параметра АМ 
+//делаем для него поле, которое так и называется (при помощи среды разработки)
+//конструктор достраивается автоматически
+
+
+
+public class SoapHelper {
+
+  private ApplicationManager app;
+
+  public SoapHelper(ApplicationManager app) {
+    this.app = app;
+  }
+  
+}
+
+
+Переносим в SoapHelper фрагмент кода для извлечения проекта
+
+
+  public void testGetProjects() throws MalformedURLException, ServiceException, RemoteException {
+    MantisConnectPortType mc = new MantisConnectLocator()
+            .getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php"));
+    ProjectData[] projects = mc.mc_projects_get_user_accessible("administrator", "root");
+
+	}
+  }
+
+
+Делаем новый метод 
+
+public Set<Project> getProjects() {
+//у каждого объекта будет свой идентификатор, поэтому делаем множество. Нет необходимости говорить о порядке проектов. 
+//вставляем сюда скопированный код 
+//добавляем все исключения
+
+
+
+public class SoapHelper {
+
+  private ApplicationManager app;
+
+  public SoapHelper(ApplicationManager app) {
+    this.app = app;
+  }
+
+  public Set<Project> getProjects() throws RemoteException, MalformedURLException, ServiceException {
+    MantisConnectPortType mc = new MantisConnectLocator()
+            .getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php"));
+    ProjectData[] projects = mc.mc_projects_get_user_accessible("administrator", "root");
+    //преобразуем полученные данные в модельные объекты
+	//ко всем элементам потока применяем функцию map, которая будет из объекта типа ProjectData строить объект типа Project
+	//с таким же идентификатором и именем
+	//поток, из новых объектов, собираем в множество 
+	//возвращаем полуичвшееся множество
+	
+	return Arrays.asList(projects).stream().map((p) -> new Project().withtId(p.getId()).withtName(p.getName()))
+            .collect(Collectors.toSet()); //не сходится тип идентификатора - возвращается Big Int а нужен Int
+			//вызываем метод intValue() чтобы преобразовать 
+
+  }
+
+Теперь метод возвращает объет типа Project и в тестах удобнее использовать именно его
+
+Теперь переделываем SoapTests
+
+было
+  @Test
+  public void testGetProjects() throws MalformedURLException, ServiceException, RemoteException {
+    //получение списка проектов
+    MantisConnectPortType mc = new MantisConnectLocator()
+            .getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php"));
+    //получаем массив проектов, к которым указанный пользователь имеет доступ
+    ProjectData[] projects = mc.mc_projects_get_user_accessible("administrator", "root");
+    //вывод на консоль количество проектов
+    System.out.println(projects.length);
+    //названия проектов
+    for (ProjectData project : projects){
+      System.out.println(project.getName());
+    }
+  }
+
+стало
+
+public class SoapTests extends TestBase {
+
+  @Test
+  public void testGetProjects() throws MalformedURLException, ServiceException, RemoteException {
+    Set<Project> projects = app.soap().getProjects();
+    System.out.println(projects.size());
+    for (Project project : projects){
+      System.out.println(project.getName());
+    }
+  }
+
+Запускаем тест, получаем тот же результат 
+
+1
+test
+
+  
+Теперь попробуем что-нибудь создать
+Научимся создавать баг репорты
+
+
+Добавим новый тест в класс SoapTests
+
+@Test
+  public void testCreateIssue() {
+    
+  }  
+ 
+Придется создать новый объект 
+  
+  
+  
+ public class Issue {
+
+  private int id;
+  private String summary;
+  private String discription;
+  private Project project;
+} 
+  
+  
+ Создаем геттеры и сеттеры
+
+
+package ru.stqa.pft.mantis.model;
+
+public class Issue {
+
+  private int id;
+  private String summary;
+  private String discription;
+  private Project project;
+
+  public int getId() {
+    return id;
+  }
+
+  public Issue withId(int id) {
+    this.id = id;
+    return this;
+
+  }
+
+  public String getSummary() {
+    return summary;
+  }
+
+  public Issue withSummary(String summary) {
+    this.summary = summary;
+    return this;
+  }
+
+  public String getDiscription() {
+    return discription;
+  }
+
+  public Issue withDiscription(String discription) {
+    this.discription = discription;
+    return this;
+  }
+
+  public Project getProject() {
+    return project;
+  }
+
+  public Issue withProject(Project project) {
+    this.project = project;
+    return this;
+  }
+}
+ 
+  
+Возвращаемся в тест 
+
+  @Test
+  public void testCreateIssue() {
+    Issue issue = new Issue().withSummary("Test Issue").withDescription("Test issue description")
+            .getProject(project); //откуда взять проект? в начале получим списпок проектов
+
+  }
+
+  
+    @Test
+  public void testCreateIssue() throws MalformedURLException, ServiceException, RemoteException {
+    Set<Project> projects = app.soap().getProjects();
+    Issue issue = new Issue().withSummary("Test Issue").withDescription("Test issue description")
+            .withProject(projects.iterator().next());
+
+Создаем функцию 
+app.soap().addIsuue(issue);
+  
+результатом которой будет новый объект типа Issue, который мы можем сравнивать с существующим
+
+Например , сравним у них Summary
+
+assertEquals(issue.getSummary(), created.getSummary());
+
+Создадим недостающий метод addIssue() 
+
+public Issue addIsuue(Issue issue) {}
+  
+  
+Сначала нужно снова создать соединени ms connect
+
+вынесем во вспомогаетльный метод 
+
+  MantisConnectPortType mc = new MantisConnectLocator()
+            .getMantisConnectPort(new URL("http://localhost/mantisbt-1.2.19/api/soap/mantisconnect.php"));
+    
+  
+  
+  MantisConnectPortType mc = getMantisConnect();
+  mc.mc_issue_add("administrator", "root", issueData); //должен указываться объект типа IssueData
+  
+  Мы должны из нашего модульного объекта типа Issue сформировать такой, который имеет нужную структуру. Для передачи его в метод удаленного интерфейса. 
+  
+  
+public Issue addIsuue(Issue issue) throws MalformedURLException, ServiceException, RemoteException {
+    //нужно снова создать соединение
+    MantisConnectPortType mc = getMantisConnect();
+    IssueData issueData = new IssueData();
+    mc.mc_issue_add("administrator", "root", issueData);
+  
+  
+  Получаем
+  
+  public Issue addIsuue(Issue issue) throws MalformedURLException, ServiceException, RemoteException {
+    MantisConnectPortType mc = getMantisConnect();
+    IssueData issueData = new IssueData();
+    //заполняем объект
+    issueData.setSummary(issue.getSummary());
+    issueData.setDescription(issue.getDescription());
+    issueData.setProject(new ObjectRef(BigInteger.valueOf(issue.getProject().getId()),
+            issue.getProject().getName()));//ObjectRef - это ссылка на проект
+    //несовпадение типов, здесь нужен объект типа BigInt. преобразовываем
+    mc.mc_issue_add("administrator", "root", issueData);
+	//теперь нужно обратно преобразовать
+	//присваиваем идентификатор созданного багрепорта в новую переменную - alt+enter на параметре issueData
+  }
+
+  
+	BigInteger issueId = mc.mc_issue_add("administrator", "root", issueData);
+
+    //преобразовываем обратно в модульный объект
+    //снова выполняем запрос
+    //в ответ получаем объект типа IssueData
+    IssueData createdIssueData = mc.mc_issue_get("administrator", "root", issueId);
+    //снова преобразуем в модельный объект
+    return new Issue().withId(createdIssueData.getId().intValue())
+                      .withDescription(createdIssueData.getDescription())
+                      .withSummary(createdIssueData.getSummary())
+                      .withProject(new Project().withtId(createdIssueData.getProject().getId().intValue())
+                                                .withtName(createdIssueData.getProject().getName()));
+    
+  }
+  
+Но при создании баг репорта есть обязательное поле - Category и там нужно указать как минимум дефолтную категорию
+
+Поэтому добавим
+
+issueData.setCategory(); //но откуда ее взять? . 
+
+Выбирем случайную. Для этого запросим у багтреккера тотже самый программный интерфейс
+
+
+mc.mc_project_get_categories("administrator", "root",
+            BigInteger.valueOf(issue.getProject().getId()));
+			
+Поместим результат в локальную переменную 
+
+String[] categories = mc.mc_project_get_categories("administrator", "root",
+            BigInteger.valueOf(issue.getProject().getId()));
+			
+Выбирим первую 
+
+issueData.setCategory(categories[0]);			
+
+В итоге получим
+
+  public Issue addIsuue(Issue issue) throws MalformedURLException, ServiceException, RemoteException {
+    MantisConnectPortType mc = getMantisConnect();
+    String[] categories = mc.mc_project_get_categories("administrator", "root",
+            BigInteger.valueOf(issue.getProject().getId()));
+    IssueData issueData = new IssueData();
+    issueData.setSummary(issue.getSummary());
+    issueData.setDescription(issue.getDescription());
+    issueData.setProject(new ObjectRef(BigInteger.valueOf(issue.getProject().getId()),
+            issue.getProject().getName()));
+    issueData.setCategory(categories[0]);
+    BigInteger issueId = mc.mc_issue_add("administrator", "root", issueData);
+    IssueData createdIssueData = mc.mc_issue_get("administrator", "root", issueId);
+    return new Issue().withId(createdIssueData.getId().intValue())
+                      .withDescription(createdIssueData.getDescription())
+                      .withSummary(createdIssueData.getSummary())
+                      .withProject(new Project().withtId(createdIssueData.getProject().getId().intValue())
+                                                .withtName(createdIssueData.getProject().getName()));
+
+  }
+  
+Запускаем тест 
+
+Все действия по созданию объектов мы выполняем через удаленный программный интерфейс, работающий по технологии soap .
+Но на понятности тестов, это никак не отразилось. Мы по прежнему здесь работаем с модельными объектами, своими собственными, а все технические детали, в том числе взаимодействие с этой технологией soap и преобразование своих собственных модельных объектов в те которые нужны для отправки данных в виде soap запроса - все это спрятанно в виде специального класса помощника. 
+
+
+
+}
 Урок 86. REST - взаимодействие с Bugify 00:24:43
 
 Урок 87. RestAssured - использовать или нет 00:06:32
@@ -8945,10 +9513,7 @@ http://www.webservicex.net/geoipservice.asmx?WDSL
 Урок 94. Behaviour Driven Testing и инструмент Cucumber-JVM 00:22:15	
 	
 	
-	
-	
-	
-	
+
 	
 	
 	
