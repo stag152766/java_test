@@ -9671,21 +9671,170 @@ private Set<Issue> getIssues() throws IOException {
 Урок 87. RestAssured {
 	
 	
-	
+RestAssured библиотека для работы с REST сервисами
+
+https://github.com/rest-assured/rest-assured
 
 
+Пример запроса
+
+get("/lotto").then().assertThat().body("lotto.lottoId", equalTo(5));
+
+Выполяется запрос и сразу выполняются проверки, в которых указан путь внутри полученного json или xml ответа ,по этому пути находится какое то значение и сравнивается с ожидаемым
+
+В действительности оказывается что тесты становятся низкоуровневыми. Потому что они работают непосредственно с json ответами, вместо того чтобы работать с модельными объектами. 
+Получаем информацию от тестируемого приложения, преобразовываем в модельные объекты и проверки выполняем уже на уровне модельных объектов.
+
+А эта библеотека предлагает выполнять проверки непосредственно на уровне json файлов, это делать не рекомендуется.
+
+Но для первой части, то есть для выполнения запросов и получения ответов в формате json эту библеотеку можно использовать.
+
+Подключаем к проекту
+implementation 'com.jayway.restassured:rest-assured-parent:2.9.0'
+
+Скопируем и перепишем тест RestTests
+
+private Set<Issue> getIssues() {
+    String json = RestAssured.get("http://demo.bugify.com/api/issues.json").asString();
+    JsonElement parsed = new JsonParser().parse(json);
+    JsonElement issues = parsed.getAsJsonObject().get("issues");
+    return new Gson().fromJson(issues, new TypeToken<Set<Issue>>(){}.getType());
+  }
 
 
+  private int createIssue(Issue newIssue) {
+    String json = RestAssured.given().parameter("subject", newIssue.getSubject())
+                                     .parameter("description", newIssue.getDescription())
+                                     .post("http://demo.bugify.com/api/issues.json").asString();
+    JsonElement parsed = new JsonParser().parse(json);
+    return parsed.getAsJsonObject().get("issue_id").getAsInt();
+  }
 
 
+Для авторизации нужно добавить
+
+ @BeforeClass
+  public void init(){
+    RestAssured.authentication = RestAssured.basic("e2307a869459460d31fe91e544054d72", "");
+  }
 
 
-
+Теперь при каждом обращении к RestAssured будут использоваться эти параметры аутентификации
 
 
 }	
 
-Урок 88. REST - взаимодействие с GitHub 00:10:26
+Урок 88. REST - взаимодействие с GitHub {
+	
+Технология REST по сравнению с технологией SOAP имеет один серьезный недостаток, она вообще не предусматривает какого то описания сервиса в стандартном формате с которого можно было бы автоматически сгенерировать код который реализует удаленный программный интерфейс к этому сервесу.
+
+Поэтому приходится все преобразователи писать вручную. Но иногда, это делают разработчики сервиса.
+
+Они предоставляют библиотеки для разных языков программирования, которые можно подключить к проекту и использовать.
+
+Пример jcabi от github
+
+https://developer.github.com/v3/libraries/
+
+https://github.jcabi.com/	
+	
+
+Создадим новый модуль github-sample
+
+Импортируем аналогично
+
+Редактируем зависимости
+
+удаляем все кроме testng
+
+добавляем 
+
+implementation 'com.jcabi:jcabi-github:1.0'
+	
+	
+	
+Создаем новый класс
+
+package ru.stqa.pft.github;
+
+import org.testng.annotations.Test;
+
+public class GithubTests {
+
+
+  @Test
+  public void testCommits() {
+    
+  }
+}	
+	
+	
+Получим из github информацию о коммитах. Прочитаем и выведем на консоль историю репозитория.
+
+Как это происходит? Идем на страницу библиотеки
+
+Github github = new RtGithub(".. your OAuth token .."); //установка соединение с github через удаленный программный интерфейс
+ 	
+Нужно указать токен, его необходимо предварительно сгенерировать
+
+В настройках	https://github.com/settings/tokens
+
+Token description=REST
+Repo=all //доступ к репозиторию - списку коммитов
+Gist=all //доступ к заметкам
+
+  @Test
+  public void testCommits() {
+    Github github = new RtGithub("630e7e729a7c7a871cf2806583e080a6f75b72dd");
+    github. //список методов, которые позволяют получить доступ к определенной части сервиса
+  }
+
+
+
+  @Test
+  public void testCommits() {
+    Github github = new RtGithub("630e7e729a7c7a871cf2806583e080a6f75b72dd");
+    RepoCommits commits = github.repos().get(new Coordinates.Simple("stag152766", "java_test")).commits();
+    for(RepoCommit commit : commits.iterate()){ //нужно передать набор пар которые описывают фильтр
+      System.out.println(commit);
+
+    }
+  }
+
+В метод iterate() нужно передать набор пар, которые описывают некоторые условия отбора коммитов (фильтр)
+
+Мы хотим получить полный список коммитов, поэтому нужно туда передать какое то пустое значение (null передавать нельзя)
+
+Построем пустой набор пар
+new ImmutableMap.Builder<String, String>().build()
+  
+В java помимо списков и множеств есть мэпы (ассоциативные массивы, карты) - это наборы пар	
+
+Запускаем тест, получаем результат в виде списка ссылок
+
+Но хотелось бы получить результат в виде понятных текстовых сообщений
+
+преобразуем объект в другой RepoCommit.Smart(commit)
+
+у него есть методы, позволяющие получить более детальную информацию о коммите, например комментарий к коммиту
+
+
+  @Test
+  public void testCommits() throws IOException {
+    Github github = new RtGithub("630e7e729a7c7a871cf2806583e080a6f75b72dd");
+    RepoCommits commits = github.repos().get(new Coordinates.Simple("stag152766", "java_test")).commits();
+    for(RepoCommit commit : commits.iterate(new ImmutableMap.Builder<String, String>().build())){ //нужно передать набор пар которые описывают фильтр
+      System.out.println(new RepoCommit.Smart(commit).message());
+
+    }
+  }
+
+Это так все удобно происходит, благодаря тому что уже есть готовые библиотеки для работы с этим удаленным программным интерфейсом.
+Если система предоставляет удаленный программный интерфейс, то иммет смысл сделать подобные библиоотеки. Чтобы не надо было думать об конкретных адресах, чтобы можно было работать с объектами, которые описывают некоторые логические сущности.
+
+  
+}
+	
 
 Занятие 10.Тестовые фреймворки и инфраструктура
 Урок 89. Сервер непрерывной интеграции 00:23:21
