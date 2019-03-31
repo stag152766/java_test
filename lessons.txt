@@ -9493,9 +9493,197 @@ issueData.setCategory(categories[0]);
 
 
 }
-Урок 86. REST - взаимодействие с Bugify 00:24:43
+Урок 86. REST - взаимодействие с Bugify {
+	
+На очереди другая разновидность удаленных программных интерфейсов - REST
 
-Урок 87. RestAssured - использовать или нет 00:06:32
+Рассмотрим на примере багтрекера	
+http://demo.bugify.com
+
+который предоставляет удаленный программный интерфейс в стиле REST
+https://bugify.com/api
+
+REST как правило используется для того чтобы получить доступ к ресурсам, удаленным объектам и работать с этими объектами: создавать,просматривать, модифицировать, удалять эти объекты.
+
+Т.е. удаленный программный интерфейс багтрекера должен содержать команды для управления багрепортами.
+
+
+Для того чтобы выполнить какую то команду, получить доступ к какому то объекту, либо модифицировать его нужно отправить запрос по протоколу http на адрес 
+http://demo.bugify.com/api + команда (GET/issues.json )
+
+в этом запросе могут передаваться параметры
+
+Доступ к этому интерфейсу разрешен только авторизованным пользователям, поэтому нужно передавать 
+API key
+e2307a869459460d31fe91e544054d72
+	
+
+Для реализации тестов нужно уметь:
+- отправлять запросы по протоколу http (при помощи httpclient)
+- анализировать полученный ответ в формате json (преобразовывать эти данные в объект языка программирования)
+
+Созадем новый модуль resp-sample
+
+Ипортируем в среду разработки (аналогично прошлым урокам)
+
+Правим конф файл build.gradle
+
+Подключаем библиотеки
+
+dependencies {
+    compile 'org.testng:testng:7.0.0-beta3'
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile 'org.apache.httpcomponents:httpclient:4.5.7'
+
+}
+
+
+Пишем тест по созданию багрепорта в Bugify
+
+public class RestTests {
+
+
+  @Test
+  public void testCreateIssue(){
+	  
+  }
+
+}
+
+Не будем делать полноценную двух уровневую архитектуру. Выносим все во вспомогательные методы, кроме логики самого теста
+
+
+  @Test
+  public void testCreateIssue() throws IOException {
+	//Получим старый список
+    Set<Issue> oldIssues = getIssues();
+	//Создадим новый бегрепор
+    Issue newIssue = new Issue().withSubject("Test sub").withDescription("Test desc");
+    int issueId = createIssue(newIssue); //возвращает идентификатор созданного багрепорта
+	//Получим новый список 
+    Set<Issue> newIssues = getIssues();
+	//Добавим багрепорт в старый список
+	//пропишем идентификатор в объект, который мы создали
+    oldIssues.add(newIssue.withId(issueId));
+	//Сравним списки
+    assertEquals(newIssues, oldIssues);
+  }
+
+Создаем класс Issue
+Создаем в нем набор атрибутов
+
+
+public class Issue {
+  private int id;
+  private String subject;
+  private String description;
+  
+}
+
+Генненируем getter и setter, редактируя setter для флуент стиля
+
+public Issue withSubject(String subject) {//меняем возвращаемое значение на объект
+    this.subject = subject;
+    return this;//возвращается тот же самый объект, в котором вызван этот метод 
+	//т.е. методы модифицируют объект, в котором они вызываются и позволяют дальше работать с этим объектом
+  }
+
+Возвращаемся в тест 
+Создаем вспомогательные методы getIssues() и createIssue() при помощи другого способа работы с http клиентом, который тоже использует флуент стиль 
+
+
+Смотрим документацию	
+https://hc.apache.org/httpcomponents-client-ga/tutorial/html/fluent.html
+
+Подлючаем библиотеку
+
+compile 'org.apache.httpcomponents:fluent-hc:4.5.7'
+
+Пишем код
+
+
+private Set<Issue> getIssues() {
+	//получаем список всех багрепортов в формате json.
+	String json = Request.Get("http://demo.bugify.com/api/issues.json").execute().returnContent().asString(); 
+	return null; //ставим точку остановы
+}	
+
+Пробуем посмотреть в отладчике, удастся ли получить ответ
+
+Доступ к указанному адресу запрещен. Нужно авторизоваться, т.е. указать логин и пароль
+
+
+Смотрим в документацию
+
+Нужно использовать executor в который передается запрос
+
+  private Executor getExecutor() {
+    return Executor.newInstance().auth("e2307a869459460d31fe91e544054d72", ""); //username (key) + password
+  }
+	
+
+private Set<Issue> getIssues() throws IOException {
+    String json = getExecutor().execute(Request.Get("http://demo.bugify.com/api/issues.json")).returnContent().asString();
+    return null; //точка остановы
+  }
+
+ 
+Запускаем в отладчике. Получаем ответ, в котором нас интересует часть где указывается список "issues":[]
+
+Этот список будем преобразовывать в Set<Issue>
+
+Сначала нужно проанализировать ответ и взять от туда кусочек, который соответствуют ключу issues
+
+  private Set<Issue> getIssues() throws IOException {
+    String json = getExecutor().execute(Request.Get("http://demo.bugify.com/api/issues.json")).returnContent().asString();
+	//при помощи методе parse() получаем объект типа JsonElement
+    JsonElement parsed = new JsonParser().parse(json);
+	//извлекаем из него по ключу нужную часть и получаем нужный список 
+    JsonElement issues = parsed.getAsJsonObject().get("issues");
+	//теперь его нужно преобразовываем в Set<Issue> 
+    return new Gson().fromJson(issues, new TypeToken<Set<Issue>>(){}.getType());//ставим точку остановы
+	//второй параметр описывает сложный тип данных, который должен получится в конце 
+	//потому что в java есть ограничение - нельзя написать Set<Issue>.class (для тех которые содержат уточняющий тип в <>)
+  }
+
+Пробуем запустить в отладчике
+  
+Прочиталось старое множество багрепортов
+
+Переходим к методу создания post запроса. В ответе нас интересует часть "issue_id"
+  
+  private int createIssue(Issue newIssue) throws IOException {
+    String json = getExecutor().execute(Request.Post("http://demo.bugify.com/api/issues.json")
+			//передаем параметры, в формате пары (имя, значение)
+			.bodyForm(new BasicNameValuePair("subject", newIssue.getSubject()),
+                      new BasicNameValuePair("description", newIssue.getDescription())))
+            .returnContent().asString();
+	//анализируем ответ 
+    JsonElement parsed = new JsonParser().parse(json);
+	//возвращаем идентификатор созданного баг репорта
+    return parsed.getAsJsonObject().get("issue_id").getAsInt();
+  }
+
+
+
+}	
+
+Урок 87. RestAssured {
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+}	
 
 Урок 88. REST - взаимодействие с GitHub 00:10:26
 
