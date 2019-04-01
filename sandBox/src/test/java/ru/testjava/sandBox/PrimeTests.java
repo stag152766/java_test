@@ -7,7 +7,7 @@ public class PrimeTests {
 
   @Test(enabled = false)
   public void testPrimes() {
-    Assert.assertTrue(Primes.isPrime(Integer.MAX_VALUE)); //Integer.MAX_VALUE - простое число
+    Assert.assertTrue(Primes.isPrime(Integer.MAX_VALUE));
   }
 
   @Test(enabled = false)
@@ -18,7 +18,7 @@ public class PrimeTests {
 
   @Test(enabled = false)
   public void testPrimesLong() {
-    long n = Integer.MAX_VALUE; //значение переменной будет преобразовано в тип long
+    long n = Integer.MAX_VALUE;
     Assert.assertTrue(Primes.isPrime(n));
   }
 
