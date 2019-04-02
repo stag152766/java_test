@@ -9947,40 +9947,61 @@ c:\Tools\gradle-5.2.1\
 Теперь можно переходить к настройкам задачи
 
 
+create new jobs > Freestyle project
+
+name=sandbox
+
+Настройка задачи состоит из 4 основных частей
+1. Source Code Management // где взять исходный код 
+Git
+указываем адрес
+Repository URL=https://github.com/stag152766/java_test
+
+2. Build Triggers //когда запускать  //пока пропустим
+
+3. Build //что именно нужно делать
+Invoke Gradle script
+Gradle Version=то что настроили
+Tasks=clean test //потому что gradle повторно тесты запускать не любит, поэтому нужно выполнять очистку чтобы тесты запустились заново
+Root Build script //указываем название подкатологов где находится файл build.gradle
+Root Build script=sandbox //т.е. относительно корня проектов, они находятся в этойм подкатологе 
+
+Build File // у нас называется build.gradle это значение которое испльзуется по умолчанию, поэтому можно оставить пустым
+
+4. Post-build Actions //- те действия которые нужно выполнить в конце
+=Publish JUnit test result report
+
+Несмотря на то что мы используем тестовый фреймворк TestNG, сборщик Gradle сгенирировать отчет в виде xml файлов в универсальном формате JUnit
+
+Test report XMLs=sandbox/build/test-results/*.xml *//где отчеты будут находиться, во время выполнения тестов будут созданы необходимые подкатологи 
+
+Т.к. мы используем TestNG поэтому в build.gradle должна быть такая инструкция 
+
+test {
+    useTestNG()
+}
+
+иначе Gradle не найдет тесты, по умолчанию он использует фреймворк JUnit. JUnit ни одного тесты не запустит и xml файл не сгенерируется
+
+Сохраняем настройки
+
+Нажимаем Build Now
 
 
+//sandBox/build/reports/tests/test/classes/*.xml
 
 
+\sandBox\build\reports\tests\test\classes\
 
 
+c:\Users\kobzev\Documents\GitHub\java_test\sandBox\build\test-results\test\
+c:\Users\kobzev\Documents\GitHub\java_test\sandBox\build\test-results\test\
+
+sandBox/build/test-results/*.xml
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+sandBox/build/test-results/test/*.xml
+\sandBox\build\test-results\test\
 
 
 
