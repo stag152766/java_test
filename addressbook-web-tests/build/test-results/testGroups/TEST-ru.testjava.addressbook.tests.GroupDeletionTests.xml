@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ru.testjava.addressbook.tests.GroupDeletionTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-02-27T12:01:49" hostname="kobzev" time="0.922">
-  <properties/>
-  <testcase name="testGroupDeletion" classname="ru.testjava.addressbook.tests.GroupDeletionTests" time="0.922"/>
-  <system-out><![CDATA[12196 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestGroupDeletionwith parameter [] 
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

@@ -22,7 +22,6 @@ public class ApplicationManager {
   private SessionHelper sessionHelper;
   private NavigationHelper navigationHelper;
   private GroupHelper groupHelper;
-  private String baseUrl;
   private boolean acceptNextAlert = true;
   private StringBuffer verificationErrors = new StringBuffer();
   private String browser;
@@ -44,12 +43,13 @@ public class ApplicationManager {
     if (browser.equals(BrowserType.CHROME)) {
       driver = new ChromeDriver();
     } else if (browser.equals(BrowserType.FIREFOX)) {
+      System.setProperty("webdriver.gecko.driver","C:\\SeleniumGecko\\geckodriver-v0.24.0-win64\\geckodriver.exe");
       driver = new FirefoxDriver();
-    } else if (browser == BrowserType.IE) {
+    } else if (browser.equals(BrowserType.IE)) {
       driver = new InternetExplorerDriver();
     }
 
-    baseUrl = "https://www.katalon.com/";
+
     driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
     driver.get(properties.getProperty("web.baseUrl"));
     sessionHelper = new SessionHelper(driver);
