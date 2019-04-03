@@ -5635,6 +5635,21 @@ task testContacts(type: Test) {
 
 Запускаем тест, вместо chrome стартует firefox
 
+---
+If Exception in thread "main" java.lang.IllegalStateException: The path to the driver executable must be set by the webdriver.gecko.driver system property; for more information, see https://github.com/mozilla/geckodriver. The latest version can be downloaded from https://github.com/mozilla/geckodriver/releases
+
+THEN
+1. Download gecko driver from the seleniumhq website (Now it is on GitHub and you can download it from Here) .
+2. You will have a zip (or tar.gz) so extract it.
+3. After extraction you will have geckodriver.exe file (appropriate executable in linux).
+4. Create Folder in C: named SeleniumGecko (Or appropriate)
+5. Copy and Paste geckodriver.exe to SeleniumGecko
+6. Set the path for gecko driver as below
+
+System.setProperty("webdriver.gecko.driver","C:\\geckodriver-v0.10.0-win64\\geckodriver.exe");
+WebDriver driver = new FirefoxDriver();
+--
+
 Если firefox не указать, то все падает. Потому что в init() возникает NullPointerException, так как переменная не определена.
 Чтобы этой проблемы избежать, нужно установить какое то дефолтное значение, которое будет использоваться в том случае если системное свойство при запуске не указано. 
 
@@ -10064,6 +10079,62 @@ Save и запускаем
 
 
 Поскольку эта другая задача, то для нее будет в подкаталоге jenkins в домашней директории создана новое рабочее пространство, в него будет скопирован репозиторий java_pft. Это будет другая независимая копия, не та в которой запускался sandbox    
+
+
+Теперь запустим теже самые тесты и изменим конфигурацию, поменяем браузер
+
+- ранее уже реализована возможность указывать браузер при запуске
+
+ 
+В настройках задачи в поле 	Switches
+-Pbrowser=firefox
+
+Так значения параметров передаются в Gradle затем , он установит эти свойства как системные для запускаемых тестов 
+
+
+Запускаем тест. Тест проходит.
+
+
+Когда сервер НИ работает (запущенный из консоли) с доступом к UI все хорошо. Браузер запускается. Тесты работают.
+Но если сервер НИ запущен как сервис (демон - термин unix) то он не иммет доступа к UI 
+В этом случае браузер не запустится совсем, либо заупститься но результаты могут быть сильно искажены.  
+
+Способ 1
+Всегда запускать сервер НИ в интерактивной сессии (из консоли)
+
+Способ 2
+Для тестирования веб приложений с помощью selenium есть Selenium Server, который независимо от сервера НИ запускается в интерактиной сессии, которая имеет доступ к UI. 
+Сами тесты работают там где jenkins, а браузер запускается там где selenium server. 
+Причем это может быть как та же самая машина, но это другая интерактивная сессия, так и совсем другая машина. 
+Т.е. тестовый стед где запускаются браузеры может быть отдельным и независимым от того сервера где работает сервер НИ.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
