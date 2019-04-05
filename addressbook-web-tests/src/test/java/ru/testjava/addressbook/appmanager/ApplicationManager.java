@@ -48,19 +48,16 @@ public class ApplicationManager {
       if (browser.equals(BrowserType.CHROME)) {
         driver = new ChromeDriver();
       } else if (browser.equals(BrowserType.FIREFOX)) {
-        System.setProperty("webdriver.gecko.driver", "c:\\Tools\\geckodriver-v0.24.0-win64\\geckodriver.exe");
+        System.setProperty("webdriver.gecko.driver", "c:\\Tools\\geckodriver.exe");
         driver = new FirefoxDriver();
       } else if (browser.equals(BrowserType.IE)) {
         driver = new InternetExplorerDriver();
       }
       //иначе мы хотим использовать Selenium Server, значит нужно использовать другой тип драйвера
     } else {
-      System.setProperty("webdriver.chrome.driver","c:\\Tools\\chromedriver_win32\\chromedriver.exe");
       DesiredCapabilities capabilities = new DesiredCapabilities();
-      //устанавливаем там браузер
-      capabilities.setBrowserName(browser);
-      capabilities.setPlatform(Platform.WINDOWS);
-      new RemoteWebDriver(new URL("http://192.168.56.1:4444/wd/hub"), capabilities); //объект передает информацию какой бразузер хотим использовать
+      capabilities.setBrowserName(browser);//устанавливаем там браузер
+      driver = new RemoteWebDriver(new URL(properties.getProperty("selenium.server")), capabilities); //объект передает информацию какой бразузер хотим использовать
     }
 
     driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
