@@ -44,7 +44,6 @@ public class ApplicationManager {
     dbHelper = new DbHelper();
 
     if ("".equals(properties.getProperty("selenium.server"))) {
-      //иницализацию оставляем как раньше
       if (browser.equals(BrowserType.CHROME)) {
         driver = new ChromeDriver();
       } else if (browser.equals(BrowserType.FIREFOX)) {
@@ -53,11 +52,11 @@ public class ApplicationManager {
       } else if (browser.equals(BrowserType.IE)) {
         driver = new InternetExplorerDriver();
       }
-      //иначе мы хотим использовать Selenium Server, значит нужно использовать другой тип драйвера
     } else {
       DesiredCapabilities capabilities = new DesiredCapabilities();
-      capabilities.setBrowserName(browser);//устанавливаем там браузер
-      driver = new RemoteWebDriver(new URL(properties.getProperty("selenium.server")), capabilities); //объект передает информацию какой бразузер хотим использовать
+      capabilities.setBrowserName(browser);
+      capabilities.setPlatform(Platform.fromString(System.getProperty("platform", "win10")));
+      driver = new RemoteWebDriver(new URL(properties.getProperty("selenium.server")), capabilities);
     }
 
     driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
