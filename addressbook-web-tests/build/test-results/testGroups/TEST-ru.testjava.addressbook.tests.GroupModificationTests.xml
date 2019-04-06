@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ru.testjava.addressbook.tests.GroupModificationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-04-02T12:26:23" hostname="kobzev" time="0.965">
+<testsuite name="ru.testjava.addressbook.tests.GroupModificationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2019-04-06T02:04:37" hostname="DESKTOP-BRBDFUN" time="1.139">
   <properties/>
-  <testcase name="testGroupModification" classname="ru.testjava.addressbook.tests.GroupModificationTests" time="0.965"/>
-  <system-out><![CDATA[8475 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestGroupModificationwith parameter [] 
-8540 [Test worker] INFO  o.h.h.i.QueryTranslatorFactoryInitiator - HHH000397: Using ASTQueryTranslatorFactory 
+  <testcase name="testGroupModification" classname="ru.testjava.addressbook.tests.GroupModificationTests" time="1.139"/>
+  <system-out><![CDATA[7187 [Test worker] INFO  r.t.addressbook.tests.TestBase - Start testtestGroupModificationwith parameter [] 
+7281 [Test worker] INFO  o.h.h.i.QueryTranslatorFactoryInitiator - HHH000397: Using ASTQueryTranslatorFactory 
 Hibernate: select groupdata0_.group_id as group_id1_2_, groupdata0_.group_footer as group_fo2_2_, groupdata0_.group_header as group_he3_2_, groupdata0_.group_name as group_na4_2_ from group_list groupdata0_
 Hibernate: select groupdata0_.group_id as group_id1_2_, groupdata0_.group_footer as group_fo2_2_, groupdata0_.group_header as group_he3_2_, groupdata0_.group_name as group_na4_2_ from group_list groupdata0_
 Hibernate: select groupdata0_.group_id as group_id1_2_, groupdata0_.group_footer as group_fo2_2_, groupdata0_.group_header as group_he3_2_, groupdata0_.group_name as group_na4_2_ from group_list groupdata0_
