@@ -10682,8 +10682,69 @@ public static final String ROBOT_LIBRARY_SCOPE = "GLOBAL";
 
 }	
 
-Урок 94. Behaviour Driven Testing и инструмент Cucumber-JVM 00:22:15	
+Урок 94. Behaviour Driven Testing и инструмент Cucumber-JVM 
 	
+Подход Behaviour Driven Testing
+Псевно-естественный язык Gerkin для написания сценариев в стиле BDD
+Инструмент Cucumber, позволяет запускать сценарии на языке Gerkin
+
+https://docs.cucumber.io/installation/java/
+
+Подлючим зависимости
+
+implementation 'io.cucumber:cucumber-java:4.2.6'
+
+Для создания запускателя нужен 
+
+implementation 'info.cukes:cucumber-testng:1.2.5'
+
+
+Делаем в папке resources подкаталог bdd
+В него будем помещать сценарии
+Создадим в нем файл groups.feature //такое расширение обычно имеют файлы, которые содержать сценарии в BDD стиле 
+Каждый такой файл содержит описание фичи, которая состоит из сценариев
+
+
+Feature: Groups 
+
+
+	Scenatio: Group creation
+	
+Типичный сценарий, написанный в стиле BDD состоит из трех частей - задается ключевыми словами
+
+Given //подготовка, описание предварительных действий
+When //описание шага на котором происходит действие, которое тестируем
+Then //описание проверки
+
+Теперь напишем шаги в виде текста на псевдо естественном языке
+
+Given a set of groups
+When I create a new group with name xxx, header yyy, footer zzz
+Then the new set of groups is equal to the old set with added group
+	
+Почему псевдо-естественный? Потому что есть обязательные ключевые слова и структура
+
+Дальне нужно реализовать эти шаги на языке програмирования
+
+Создадим пакет bdd в пакете ru.stqa.pft.addressbook
+внутри 2 класса
+- описания шагов GroupStepDefinitions
+- запускатель для сценариев GroupTests
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
 
 	
