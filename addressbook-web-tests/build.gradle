@@ -5,6 +5,9 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    agent
+}
 
 dependencies {
     implementation 'org.testng:testng:7.0.0-beta3'
@@ -20,7 +23,13 @@ dependencies {
     compile('javax.xml.bind:jaxb-api:2.3.0')
     compile('javax.activation:activation:1.1')
     compile('org.glassfish.jaxb:jaxb-runtime:2.3.0')
+    implementation 'io.qameta.allure:allure2-model:1.0.0'
+    agent "org.aspectj:aspectjweaver:1.8.0"
+    implementation "ru.yandex.qatools.allure:allure-testng-adaptor:1.4.0.RC4"
+    implementation 'org.robotframework:robotframework:3.1.1'
+
 }
+
 
 task testGroups(type: Test) {
     useTestNG() {
@@ -43,6 +52,10 @@ task testGroups(type: Test) {
     }
 }
 
+testGroups.doFirst {
+    jvmArgs "-javaagent:${configurations.agent.singleFile}"
+}
+
 task testContacts(type: Test) {
     useTestNG() {
         suites 'src/test/resources/testng-contacts.xml'
@@ -63,4 +76,13 @@ task testContacts(type: Test) {
         systemProperty 'platform', "${platform}"
     }
 }
+
+task rf (type: JavaExec){
+    main = 'org.robotframework.RobotFramework'
+    classpath = sourceSets.test.runtimeClasspath
+    args '--output', 'build/rf-report'
+    args 'src/test/resources/rf'
+}
+
+
 

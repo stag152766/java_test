@@ -10357,10 +10357,330 @@ Testng использует глобальную переменную, кото�
 
 
 }
+Урок 92. Генерация отчётов при помощи Allure {
+	
+https://github.com/allure-framework/allure1/wiki
 
-Урок 92. Генерация отчётов при помощи Allure 00:25:35
+Процедура создания отчета разделена на 2 фазы
 
-Урок 93. Keyword Driven Testing и инструмент Robot Framework 00:20:52
+1. Сбор информации
+2. Генерация отчета
+	
+Чтобы первый этап отработал  нужен специальный адаптер для тестового фреймворка Testng и запускатель этого адаптера, который встраивается в сборщик Gradle
+
+https://github.com/allure-framework/allure1/wiki/TestNG	
+	
+Для второго этапа, нужен jenkins plagin 
+
+Подключаем 
+
+	
+
+apply plugin: 'java'
+
+
+repositories {
+    mavenCentral()
+}
+
+//ставим перед декларированием зависимостей
+configurations {
+    agent
+}
+
+dependencies {
+    implementation 'org.testng:testng:7.0.0-beta3'
+    implementation 'com.katalon:com.katalon.platform.parent:1.0.5'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.59'
+    implementation 'org.hamcrest:hamcrest:2.1'
+    implementation 'com.beust:jcommander:1.72'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'ch.qos.logback:logback-classic:1.3.0-alpha4'
+    implementation 'mysql:mysql-connector-java:5.1.38'
+    implementation 'org.hibernate:hibernate-core:5.1.0.Final'
+    compile('javax.xml.bind:jaxb-api:2.3.0')
+    compile('javax.activation:activation:1.1')
+    compile('org.glassfish.jaxb:jaxb-runtime:2.3.0')
+	//1.8.0 вместо {aspectjVersion}
+    agent "org.aspectj:aspectjweaver:1.8.0"
+	//implementation вместо test.compile
+	//вместо {allureVersion}
+    implementation "ru.yandex.qatools.allure:allure-testng-adaptor:1.4.0.RC4"
+}
+
+//задача декларируется
+task testGroups(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng-groups.xml'
+    }
+    if (project.hasProperty('browser')) {
+        systemProperty 'browser', "${browser}"
+    }
+
+    if (project.hasProperty('target')) {
+        systemProperty 'target', "${target}"
+    }
+
+    if (project.hasProperty('verifyUI')) {
+        systemProperty 'verifyUI', "${verifyUI}"
+    }
+
+    if (project.hasProperty('platform')) {
+        systemProperty 'platform', "${platform}"
+    }
+}
+
+//меняются настройки задачи
+//перед запуском указанной задачи JVM будет выставлены специальные опции
+//testGroups вместо test 
+testGroups.doFirst {
+    jvmArgs "-javaagent:${configurations.agent.singleFile}"
+}
+
+task testContacts(type: Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng-contacts.xml'
+    }
+    if (project.hasProperty('browser')) {
+        systemProperty 'browser', "${browser}"        
+    }
+
+    if (project.hasProperty('target')) {
+        systemProperty 'target', "${target}"
+    }
+
+    if (project.hasProperty('verifyUI')) {
+        systemProperty 'verifyUI', "${verifyUI}"
+    }
+
+    if (project.hasProperty('platform')) {
+        systemProperty 'platform', "${platform}"
+    }
+}
+
+Кроме того, чтобы Allure складывал все файлы во внутрь директории build нужно сделать еше одну настройку
+
+Необходим файл allure.properties 
+в нем должна быть такая настройка
+allure.results.directory=build/allure-results
+
+
+Запускаем консоль и выполняем команду
+gradlew testGroups
+
+Тест завершается успешно 
+
+Второй этап
+
+Нужно сгенерировать отчет
+Для этого нам понадобится инструмент Command Line Tool
+
+https://github.com/allure-framework/allure1/releases/tag/allure-core-1.4.22	
+
+Загружаем архив и распаковываем c:tools/
+Инструмент готов к эксплуатации
+
+Запускаем
+c:\Tools\allure-commandline\bin\allure.bat help
+
+Из подсказки следует что для генерации отчета нужно указать опцию generate 
+И дальше указать место где находится информация - исходные данные для генерации отчетов
+Т.е. там где мы настроили 
+c:\...\addressbook-web-tests\build\allure-results\
+
+Выполняем команду
+c:\Users\Admin\Documents\GitHub\java_test\addressbook-web-tests>
+c:\Tools\allure-commandline\bin\allure.bat generate build\allure-results
+
+
+
+[main] ERROR ru.yandex.qatools.allure.data.utils.ServiceLoaderUtils - ru.yandex.qatools.allure.data.plugins.Plugin: Provider 
+ru.yandex.qatools.allure.data.plugins.MigrationPlugin could not be instantiated
+[main] ERROR ru.yandex.qatools.allure.data.utils.ServiceLoaderUtils - ru.yandex.qatools.allure.data.plugins.Plugin: Provider 
+ru.yandex.qatools.allure.data.plugins.EnvironmentPlugin could not be instantiated
+
+
+}	
+Урок 93. Keyword Driven Testing и инструмент Robot Framework {
+	
+Программирование в табличках
+
+https://robotframework.org/	
+	
+Фреймворк написан на Pyhton но есть реализация Jython которая работает на JVM
+	
+Почему подход называется Keyword Driven Testing ?
+
+Инструмент предоставляет базовае ключевые слова (функции) КС
+Можно создать свои КС	
+Функция может быть реализована при помощи более простых функций
+Фактически вызывается функция в нее передается параметры
+Такой текст на псевдо-естественном языке эквивалентно программному коду
+
+Реализуем КС для адрессной книги
+
+Можно высокоуровневые ключевые слова не реализоваывать при помощи простых КС на языке, который предлагает робот
+Можно сразу КС реализовать на языке программирования java
+
+Наример, если мы хотим чтобы было кс посчитать количичество групп, то для этого уже есть все необходимое 
+Нужно только кс привязать к уже существующей реализации
+
+Над существующей реализацией сделаем надстройку, которая позволит писать сценарии в виде таблички в стиле от Robotframework
+
+Начнем с написания сценария
+
+resources > add dir > rf > new file "groups.robot"
+
+Должна соблюдаться структура
+
+http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html#basic-syntax 
+ 
+//заголовок 
+*** Test Cases ***
+//название сценария
+Can Create Group With Valid Data
+//сценарий, который состоит из последовательности шагов
+//для каждого шага указывается кс (функция) и параметры
+//параметры отделяются от функции более чем одним пробелом 
+//добавим проверки количества групп
+//переменные указываются в формата ${переменная}
+	${old_count} =    Get Group Count //кс которое возвращает результат	(отделяется более чем 1 пробелом) 
+    Create Group  
+
+	
+    ${new_count} =    Get Group Count
+    ${expected_count} =    Evaluate ${old_count} + 1	
+//добавляем проверку	
+//нельзя написать ${old_count} + 1 вычисления нужно сделать отдельным шагом
+	 Should Be Equal As Integers    ${new_count}    ${expected_count}
+ 
+ 
+Еще нужно проинициализировать АМ (т.е. запустить и остановить браузер) 
+Добавим отдельный блок 
+
+***Settings***
+//собираемся запустить браузер один раз и использовать его многократно
+//поэтому используется 
+Suite Setup    Init Application Manager //Init Application Manager - кс
+Suite Teardown
+ 
+
+В результате получим:
+
+
+***Settings***
+Suite Setup    Init Application Manager
+Suite Teardown    Stop Application Manager
+
+*** Test Cases ***
+Can Create Group With Valid Data
+    ${old_count} =    Get Group Count
+    Create Group    test name    test header    test footer
+    ${new_count} =    Get Group Count
+    ${expected_count} =    Evaluate    ${old_count} + 1
+    Should Be Equal As Integers    ${new_count}    ${expected_count}
+ 
+ 
+Теперь нужно кс реализовать
+
+Создать класс AddressbookKeywords в отдельном пакете rf
+ 
+Для каждого кс нужно создать функцию
+
+package ru.testjava.addressbook.rf;
+
+public class AddressbookKeywords {
+	
+private ApplicationManager app;	//1- делаем переменную, которая будет проиницилизирована в методе initApplicationManager()
+
+  public void initApplicationManager() {
+    //нужно проинициализировать АМ 
+	//для этого нужно сделать переменную - 1
+	//создаем объект нужного типа - 2
+	app = new ApplicationManager(System.getProperty("browser", BrowserType.CHROME));
+	//собственно сама инициализация
+	app.init();
+  }
+}
+ 
+  public void stopApplicationManager() {
+    app.stop();
+    app = null;
+  }
+
+  public int  getGroupCount() {
+    app.goTo().groupPage();
+    return app.group().count();
+  }
+
+  public void createGroup(String name, String header, String footer){
+    app.goTo().groupPage();
+    app.group().create(new GroupData().withName(name).withHeader(header).withFooter(footer));
+  }
+
+}
+ 
+ 
+ Теперь чтобы робот знал что мы хотим использовать именно этот класс в качестве библиотеки, содержащей ключевые слова 
+ 
+ ***Settings***
+Library    ru.testjava.addressbook.rf.AddressbookKeywords
+ 
+ 
+ 
+Осталось последнее действие - запустить при помощи сборшика Gradle
+
+Соответствующего плагина нет, поэтому придется написать собственный task, который будет реализовывать запуск
+
+//будем запускать обычную java программу
+task rf (type: JavaExec) {
+//основной запускаемый класс
+main = org.robotframework.robotframework
+//набор классов который будет подлючен при запуске этой программы
+//будут подлючены все бибилиотеки что и при запуске тестов
+classpath = sourceSets.test.runtimeClasspath 	
+//параметры 
+//опция которая задает директорию, в которую будет помещен отчет
+args '--output', 'build/rf-report'
+//где находятся сценарии
+args 'src/test/resources/rf'	
+	
+}
+
+нужно подключить к проекту доп записимость от RobotFrameWork 
+ 
+И запустить класс org > robotframework > RobotFramework
+ 
+Открываем консоль
+ 
+Выполняем команду
+gradlew rf 
+
+Получаем ошибку NullPointerException на шаге 
+${old_count} = ru.testjava.addressbook.rf.AddressbookKeywords . Get Group Count
+
+Библиотеку AddressbookKeywords нужно инициализировать один раз в самом начале 
+По умолчанию robotframework создает один экземляр библиотеки для каждого тест кейса 
+И это иногда хорошо
+но у нас написано что нужно сделать общую инициализацию
+и это означает чтобы один экземляр библиотеки использовался для всех сценариев
+поэтому нужно определить спец константу, которая указывает тип библиотеки
+
+в классе AddressbookKeywords
+	
+public static final String ROBOT_LIBRARY_SCOPE = "GLOBAL";
+  	
+	
+Теперь библиотека инициализируется один раз и будет использоваться для всех тестовых сценариев
+	
+сначала будет создан объект этой бибилиотеки
+потом в этом едином объекте будет вызвано ключевое слово Init Application Manager
+потом в том же самом глобальном объекте будут выполняться действия, которые включенны в сценарий 
+в конце в нем же будет выполненое слово  Stop Application Manager
+	
+
+}	
 
 Урок 94. Behaviour Driven Testing и инструмент Cucumber-JVM 00:22:15	
 	

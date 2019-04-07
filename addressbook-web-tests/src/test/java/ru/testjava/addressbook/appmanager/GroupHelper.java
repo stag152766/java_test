@@ -92,7 +92,7 @@ public class GroupHelper extends HelperBase {
     returnToGroupPage();
   }
 
-  public int сount() {
+  public int count() {
     return driver.findElements(By.name("selected[]")).size();
   }
 

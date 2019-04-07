@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot rpa="false" generator="Robot 3.1.1 (Jython 2.7.0 on java11.0.1)" generated="20190407 10:47:02.765">
+<suite source="C:\Users\Admin\Documents\GitHub\java_test\addressbook-web-tests\src\test\resources\rf" name="Rf" id="s1">
+<suite source="C:\Users\Admin\Documents\GitHub\java_test\addressbook-web-tests\src\test\resources\rf\groups.robot" name="Groups" id="s1-s1">
+<kw type="setup" library="ru.testjava.addressbook.rf.AddressbookKeywords" name="Init Application Manager">
+<msg level="INFO" timestamp="20190407 10:47:10.004">Starting ChromeDriver 73.0.3683.68 (47787ec04b6e38e22703e856e101e840b65afe72) on port 29334
+Only local connections are allowed.
+Please protect ports used by ChromeDriver and related test frameworks to prevent access by malicious code.
+���. 07, 2019 10:47:08 AM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: OSS</msg>
+<status endtime="20190407 10:47:10.016" starttime="20190407 10:47:03.325" status="PASS"></status>
+</kw>
+<test name="Can Create Group With Valid Data" id="s1-s1-t1">
+<kw library="ru.testjava.addressbook.rf.AddressbookKeywords" name="Get Group Count">
+<assign>
+<var>${old_count}</var>
+</assign>
+<msg level="INFO" timestamp="20190407 10:47:10.282">${old_count} = 4</msg>
+<status endtime="20190407 10:47:10.284" starttime="20190407 10:47:10.035" status="PASS"></status>
+</kw>
+<kw library="ru.testjava.addressbook.rf.AddressbookKeywords" name="Create Group">
+<arguments>
+<arg>test name</arg>
+<arg>test header</arg>
+<arg>test footer</arg>
+</arguments>
+<status endtime="20190407 10:47:11.524" starttime="20190407 10:47:10.286" status="PASS"></status>
+</kw>
+<kw library="ru.testjava.addressbook.rf.AddressbookKeywords" name="Get Group Count">
+<assign>
+<var>${new_count}</var>
+</assign>
+<msg level="INFO" timestamp="20190407 10:47:11.695">${new_count} = 5</msg>
+<status endtime="20190407 10:47:11.696" starttime="20190407 10:47:11.526" status="PASS"></status>
+</kw>
+<kw library="BuiltIn" name="Evaluate">
+<doc>Evaluates the given expression in Python and returns the results.</doc>
+<arguments>
+<arg>${old_count} + 1</arg>
+</arguments>
+<assign>
+<var>${expected_count}</var>
+</assign>
+<msg level="INFO" timestamp="20190407 10:47:11.712">${expected_count} = 5</msg>
+<status endtime="20190407 10:47:11.712" starttime="20190407 10:47:11.700" status="PASS"></status>
+</kw>
+<kw library="BuiltIn" name="Should Be Equal As Integers">
+<doc>Fails if objects are unequal after converting them to integers.</doc>
+<arguments>
+<arg>${new_count}</arg>
+<arg>${expected_count}</arg>
+</arguments>
+<status endtime="20190407 10:47:11.724" starttime="20190407 10:47:11.718" status="PASS"></status>
+</kw>
+<status critical="yes" endtime="20190407 10:47:11.725" starttime="20190407 10:47:10.023" status="PASS"></status>
+</test>
+<kw type="teardown" library="ru.testjava.addressbook.rf.AddressbookKeywords" name="Stop Application Manager">
+<status endtime="20190407 10:47:12.383" starttime="20190407 10:47:11.729" status="PASS"></status>
+</kw>
+<status endtime="20190407 10:47:12.383" starttime="20190407 10:47:03.222" status="PASS"></status>
+</suite>
+<status endtime="20190407 10:47:12.404" starttime="20190407 10:47:02.785" status="PASS"></status>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0">Critical Tests</stat>
+<stat pass="1" fail="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat pass="1" fail="0" name="Rf" id="s1">Rf</stat>
+<stat pass="1" fail="0" name="Groups" id="s1-s1">Rf.Groups</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
