@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:test-suite xmlns:ns2="urn:model.allure.qatools.yandex.ru" start="1554722444323" stop="1554722456873">
+    <name>Default Suite</name>
+    <test-cases>
+        <test-case start="1554722445319" stop="1554722456360" status="broken">
+            <name>feature[Groups]</name>
+            <failure>
+                <message>CucumberException: java.lang.AssertionError: 
+Expected: &lt;[GroupData{id='35', name='test2'}, GroupData{id='2147483647', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;
+     but: was &lt;[GroupData{id='35', name='test2'}, GroupData{id='36', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;</message>
+                <stack-trace>cucumber.runtime.CucumberException: java.lang.AssertionError: 
+Expected: &lt;[GroupData{id='35', name='test2'}, GroupData{id='2147483647', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;
+     but: was &lt;[GroupData{id='35', name='test2'}, GroupData{id='36', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;
+	at cucumber.api.testng.TestNGCucumberRunner.runCucumber(TestNGCucumberRunner.java:69)
+	at cucumber.api.testng.AbstractTestNGCucumberTests.feature(AbstractTestNGCucumberTests.java:21)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.testng.internal.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:131)
+	at org.testng.internal.TestInvoker.invokeMethod(TestInvoker.java:570)
+	at org.testng.internal.TestInvoker.invokeTestMethod(TestInvoker.java:170)
+	at org.testng.internal.MethodRunner.runInSequence(MethodRunner.java:46)
+	at org.testng.internal.TestInvoker$MethodInvocationAgent.invoke(TestInvoker.java:790)
+	at org.testng.internal.TestInvoker.invokeTestMethods(TestInvoker.java:143)
+	at org.testng.internal.TestMethodWorker.invokeTestMethods(TestMethodWorker.java:146)
+	at org.testng.internal.TestMethodWorker.run(TestMethodWorker.java:128)
+	at org.testng.TestRunner.privateRun(TestRunner.java:763)
+	at org.testng.TestRunner.run(TestRunner.java:594)
+	at org.testng.SuiteRunner.runTest(SuiteRunner.java:398)
+	at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:392)
+	at org.testng.SuiteRunner.privateRun(SuiteRunner.java:355)
+	at org.testng.SuiteRunner.run(SuiteRunner.java:304)
+	at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:53)
+	at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:96)
+	at org.testng.TestNG.runSuitesSequentially(TestNG.java:1146)
+	at org.testng.TestNG.runSuitesLocally(TestNG.java:1067)
+	at org.testng.TestNG.runSuites(TestNG.java:997)
+	at org.testng.TestNG.run(TestNG.java:965)
+	at org.testng.IDEARemoteTestNG.run(IDEARemoteTestNG.java:73)
+	at org.testng.RemoteTestNGStarter.main(RemoteTestNGStarter.java:123)
+Caused by: java.lang.AssertionError: 
+Expected: &lt;[GroupData{id='35', name='test2'}, GroupData{id='2147483647', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;
+     but: was &lt;[GroupData{id='35', name='test2'}, GroupData{id='36', name='xxx'}, GroupData{id='33', name='mod1'}, GroupData{id='34', name='test3'}]&gt;
+	at org.hamcrest.MatcherAssert.assertThat(MatcherAssert.java:18)
+	at org.hamcrest.MatcherAssert.assertThat(MatcherAssert.java:6)
+	at ru.testjava.addressbook.bdd.GroupStepDefinitions.verifyGroupCreated(GroupStepDefinitions.java:54)
+	at ✽.Then the new set of groups is equal to the old set with added group(bdd/groups.feature:6)
+</stack-trace>
+            </failure>
+            <steps/>
+            <attachments/>
+            <labels/>
+        </test-case>
+    </test-cases>
+    <labels/>
+</ns2:test-suite>

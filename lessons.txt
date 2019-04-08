@@ -10724,27 +10724,132 @@ Then the new set of groups is equal to the old set with added group
 	
 Почему псевдо-естественный? Потому что есть обязательные ключевые слова и структура
 
-Дальне нужно реализовать эти шаги на языке програмирования
+Дальше нужно реализовать эти шаги на языке програмирования
 
 Создадим пакет bdd в пакете ru.stqa.pft.addressbook
 внутри 2 класса
-- описания шагов GroupStepDefinitions
+- описания шагов GroupStepDefinitions //при помощи аннотаций
 - запускатель для сценариев GroupTests
 
 
+@CucumberOptions(features = "classpath:bdd")//файлы с описанием сценариев находятся гдето в одной из директорий включенных в класспасс
+public class GroupTests extends AbstractTestNGCucumberTests {
+}
+
+Реализацию никакую внутри его писать не надо , все написано внутри класса 
 
 
 
+@CucumberOptions(features = "classpath:bdd", plugin = {"pretty", "html:build/cucumber-report"} ) //в плагине задается формат отчетов pretty и еще один формат html, который поместиться в указанное место
+
+
+Теперь реализуем шаги
+package ru.testjava.addressbook.bdd;
+
+import cucumber.api.java.en.Given;
+
+public class GroupStepDefinitions {
+
+	//для  того чтобы метод стал описанием шага, нужно указать аннотацию и внутри указать полное название шага
+	
+  @Given("^a set of groups$")
+  public void loadGroups() {
+
+  }
+
+}
+Теперь когда cucumber будет выполнять этот сценарий и увидет такой шаг, он найдет подходяший метод который имеет аннотацию Given и нужный текст, и выполнит этот метод 
+Для того чтобы поиск был по точному соответствию, нужно использовать элементы решулярных выражений и привязать их к началу и к концу
+
+
+@When("^I create a new group with name (.+), header (.+), footer (.+)$") 
+//нужно превратить в параметры метода xxx
+//(.+) группа состоящая из набора символов превращается в параметр
+public void createGroup(String name, String header, String footer)
+
+  }
+
+  @Then("^the new set of groups is equal to the old set with added group$")
+  public void verifyGroupCreated() {
+
+  }
+
+Чтобы эти методы заполнить понадобится АМ
+private ApplicationManager app;
+
+Эту ссылку нужно в начале проиницилизировать а в конце браузер должен остатонвиться
+Поэтому нужно сделать доп методы инициализации и завершения
+
+
+cucumber.api.java.Before;
+
+  @Before
+  public void init() throws IOException {
+    app = new ApplicationManager(System.getProperty("browser", BrowserType.CHROME));
+    app.init();
+  }
+
+
+  @After
+  public void stop(){
+    app.stop();
+    app = null;
+  }
 
 
 
+Теперь сама реализация шагов
+
+ @Given("^a set of groups$")
+  public void loadGroups() {
+	  //загрузим список групп из бд
+	groups = app.db().groups();   //результат нужно куда то сохранить, чтобы поспользоваться в другом методе проверки
+	//добавляем поле 
+    app.db()
+
+  }
+
+Для того чтобы передавать данные из одного в другой нужно их переместить на один уровень выше - т.е. сделать это полем 
+
+  @When("^I create a new group with name (.+), header (.+) and footer (.+)$")
+  public void createGroup(String name, String header, String footer) {
+	  //должен выполняться через пользовательский интерфейс
+    newGroup = new GroupData().withName(name).withHeader(header).withFooter(footer); //добавим в поле, т.к. нужно эту группу передать в метод сравнения
+    app.group().create(newGroup);
+  }
 
 
+@Then("^the new set of groups is equal to the old set with added group$")
+  public void verifyGroupCreated() {
+    Groups newGroups = app.db().groups();
+    assertThat(newGroups, equalTo(groups.withAdded(newGroup));
 
+  }
 
+Запускаем тест 
 
+Если нужно запускать эти тесты из консоли и на сервере ни
+Нужно запускать класс GroupTests
 
+во первых нужно сделать подходящий конф файл для testng, который указывает на этот класс и предназначен для запуска этого класса
+вот вторых чтобы этот конф файл запускать нужно в файле build.gradle сделать задачу, аналогично как мы делали задачу testng-groups.xml
 
+Как сделать параметризованный сценарий для cucumber?
+
+Feature: Groups
+Scenario Outline: Group creation
+
+Given a set of groups
+When I create a new group with name <name>, header <header> and footer <footer>
+Then the new set of groups is equal to the old set with added group
+
+Examples:
+| name          |header         |footer         |
+| test name     |test header    |test footer    |
+
+Чтобы увеличить количество тестовых данных, нужно просто добавляеть  сюда строчки
+
+}
 	
 
 	
